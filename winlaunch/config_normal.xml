@@ -1,0 +1,35 @@
+<launch4jConfig>
+  <dontWrapJar>true</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>lanxchange.jar</jar>
+  <outfile>lxc.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine>-managed</cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <manifest></manifest>
+  <icon>/home/tfg/NetBeansProjects/lanxchange/winlaunch/LXC.ico</icon>
+  <jre>
+    <path></path>
+    <minVersion>1.6.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <opt>-splash:img/logo.png</opt>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>LXC 1.00 v144</txtFileVersion>
+    <fileDescription>LanXchange 1.00 (RC1) v144</fileDescription>
+    <copyright>2009-2012 Tobias Fleig - All rights reserved</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>LXC 1.00 v144</txtProductVersion>
+    <productName>LanXchange</productName>
+    <companyName></companyName>
+    <internalName>lxc v144</internalName>
+    <originalFilename>lxc.exe</originalFilename>
+  </versionInfo>
+</launch4jConfig>

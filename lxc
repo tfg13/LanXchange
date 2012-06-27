@@ -1,0 +1,30 @@
+#!/bin/sh
+
+sargs="$*"
+cd `dirname $0`
+
+echo '#!/bin/sh
+
+sargs="$*"
+ret="0"
+cd `dirname $0`
+
+startlxc() {
+  if [ -n "$JAVA_HOME" ]; then
+    $JAVA_HOME/bin/java -splash:img/logo.png -jar ./lanxchange.jar -managed $sargs
+  else
+    java -splash:img/logo.png -jar ./lanxchange.jar -managed $sargs
+  fi
+  ret="$?"
+}
+
+startlxc
+while [ "$ret" -eq "6" ]; do
+  startlxc
+done
+
+rm ./lxcr
+cd $OLDPWD
+' > lxcr
+chmod +x lxcr
+./lxcr $sargs &
