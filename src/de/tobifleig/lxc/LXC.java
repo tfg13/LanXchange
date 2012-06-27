@@ -46,7 +46,7 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 144;
+    public static final int versionId = 145;
     /**
      * The Platform we are running on. Modified by build-scripts.
      */
