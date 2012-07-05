@@ -32,6 +32,11 @@ Getting started
 3. Run it by double-clicking "LXC.exe" (Windows) or "lxc" (OS X, Linux)
 4. Repeat these steps for all computers and start sharing!
 
+Upcoming Features
+-----------------
+
+* LanXchange for Android
+
 License
 -------
 
