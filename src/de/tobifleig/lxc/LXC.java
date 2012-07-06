@@ -29,7 +29,6 @@ import de.tobifleig.lxc.net.TransFileList;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
-import de.tobifleig.lxc.plaf.impl.GenericPCPlatform;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -50,7 +49,7 @@ public class LXC {
     /**
      * The Platform we are running on. Modified by build-scripts.
      */
-    private static final Platform platform = new GenericPCPlatform();
+    private static final Platform platform = new de.tobifleig.lxc.plaf.impl.GenericPCPlatform();
     /**
      * Our GUI.
      */
