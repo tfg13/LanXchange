@@ -98,14 +98,6 @@ public class LXC {
 
 	gui.init(args);
 
-	// check permissions for own folder. will be removed soon
-	File home = new File(".");
-	if (!home.canWrite()) {
-	    System.out.println("ERROR: Cannot write to own directory (" + home.getAbsolutePath() + "). Try running LXC in your home directory.");
-	    gui.showError("Cannot write to own folder. Please move to your home directory or start as administrator.");
-	    System.exit(1);
-	}
-
 	askForDownloadTargetSupported = platform.askForDownloadTargetSupported();
 	if (platform.getDefaultDownloadTarget() != null) {
 	    defaultDownloadTarget = new File(platform.getDefaultDownloadTarget());
