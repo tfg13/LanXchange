@@ -28,11 +28,11 @@ cp -r * "/tmp/lxcbuild"
 
 echo "Compiling..."
 cd "/tmp/lxcbuild"
-javac -encoding utf8 -d classes -sourcepath src -source 6 -target 6 src/de/tobifleig/lxc/LXC.java
+javac -encoding utf8 -d classes -sourcepath src -source 6 -target 6 src/de/tobifleig/lxc/plaf/impl/GenericPCPlatform.java
 
 echo "Packing jar..."
 cd classes
-echo "Main-Class: de.tobifleig.lxc.LXC" > manifest.txt
+echo "Main-Class: de.tobifleig.lxc.plaf.impl.GenericPCPlatform" > manifest.txt
 jar -cmf manifest.txt ../lanxchange.jar de
 
 cd ..

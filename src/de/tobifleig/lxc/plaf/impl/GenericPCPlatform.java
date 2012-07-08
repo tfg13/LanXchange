@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.plaf.impl;
 
 import de.tobifleig.lxc.Configuration;
+import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.swing.LXCUpdater;
@@ -32,6 +33,7 @@ import javax.swing.JOptionPane;
 
 /**
  * A generic Platform for all OS prividing Swing and write access to the LXC-directory.
+ * Offers a main-method to start LanXchange.
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
@@ -196,5 +198,13 @@ public class GenericPCPlatform implements Platform {
 	    }
 	}
 	return null; // invalid path = ask
+    }
+
+    /**
+     * Starts LanXchange on PC plaforms.
+     * @param args any arguments you want to pass to LanXchange
+     */
+    public static void main(String[] args) {
+	LXC lxc = new LXC(new GenericPCPlatform(), args);
     }
 }

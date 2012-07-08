@@ -47,9 +47,9 @@ public class LXC {
      */
     public static final int versionId = 145;
     /**
-     * The Platform we are running on. Modified by build-scripts.
+     * The Platform we are running on.
      */
-    private static final Platform platform = new de.tobifleig.lxc.plaf.impl.GenericPCPlatform();
+    private final Platform platform;
     /**
      * Our GUI.
      */
@@ -75,9 +75,12 @@ public class LXC {
      * Create a new instance of LXC with the given command-line options.
      * Should be called by the main-method only.
      *
+     * @param the platform LXC is running on
      * @param args command-line args
      */
-    public LXC(final String[] args) {
+    public LXC(Platform platform, final String[] args) {
+	this.platform = platform;
+
 	initLogging(args);
 
 	System.out.println("This is LanXchange v1.00 RC1 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012 Tobias Fleig - License GPLv3 or later");
@@ -151,6 +154,7 @@ public class LXC {
 
     /**
      * Manages logging.
+     *
      * @param args the start-params
      */
     private void initLogging(final String[] args) {
@@ -251,15 +255,5 @@ public class LXC {
 	// done, exit
 	System.out.println("LXC done. Thank you.");
 	System.exit(0);
-    }
-
-    /**
-     * The main-method. Starts LanXchange.
-     *
-     * @param args command-line args
-     */
-    public static void main(String[] args) {
-	// Go!
-	LXC lxc = new LXC(args);
     }
 }
