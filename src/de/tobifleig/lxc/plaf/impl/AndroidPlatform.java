@@ -1,5 +1,9 @@
 package de.tobifleig.lxc.plaf.impl;
 
+import java.util.Iterator;
+import java.util.Map;
+
+import de.tobifleig.lxc.Configuration;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.R.layout;
 import de.tobifleig.lxc.R.menu;
@@ -7,6 +11,7 @@ import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.Platform;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.view.Menu;
 import android.support.v4.app.NavUtils;
 
@@ -49,12 +54,24 @@ public class AndroidPlatform extends Activity implements Platform {
 
 	@Override
 	public void readConfiguration(String[] args) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+		Map<String, ?> stored = prefs.getAll();
+		for (String key : stored.keySet()) {
+			Object value = stored.get(key);
+			Configuration.putStringSetting(key, value.toString());
+		}
 	}
 
 	@Override
 	public void writeConfiguration() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		SharedPreferences.Editor prefs = getPreferences(MODE_PRIVATE).edit();
+		prefs.clear();
+		Iterator<String> keyIter = Configuration.getKeyIterator();
+		while (keyIter.hasNext()) {
+			String key = keyIter.next();
+			prefs.putString(key, Configuration.getStringSetting(key));
+		}
+		prefs.commit();
 	}
 
 	@Override
