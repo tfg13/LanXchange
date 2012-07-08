@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".LXCActivity"
+            android:name=".plaf.impl.AndroidPlatform"
             android:label="@string/title_activity_lxc" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
