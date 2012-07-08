@@ -1,16 +1,25 @@
 package de.tobifleig.lxc.plaf.impl;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
 import de.tobifleig.lxc.Configuration;
+import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.R.layout;
 import de.tobifleig.lxc.R.menu;
+import de.tobifleig.lxc.data.FileManager;
+import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiInterface;
+import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 import android.os.Bundle;
+import android.os.Environment;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 import android.view.Menu;
 import android.support.v4.app.NavUtils;
@@ -27,7 +36,8 @@ public class AndroidPlatform extends Activity implements Platform {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.lxc_layout);
+		setContentView(R.layout.loading);
+		LXC lxc = new LXC(this, new String[]{"-nolog"});
 	}
 
 	@Override
@@ -49,7 +59,56 @@ public class AndroidPlatform extends Activity implements Platform {
 
 	@Override
 	public GuiInterface getGui(String[] args) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return new GuiInterface() {
+			
+			@Override
+			public void update() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void showError(String error) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void setGuiListener(GuiListener guiListener) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void setFileManager(FileManager fileManager) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void init(String[] args) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public File getFileTarget(LXCFile file) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public void display() {
+				setContentView(R.layout.lxc_layout);
+				
+			}
+			
+			@Override
+			public boolean confirmCloseWithTransfersRunning() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+		};
 	}
 
 	@Override
@@ -81,7 +140,27 @@ public class AndroidPlatform extends Activity implements Platform {
 
 	@Override
 	public String getDefaultDownloadTarget() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+			return Environment.getExternalStorageDirectory().getAbsolutePath();
+		} else {
+			// Bad. Display error message and exit
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage("Cannot access data ");
+			builder.setCancelable(false);
+			builder.setNeutralButton("OK", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int id) {
+					dialog.cancel();
+				}
+			});
+			builder.create();
+			finish();
+			return null; // should not be executed
+		}
 	}
 
 }
