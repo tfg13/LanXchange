@@ -5,9 +5,9 @@ Ever tried to copy files from one computer to another? What if your flash drive 
 
 LanXchange uses your local (wifi-)network to transfer files and folder directly, without DVDs or flash drives.
 
-It is very simple to use, you only have to launch the application and drag files into the window on one computer to offer them.
-When you start LanXchange on another computer, those files will be detected automatically and show up on the screen.
-Just click them and the transfer starts immediately.
+LanXchange is very simple to use, just drag files into the window on one computer to make them available in your home network.
+When started on other computers, LanXchange automatically detects those files.
+Your transfer starts after a simple click.
 
 Features
 --------
@@ -21,7 +21,7 @@ Features
 Requirements
 ------------
 
-* Runs on Windows, OS X and Linux
+* Runs on Windows, OS X and Linux (Android version in the works!)
 * Java 6 installed
 
 Getting started
