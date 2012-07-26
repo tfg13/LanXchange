@@ -56,6 +56,15 @@ public interface GuiListener {
     public void downloadFile(LXCFile file, boolean chooseTarget);
 
     /**
+     * Unsets the "downloaded" (available) flag for a given file.
+     * If the file is still available, it can be downloaded again.
+     * Otherwise it will disappear.
+     *
+     * @param file the downloaded, non-local file to reset
+     */
+    public void resetFile(LXCFile file);
+
+    /**
      * The user wants to quit LXC.
      */
     public void shutdown();

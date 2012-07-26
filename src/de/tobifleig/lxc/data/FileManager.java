@@ -35,12 +35,17 @@ public class FileManager {
      * Contains all LXCFiles.
      */
     private LinkedList<LXCFile> files;
+    /**
+     * Stores the latest List of available Files for each instance.
+     */
+    private HashMap<LXCInstance, List<LXCFile>> recentFileLists;
 
     /**
      * Creates a new FileManager.
      */
     public FileManager() {
 	files = new LinkedList<LXCFile>();
+	recentFileLists = new HashMap<LXCInstance, List<LXCFile>>();
     }
 
     /**
@@ -51,6 +56,7 @@ public class FileManager {
      */
     public void computeFileList(TransFileList receivedList, LXCInstance sender) {
 	List<LXCFile> rawList = receivedList.getAll();
+	recentFileLists.put(sender, rawList);
 	Iterator<LXCFile> iter = files.iterator();
 	// Remove all files no longer offerd by this instance
 	while (iter.hasNext()) {
@@ -81,7 +87,8 @@ public class FileManager {
      *
      * @param instance the instance which files should be no longer available
      */
-    public void removeFromInstance(LXCInstance instance) {
+    public void instanceRemoved(LXCInstance instance) {
+	recentFileLists.remove(instance);
 	Iterator<LXCFile> iter = files.iterator();
 	while (iter.hasNext()) {
 	    LXCFile file = iter.next();
@@ -181,5 +188,26 @@ public class FileManager {
 	    }
 	}
 	return false;
+    }
+
+    /**
+     * Resets a available file.
+     * Resetting a file reverts the "downloaded"-flag.
+     * If no longer available, the file will disappear.
+     * Otherwise, it can be redownloaded.
+     *
+     * @param file the available, non-local file to reset
+     */
+    public void resetAvailableFile(LXCFile file) {
+	if (file.isAvailable() && !file.isLocal() && !file.isLocked()) {
+	    file.setAvailable(false);
+	    if (!recentFileLists.containsKey(file.getInstance()) || !recentFileLists.get(file.getInstance()).contains(file)) {
+		files.remove(file);
+	    }
+	} else {
+	    throw new IllegalArgumentException("Cannot reset given file! (debug: "
+		    + file.getShownName() + " " + file.isAvailable() + " "
+		    + file.isLocal() + " " + file.isLocked());
+	}
     }
 }

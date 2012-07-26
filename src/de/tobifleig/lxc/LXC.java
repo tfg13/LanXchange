@@ -108,7 +108,6 @@ public class LXC {
 
 	// init networking
 	network = new NetworkManager(new NetworkManagerListener() {
-
 	    @Override
 	    public void listReceived(TransFileList list, LXCInstance sender) {
 		files.computeFileList(list, sender);
@@ -122,7 +121,7 @@ public class LXC {
 
 	    @Override
 	    public void instanceRemoved(LXCInstance removedInstance) {
-		files.removeFromInstance(removedInstance);
+		files.instanceRemoved(removedInstance);
 		gui.update();
 	    }
 	}, files);
@@ -181,7 +180,6 @@ public class LXC {
      */
     private void initListeners() {
 	gui.setGuiListener(new GuiListener() {
-
 	    @Override
 	    public void offerFile(LXCFile newFile) {
 		files.addLocal(newFile);
@@ -197,6 +195,11 @@ public class LXC {
 		    }
 		}
 		LXC.this.shutdown();
+	    }
+
+	    @Override
+	    public void resetFile(LXCFile file) {
+		files.resetAvailableFile(file);
 	    }
 
 	    @Override

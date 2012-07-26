@@ -182,7 +182,7 @@ public class LXCPanel extends JPanel {
 			g2.setFont(f2);
 			String status = "Available - Click to download";
 			if (file.isAvailable()) {
-			    status = "Download completed";
+			    status = "Download completed - Right-click to remove/redownload";
 			}
 			if (!file.isLocked()) {
 			    g2.drawString(status, this.getWidth() / 2 - mer2.stringWidth(status) / 2, y + 36); // center
@@ -359,7 +359,6 @@ public class LXCPanel extends JPanel {
 	mer2 = this.getGraphics().getFontMetrics(f2);
 	running = true;
 	this.addMouseListener(new MouseListener() {
-
 	    @Override
 	    public void mouseClicked(MouseEvent e) {
 	    }
@@ -397,7 +396,6 @@ public class LXCPanel extends JPanel {
 			// init dl (threaded)
 			file.setLocked(true);
 			Thread t = new Thread(new Runnable() {
-
 			    @Override
 			    public void run() {
 				guiListener.downloadFile(file, e.isShiftDown());
@@ -407,6 +405,9 @@ public class LXCPanel extends JPanel {
 			t.setName("lxc_helper_initdl_" + file.getShownName());
 			t.setDaemon(true);
 			t.start();
+		    } else if (e.getButton() == 3 && !file.isLocked() && !file.isLocal() && file.isAvailable()) {
+			// reset file. (disappears or allows re-download)
+			guiListener.resetFile(file);
 		    }
 		}
 		selfTrigger();
@@ -429,7 +430,6 @@ public class LXCPanel extends JPanel {
 	    }
 	});
 	this.addMouseMotionListener(new MouseMotionListener() {
-
 	    @Override
 	    public void mouseDragged(MouseEvent e) {
 	    }
@@ -557,7 +557,6 @@ public class LXCPanel extends JPanel {
      */
     private void selfTrigger() {
 	SwingUtilities.invokeLater(new Runnable() {
-
 	    @Override
 	    public void run() {
 		repaint();
