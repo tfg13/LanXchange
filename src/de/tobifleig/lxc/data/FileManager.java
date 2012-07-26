@@ -95,7 +95,7 @@ public class FileManager {
     }
 
     /**
-     * Returns the local representation for a LXCFile sent be a remote instance.
+     * Returns the local representation for a LXCFile sent by a remote instance.
      * This step is required to upload a file, because only the local representation contains the paths to the source files.
      *
      * @param remoteRepresentation the remote representation
