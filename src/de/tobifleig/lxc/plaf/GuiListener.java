@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.plaf;
 
 import de.tobifleig.lxc.data.LXCFile;
+import java.util.List;
 
 /**
  * The Listener for LXC GUIs.
@@ -29,6 +30,14 @@ import de.tobifleig.lxc.data.LXCFile;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 public interface GuiListener {
+
+    /**
+     * Called within gui.display().
+     * Must return a (non-modifiable) list of all managed files.
+     * This method is only called once, so the list must be backed be the real, internal state of FileManager.
+     * @return a List containing all managed files.
+     */
+    public List<LXCFile> getFileList();
 
     /**
      * Called when the user wants to offer a new LXCFile.

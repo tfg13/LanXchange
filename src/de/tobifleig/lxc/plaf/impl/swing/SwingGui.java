@@ -204,15 +204,11 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
 
     @Override
     public void display() {
+	panel.setFileList(listener.getFileList());
 	panel.setUsedFont(ubuFont);
 	setVisible(true);
 	panel.start();
 	start();
-    }
-
-    @Override
-    public void setFileManager(FileManager fileManager) {
-	panel.setFileManager(fileManager);
     }
 
     @Override

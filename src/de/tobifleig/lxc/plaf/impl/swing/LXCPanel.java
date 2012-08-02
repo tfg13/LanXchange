@@ -108,7 +108,7 @@ public class LXCPanel extends JPanel {
 		g2.drawLine(this.getWidth() - 35, this.getHeight(), this.getWidth(), this.getHeight() - 35);
 	    }
 	    // header
-	    if (fileManager.containsElements()) {
+	    if (!allFiles.isEmpty()) {
 		g2.setColor(background);
 		g2.fillRect(-1, 0, this.getWidth() + 1, 19);
 		g2.setPaint(grad);
@@ -257,7 +257,7 @@ public class LXCPanel extends JPanel {
 		g2.drawString(calcText, this.getWidth() / 2 - mer.stringWidth(calcText) / 2, y + 9 + (mer.getAscent() / 2));
 	    }
 	    // seperator line
-	    if (fileManager.containsElements()) {
+	    if (!allFiles.isEmpty()) {
 		g2.setPaint(grad);
 		g2.drawLine(0, y, this.getWidth(), y);
 		g2.setPaint(null);
@@ -570,9 +570,8 @@ public class LXCPanel extends JPanel {
      *
      * @param fileManager
      */
-    public void setFileManager(FileManager fileManager) {
-	this.fileManager = fileManager;
-	this.allFiles = fileManager.getList();
+    public void setFileList(List<LXCFile> fileList) {
+	this.allFiles = fileList;
     }
 
     /**

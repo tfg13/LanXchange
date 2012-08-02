@@ -50,12 +50,6 @@ public interface GuiInterface {
      * @param error the message to show
      */
     public void showError(String error);
-    
-    /**
-     * Sets the filemanager
-     * @param fileManager the new filemanager
-     */
-    public void setFileManager(FileManager fileManager);
 
     /**
      * Sets the listener.

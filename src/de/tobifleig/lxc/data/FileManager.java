@@ -132,16 +132,6 @@ public class FileManager {
     }
 
     /**
-     * Whether there are any files.
-     * Like !isEmpty()
-     *
-     * @return true, if at least element is managed
-     */
-    public boolean containsElements() {
-	return !files.isEmpty();
-    }
-
-    /**
      * Returns a list of all known Files.
      * This list is backed by the internal list, but not modifiable.
      *

@@ -32,6 +32,7 @@ import de.tobifleig.lxc.plaf.Platform;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 
 /**
  * The main class of LanXchange.
@@ -125,10 +126,6 @@ public class LXC {
 		gui.update();
 	    }
 	}, files);
-
-
-	// sync gui with filemanager
-	gui.setFileManager(files);
 
 	// start networking
 	if (!network.checkSingletonAndStart()) {
@@ -233,6 +230,11 @@ public class LXC {
 		} else {
 		    defaultDownloadTarget = null;
 		}
+	    }
+
+	    @Override
+	    public List<LXCFile> getFileList() {
+		return files.getList();
 	    }
 	});
     }
