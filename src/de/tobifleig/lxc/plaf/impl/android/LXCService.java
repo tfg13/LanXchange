@@ -1,6 +1,7 @@
 package de.tobifleig.lxc.plaf.impl.android;
 
 import java.io.File;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.os.IBinder;
 import de.tobifleig.lxc.LXC;
@@ -183,4 +185,17 @@ public class LXCService extends Service implements Platform {
 		}
 	}
 
+	@Override
+	public void downloadComplete(LXCFile file) {
+		// TODO Auto-generated method stub
+		// Tell the media scanner about the new file so that it is
+        // immediately available to the user.
+		List<File> baseFiles = file.getFiles();
+		String[] paths = new String[baseFiles.size()];
+		for (int i = 0; i < paths.length; i++) {
+			paths[i] = baseFiles.get(i).getAbsolutePath();
+		}
+
+		MediaScannerConnection.scanFile(this, paths, null, null);
+	}
 }
