@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.plaf;
 
+import de.tobifleig.lxc.data.LXCFile;
+
 /**
  * Provides platform-specific settings and functions such as automatic updates.
  *
@@ -83,4 +85,10 @@ public interface Platform {
      * @return see above
      */
     public String getDefaultDownloadTarget();
+
+    /**
+     * Informs about finished downloads.
+     * Some platforms (like android) need to be informed about this so they can index the new files.
+     */
+    public void downloadComplete(LXCFile file);
 }

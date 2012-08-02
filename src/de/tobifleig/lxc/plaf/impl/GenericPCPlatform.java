@@ -22,6 +22,7 @@ package de.tobifleig.lxc.plaf.impl;
 
 import de.tobifleig.lxc.Configuration;
 import de.tobifleig.lxc.LXC;
+import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.swing.LXCUpdater;
@@ -234,4 +235,9 @@ public class GenericPCPlatform implements Platform {
 		}
 		LXC lxc = new LXC(new GenericPCPlatform(), args);
 	}
+
+    @Override
+    public void downloadComplete(LXCFile file) {
+	// not required for generic pcs
+    }
 }

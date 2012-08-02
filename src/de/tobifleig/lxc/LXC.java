@@ -125,6 +125,11 @@ public class LXC {
 		files.instanceRemoved(removedInstance);
 		gui.update();
 	    }
+
+	    @Override
+	    public void downloadComplete(LXCFile file) {
+		LXC.this.platform.downloadComplete(file);
+	    }
 	}, files);
 
 	// start networking

@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.net;
 
+import de.tobifleig.lxc.data.LXCFile;
+
 /**
  * A Listener for NetworkManager.
  * Used by LXC to listen for events created by NetworkManager.
@@ -45,4 +47,10 @@ public interface NetworkManagerListener {
      * @param removedInstance the removed instance
      */
     public void instanceRemoved(LXCInstance removedInstance);
+
+    /**
+     * Called when a download was completed successfully.
+     * @param file the file
+     */
+    public void downloadComplete(LXCFile file);
 }

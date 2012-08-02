@@ -222,6 +222,7 @@ public class NetworkManager {
 			file.setLocked(false);
 			if (success) {
 			    file.setAvailable(true);
+			    listener.downloadComplete(file);
 			}
 			file.removeJob(jobs.get(leech));
 			listener.triggerGui();
