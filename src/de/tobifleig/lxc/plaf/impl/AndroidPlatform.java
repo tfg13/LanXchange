@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
@@ -155,6 +156,22 @@ public class AndroidPlatform extends ListActivity {
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		final LXCFile file = files.get(position);
+		if (!file.isLocal() && !file.isAvailable()) {
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					guiListener.downloadFile(file, false);
+				}
+			});
+			t.setName("lxc_helper_initdl_" + file.getShownName());
+			t.setDaemon(true);
+			t.start();
 		}
 	}
 
