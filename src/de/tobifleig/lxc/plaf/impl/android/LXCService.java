@@ -166,7 +166,7 @@ public class LXCService extends Service implements Platform {
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) { // We can read and write
 														// the media
-			return Environment.getExternalStorageDirectory().getAbsolutePath();
+			return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 		} else { // Bad. Display error message and exit
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage("Cannot access data ");
