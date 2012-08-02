@@ -43,6 +43,10 @@ class HeartbeatSender {
      */
     private Timer timer;
     /**
+     * The mutlicast-task.
+     */
+    private TimerTask multicastTask;
+    /**
      * The heartbeat-packet. Always the same and therefore cached.
      */
     private byte[] packet;
@@ -85,9 +89,20 @@ class HeartbeatSender {
      * Stops sending heartbeats and sends a special, last offline-beat.
      */
     void stop() {
-	timer.cancel();
+	// Set packet content to "offline-signal"
 	packet[4] = 'o';
-	multicast(packet);
+	// cancel repeated task:
+	multicastTask.cancel();
+	// Send one last signal ASAP
+	timer.schedule(new TimerTask() {
+
+	    @Override
+	    public void run() {
+		multicast(packet);
+		// shutdown timer thread
+		timer.cancel();
+	    }
+	}, 0);
     }
     
     /**
@@ -102,7 +117,7 @@ class HeartbeatSender {
 	    multicast(packet);
 	} else {
 	    // asynchronous (multiple times)
-	    TimerTask task = new TimerTask() {
+	    multicastTask = new TimerTask() {
 
 		int counter = asyncRepetitions;
 
@@ -114,7 +129,7 @@ class HeartbeatSender {
 		    }
 		}
 	    };
-	    timer.schedule(task, 0, 1000);
+	    timer.schedule(multicastTask, 0, 1000);
 	}
     }
     
