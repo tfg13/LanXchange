@@ -1,11 +1,17 @@
 package de.tobifleig.lxc.plaf.impl;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.database.DataSetObserver;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -150,12 +156,43 @@ public class AndroidPlatform extends ListActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.item1:
+		case R.id.quit:
 			AndroidSingleton.onRealDestroy(this);
 			finish();
 			return true;
+		case R.id.addFile:
+			Intent intent = new Intent();
+			intent.setAction(Intent.ACTION_PICK);
+			// intent.setData(MediaStore.Files.getContentUri("external"));
+			intent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+			//intent.setData(Uri.parse("content://media/external/images/media"));
+			startActivityForResult(intent, 12345);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data == null) {
+			// User pressed "back"/"cancel" etc
+			return;
+		}
+		switch (requestCode) {
+		case 12345:
+			String[] proj = { MediaStore.Images.Media.DATA };
+			Cursor cursor = managedQuery(data.getData(), proj, null, null, null);
+			int column_index = cursor
+					.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			cursor.moveToFirst();
+			String path = cursor.getString(column_index);
+			File file = new File(path);
+			List<File> list = new ArrayList<File>();
+			list.add(file);
+			LXCFile lxcfile = new LXCFile(list, path);
+			guiListener.offerFile(lxcfile);
+			break;
 		}
 	}
 
@@ -188,7 +225,7 @@ public class AndroidPlatform extends ListActivity {
 		this.guiListener = guiListener;
 		updateGui();
 	}
-	
+
 	private void updateGui() {
 		getListView().post(new Runnable() {
 
