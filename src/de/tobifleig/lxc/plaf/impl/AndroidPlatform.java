@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -21,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiListener;
@@ -36,205 +39,239 @@ import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
  */
 public class AndroidPlatform extends ListActivity {
 
-	private LayoutInflater infl;
-	private GuiListener guiListener;
-	private List<LXCFile> files;
-	private DataSetObserver observer;
+    private static final int RETURNCODE_FILEINTENT = 12345;
+    private static final int RETURNCODE_MEDIAINTENT = 12346;
+    private LayoutInflater infl;
+    private GuiListener guiListener;
+    private List<LXCFile> files;
+    private DataSetObserver observer;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		TextView emptyText = new TextView(this);
-		emptyText.setText("loading...");
-		emptyText.setGravity(Gravity.CENTER);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        TextView emptyText = new TextView(this);
+        emptyText.setText("loading...");
+        emptyText.setGravity(Gravity.CENTER);
 
-		getListView().setEmptyView(emptyText);
+        getListView().setEmptyView(emptyText);
 
-		ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
-		root.addView(emptyText);
+        ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
+        root.addView(emptyText);
 
-		infl = (LayoutInflater) getBaseContext().getSystemService(
-				Context.LAYOUT_INFLATER_SERVICE);
+        infl = (LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		getListView().setAdapter(new ListAdapter() {
+        getListView().setAdapter(new ListAdapter() {
 
-			@Override
-			public void unregisterDataSetObserver(DataSetObserver arg0) {
-				System.out.println("Observer deregistered");
-				observer = null;
-			}
+            @Override
+            public void unregisterDataSetObserver(DataSetObserver arg0) {
+                System.out.println("Observer deregistered");
+                observer = null;
+            }
 
-			@Override
-			public void registerDataSetObserver(DataSetObserver arg0) {
-				System.out.println("Observer registered!");
-				observer = arg0;
-			}
+            @Override
+            public void registerDataSetObserver(DataSetObserver arg0) {
+                System.out.println("Observer registered!");
+                observer = arg0;
+            }
 
-			@Override
-			public boolean isEmpty() {
-				return guiListener == null || files.isEmpty();
-			}
+            @Override
+            public boolean isEmpty() {
+                return guiListener == null || files.isEmpty();
+            }
 
-			@Override
-			public boolean hasStableIds() {
-				// TODO Auto-generated method stub
-				return false;
-			}
+            @Override
+            public boolean hasStableIds() {
+                // TODO Auto-generated method stub
+                return false;
+            }
 
-			@Override
-			public int getViewTypeCount() {
-				// TODO Auto-generated method stub
-				return 1;
-			}
+            @Override
+            public int getViewTypeCount() {
+                // TODO Auto-generated method stub
+                return 1;
+            }
 
-			@Override
-			public View getView(int arg0, View arg1, ViewGroup arg2) {
-				View item = infl.inflate(R.layout.file_item, arg2, false);
+            @Override
+            public View getView(int arg0, View arg1, ViewGroup arg2) {
+                View item = infl.inflate(R.layout.file_item, arg2, false);
 
-				((TextView) item.findViewById(R.id.filename)).setText(files
-						.get(arg0).getShownName());
-				((TextView) item.findViewById(R.id.filesize)).setText(LXCFile
-						.getFormattedSize(files.get(arg0).getFileSize()));
+                ((TextView) item.findViewById(R.id.filename)).setText(files.get(arg0).getShownName());
+                ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(files.get(arg0).getFileSize()));
 
-				return item;
-			}
+                return item;
+            }
 
-			@Override
-			public int getItemViewType(int arg0) {
-				// TODO Auto-generated method stub
-				return 0;
-			}
+            @Override
+            public int getItemViewType(int arg0) {
+                // TODO Auto-generated method stub
+                return 0;
+            }
 
-			@Override
-			public long getItemId(int arg0) {
-				// TODO Auto-generated method stub
-				return arg0;
-			}
+            @Override
+            public long getItemId(int arg0) {
+                // TODO Auto-generated method stub
+                return arg0;
+            }
 
-			@Override
-			public Object getItem(int arg0) {
-				// TODO Auto-generated method stub
-				return null;
-			}
+            @Override
+            public Object getItem(int arg0) {
+                // TODO Auto-generated method stub
+                return null;
+            }
 
-			@Override
-			public int getCount() {
-				return guiListener == null ? 0 : files.size();
-			}
+            @Override
+            public int getCount() {
+                return guiListener == null ? 0 : files.size();
+            }
 
-			@Override
-			public boolean isEnabled(int position) {
-				return true;
-			}
+            @Override
+            public boolean isEnabled(int position) {
+                return true;
+            }
 
-			@Override
-			public boolean areAllItemsEnabled() {
-				return true;
-			}
-		});
+            @Override
+            public boolean areAllItemsEnabled() {
+                return true;
+            }
+        });
 
-		AndroidSingleton.onCreateMainActivity(this, new GuiInterfaceBridge() {
+        AndroidSingleton.onCreateMainActivity(this, new GuiInterfaceBridge() {
 
-			@Override
-			public void update() {
-				updateGui();
-			}
-		});
-	}
+            @Override
+            public void update() {
+                updateGui();
+            }
+        });
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-	}
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.lxc_layout, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.lxc_layout, menu);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.quit:
-			AndroidSingleton.onRealDestroy(this);
-			finish();
-			return true;
-		case R.id.addFile:
-			Intent intent = new Intent();
-			intent.setAction(Intent.ACTION_PICK);
-			// intent.setData(MediaStore.Files.getContentUri("external"));
-			intent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-			//intent.setData(Uri.parse("content://media/external/images/media"));
-			startActivityForResult(intent, 12345);
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.quit:
+                AndroidSingleton.onRealDestroy(this);
+                finish();
+                return true;
+            case R.id.addFile:
+                // There are several methods to select a file
+                // Best way: User has a file-browser installed:
+                Intent fileIntent = new Intent();
+                fileIntent.setAction(Intent.ACTION_GET_CONTENT);
+                fileIntent.setType("file/*");
+                if (this.getPackageManager().resolveActivity(fileIntent, 0) != null) {
+                    // file-browser available:
+                    startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
+                } else {
+                    // Fallback: Use default video/audio/image-app:
+                    final CharSequence[] items = {"Video", "Audio", "Image"};
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (data == null) {
-			// User pressed "back"/"cancel" etc
-			return;
-		}
-		switch (requestCode) {
-		case 12345:
-			String[] proj = { MediaStore.Images.Media.DATA };
-			Cursor cursor = managedQuery(data.getData(), proj, null, null, null);
-			int column_index = cursor
-					.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			cursor.moveToFirst();
-			String path = cursor.getString(column_index);
-			File file = new File(path);
-			List<File> list = new ArrayList<File>();
-			list.add(file);
-			LXCFile lxcfile = new LXCFile(list, path);
-			guiListener.offerFile(lxcfile);
-			break;
-		}
-	}
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Pick what to share:");
+                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int item) {
+                            Intent pickIntent = new Intent();
+                            pickIntent.setAction(Intent.ACTION_PICK);
+                            switch (item) {
+                                case 0: // Video
+                                    pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                                    break;
+                                case 1: // Audio
+                                    pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                                    break;
+                                case 2: // Images
+                                    pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                    break;
+                            }
+                            startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+                        }
+                    });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		final LXCFile file = files.get(position);
-		if (!file.isLocal() && !file.isAvailable()) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					guiListener.downloadFile(file, false);
-				}
-			});
-			t.setName("lxc_helper_initdl_" + file.getShownName());
-			t.setDaemon(true);
-			t.start();
-		}
-	}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null) {
+            // User pressed "back"/"cancel" etc
+            return;
+        }
+        switch (requestCode) {
+            case RETURNCODE_MEDIAINTENT:
+                String[] proj = { MediaStore.Images.Media.DATA };
+                Cursor cursor = managedQuery(data.getData(), proj, null, null, null);
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                String path = cursor.getString(column_index);
+                File mediaFile = new File(path);
+                List<File> list = new ArrayList<File>();
+                list.add(mediaFile);
+                LXCFile lxcfile = new LXCFile(list, path);
+                guiListener.offerFile(lxcfile);
+                break;
+            case RETURNCODE_FILEINTENT:
+                String filePath = data.getData().toString();
+                File file = new File(filePath.substring(filePath.indexOf('/')));
+                List<File> fileList = new ArrayList<File>();
+                fileList.add(file);
+                guiListener.offerFile(new LXCFile(fileList, filePath));
+                break;
+        }
+    }
 
-	/**
-	 * Sets the GuiListener. Will be called by AndroidSingleton when LXC is
-	 * ready. If this Activity has been recreated and LXC is still running,
-	 * AndroidSingleton calls this within onCreateMainActivity
-	 * 
-	 * @param guiListener
-	 *            out future GuiListener
-	 */
-	public void setGuiListener(GuiListener guiListener) {
-		files = guiListener.getFileList();
-		this.guiListener = guiListener;
-		updateGui();
-	}
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        final LXCFile file = files.get(position);
+        if (!file.isLocal() && !file.isAvailable()) {
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    guiListener.downloadFile(file, false);
+                }
+            });
+            t.setName("lxc_helper_initdl_" + file.getShownName());
+            t.setDaemon(true);
+            t.start();
+        }
+    }
 
-	private void updateGui() {
-		getListView().post(new Runnable() {
+    /**
+     * Sets the GuiListener. Will be called by AndroidSingleton when LXC is
+     * ready. If this Activity has been recreated and LXC is still running,
+     * AndroidSingleton calls this within onCreateMainActivity
+     * 
+     * @param guiListener
+     *            out future GuiListener
+     */
+    public void setGuiListener(GuiListener guiListener) {
+        files = guiListener.getFileList();
+        this.guiListener = guiListener;
+        updateGui();
+    }
 
-			@Override
-			public void run() {
-				if (observer != null) {
-					observer.onChanged();
-				}
-			}
-		});
-	}
+    private void updateGui() {
+        getListView().post(new Runnable() {
+
+            @Override
+            public void run() {
+                if (observer != null) {
+                    observer.onChanged();
+                }
+            }
+        });
+    }
 }
