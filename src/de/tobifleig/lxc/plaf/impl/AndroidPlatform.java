@@ -227,7 +227,7 @@ public class AndroidPlatform extends ListActivity {
                 File mediaFile = new File(path);
                 List<File> list = new ArrayList<File>();
                 list.add(mediaFile);
-                LXCFile lxcfile = new LXCFile(list, path);
+                LXCFile lxcfile = new LXCFile(list, mediaFile.getName());
                 guiListener.offerFile(lxcfile);
                 break;
             case RETURNCODE_FILEINTENT:
@@ -235,7 +235,7 @@ public class AndroidPlatform extends ListActivity {
                 File file = new File(filePath.substring(filePath.indexOf('/')));
                 List<File> fileList = new ArrayList<File>();
                 fileList.add(file);
-                guiListener.offerFile(new LXCFile(fileList, filePath));
+                guiListener.offerFile(new LXCFile(fileList, file.getName()));
                 break;
         }
     }
