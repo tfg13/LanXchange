@@ -4,7 +4,7 @@
     <string name="hello_world">Android-Version coming soon!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_lxc">LanXchange</string>
-    <string name="loading">loading...</string>
+    <string name="nofiles">No files found in your home network. \nPress + to start sharing</string>
     <string name="menu_stop">Stop LXC</string>
     <string name="menu_add">Offer file(s)</string>
 

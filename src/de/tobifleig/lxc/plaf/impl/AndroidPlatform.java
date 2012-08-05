@@ -50,7 +50,7 @@ public class AndroidPlatform extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TextView emptyText = new TextView(this);
-        emptyText.setText("loading...");
+        emptyText.setText(R.string.nofiles);
         emptyText.setGravity(Gravity.CENTER);
 
         getListView().setEmptyView(emptyText);
