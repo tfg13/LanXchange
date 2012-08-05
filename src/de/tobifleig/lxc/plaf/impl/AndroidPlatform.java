@@ -135,13 +135,23 @@ public class AndroidPlatform extends ListActivity {
             }
         });
 
+        // Check intent
+        String quickShare = null;
+        Intent launchIntent = getIntent();
+        if (launchIntent.getAction() != null && launchIntent.getAction().equals(Intent.ACTION_SEND)) {
+            // Make file available asap:
+            quickShare = launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString().substring(8); // remove
+                                                                                                    // "file://"
+            System.out.println("Quicksharepath:" + quickShare);
+        }
+
         AndroidSingleton.onCreateMainActivity(this, new GuiInterfaceBridge() {
 
             @Override
             public void update() {
                 updateGui();
             }
-        });
+        }, quickShare);
     }
 
     @Override
@@ -200,7 +210,7 @@ public class AndroidPlatform extends ListActivity {
                                 startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
                                 break;
                         }
-                        
+
                     }
                 });
                 AlertDialog alert = builder.create();
@@ -223,21 +233,31 @@ public class AndroidPlatform extends ListActivity {
                 Cursor cursor = managedQuery(data.getData(), proj, null, null, null);
                 int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
                 cursor.moveToFirst();
-                String path = cursor.getString(column_index);
-                File mediaFile = new File(path);
-                List<File> list = new ArrayList<File>();
-                list.add(mediaFile);
-                LXCFile lxcfile = new LXCFile(list, mediaFile.getName());
-                guiListener.offerFile(lxcfile);
+                offerFile(cursor.getString(column_index));
                 break;
             case RETURNCODE_FILEINTENT:
                 String filePath = data.getData().toString();
-                File file = new File(filePath.substring(filePath.indexOf('/')));
-                List<File> fileList = new ArrayList<File>();
-                fileList.add(file);
-                guiListener.offerFile(new LXCFile(fileList, file.getName()));
+                offerFile(filePath.substring(filePath.indexOf('/')));
                 break;
         }
+    }
+
+    /**
+     * Offers a file.
+     * 
+     * @param path
+     *            the absolute path
+     */
+    private void offerFile(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            System.err.println("file does not exist!!! + file: " + path);
+            return;
+        }
+        List<File> list = new ArrayList<File>();
+        list.add(file);
+        LXCFile lxcfile = new LXCFile(list, file.getName());
+        guiListener.offerFile(lxcfile);
     }
 
     @Override
@@ -280,5 +300,15 @@ public class AndroidPlatform extends ListActivity {
                 }
             }
         });
+    }
+
+    /**
+     * When this activity is started with an ACTION_SEND Intent, the path of the
+     * file to share will end up here.
+     * 
+     * @param path
+     */
+    public void quickShare(String path) {
+        offerFile(path);
     }
 }
