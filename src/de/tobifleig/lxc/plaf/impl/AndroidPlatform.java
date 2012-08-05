@@ -164,40 +164,47 @@ public class AndroidPlatform extends ListActivity {
                 return true;
             case R.id.addFile:
                 // There are several methods to select a file
+                // Built-in (always offered) are Music, Video and Images
+                // Optional are generic files. This option is available if the
+                // user has a file-browser installed:
                 // Best way: User has a file-browser installed:
-                Intent fileIntent = new Intent();
+                final Intent fileIntent = new Intent();
                 fileIntent.setAction(Intent.ACTION_GET_CONTENT);
                 fileIntent.setType("file/*");
+                CharSequence[] items = { "Video", "Music", "Image" };
                 if (this.getPackageManager().resolveActivity(fileIntent, 0) != null) {
                     // file-browser available:
-                    startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
-                } else {
-                    // Fallback: Use default video/audio/image-app:
-                    final CharSequence[] items = {"Video", "Audio", "Image"};
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Pick what to share:");
-                    builder.setItems(items, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int item) {
-                            Intent pickIntent = new Intent();
-                            pickIntent.setAction(Intent.ACTION_PICK);
-                            switch (item) {
-                                case 0: // Video
-                                    pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                                    break;
-                                case 1: // Audio
-                                    pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                                    break;
-                                case 2: // Images
-                                    pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                    break;
-                            }
-                            startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
-                        }
-                    });
-                    AlertDialog alert = builder.create();
-                    alert.show();
+                    items = new CharSequence[] { "Video", "Music", "Image", "Other files" };
                 }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Pick what to share:");
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        Intent pickIntent = new Intent();
+                        pickIntent.setAction(Intent.ACTION_PICK);
+                        switch (item) {
+                            case 0: // Video
+                                pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+                                break;
+                            case 1: // Audio
+                                pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+                                break;
+                            case 2: // Images
+                                pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+                                break;
+                            case 3: // Other files
+                                startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
+                                break;
+                        }
+                        
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
