@@ -43,22 +43,20 @@ public class LXCService extends Service implements Platform {
 			running = true;
 			System.out.println("LXC_SERVICE START");
 			
-			String ns = Context.NOTIFICATION_SERVICE;
-			NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
 			int icon = R.drawable.ic_lxc_running;
-			CharSequence tickerText = "LXC Service started!";
+			CharSequence tickerText = "LanXchange running";
 			long when = System.currentTimeMillis();
 
 			Notification notification = new Notification(icon, tickerText, when);
 			
 			Context context = getApplicationContext();
-			CharSequence contentTitle = "LanXchange Service Indicator";
-			CharSequence contentText = "Service running!";
+			CharSequence contentTitle = "LanXchange running";
+			CharSequence contentText = "Tap to return to LanXchange";
 			Intent notificationIntent = new Intent(this, AndroidPlatform.class);
 			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
 			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-
+			
 			startForeground(1, notification);
 
 			startLXC();
