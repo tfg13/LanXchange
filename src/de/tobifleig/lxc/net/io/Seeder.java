@@ -75,6 +75,7 @@ public class Seeder extends Transceiver {
                                 transferedBytes += gotbytes;
                                 listener.progress();
                                 out.write(buffer, 0, gotbytes);
+                                out.flush();
                             }
                             // done
                             out.flush();
