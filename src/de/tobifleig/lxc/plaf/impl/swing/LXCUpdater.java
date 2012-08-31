@@ -229,7 +229,7 @@ public final class LXCUpdater {
 	    updateGui.setVisible(false);
 	    updateGui.dispose();
 	} else {
-	    System.out.println("You have the lastest version");
+	    System.out.println("You have the latest version");
 	}
 
     }
