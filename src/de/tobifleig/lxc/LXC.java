@@ -84,7 +84,7 @@ public class LXC {
 
 	initLogging(args);
 
-	System.out.println("This is LanXchange v1.00 RC2 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012 Tobias Fleig - License GPLv3 or later");
+	System.out.println("This is LanXchange v1.00 RC3 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012 Tobias Fleig - License GPLv3 or later");
 
 	platform.readConfiguration(args);
 
