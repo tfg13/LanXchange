@@ -89,10 +89,11 @@ public class NetworkManager {
 	this.fileManager = fileManager;
 	jobs = new HashMap<Transceiver, LXCJob>();
 	instances = new InstanceManager(new InstanceManagerListener() {
-
 	    @Override
 	    public void instanceAdded(LXCInstance newInstance) {
 		broadcastList();
+		// request list
+		sendList(null, newInstance);
 	    }
 
 	    @Override
@@ -101,12 +102,10 @@ public class NetworkManager {
 	    }
 	});
 	fileServer = new FileServer(new FileServerListener() {
-
 	    @Override
 	    public void downloadRequest(final LXCFile file, ObjectOutputStream outStream, ObjectInputStream inStream, InetAddress address, int transVersion) {
 		final Seeder seed = new Seeder(outStream, inStream, file, transVersion);
 		TransceiverListener leechListener = new TransceiverListener() {
-
 		    @Override
 		    public void progress() {
 			NetworkManager.this.listener.triggerGui();
@@ -128,14 +127,17 @@ public class NetworkManager {
 	    }
 	}, fileManager);
 	listServer = new ListServer(new ListServerListener() {
-
 	    @Override
 	    public void listReceived(TransFileList list, InetAddress host) {
 		NetworkManager.this.listener.listReceived(list, instances.getOrCreateInstance(host, list.getOriginId()));
 	    }
+
+	    @Override
+	    public void listRequested() {
+		broadcastList();
+	    }
 	});
 	pingServer = new PingServer(new PingServerListener() {
-
 	    @Override
 	    public void pingReceived(byte[] data, InetAddress host) {
 		instances.computePing(data, host);
@@ -211,7 +213,6 @@ public class NetworkManager {
 		// accepted
 		final Leecher leech = new Leecher(input, output, file, targetFolder, file.getLxcTransVersion());
 		TransceiverListener leechListener = new TransceiverListener() {
-
 		    @Override
 		    public void progress() {
 			listener.triggerGui();
@@ -252,7 +253,6 @@ public class NetworkManager {
      */
     public void broadcastList() {
 	Thread t = new Thread(new Runnable() {
-
 	    @Override
 	    public void run() {
 		TransFileList list = fileManager.getTransFileList();

@@ -29,12 +29,18 @@ import java.net.InetAddress;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 public interface ListServerListener {
-    
+
     /**
      * ListServer received a (new) filelist.
+     *
      * @param list the list
      * @param host the origin of this list
      */
     public void listReceived(TransFileList list, InetAddress host);
 
+    /**
+     * Someone manually requested the filelist.
+     * This will result in a broadcast to everyone
+     */
+    public void listRequested();
 }

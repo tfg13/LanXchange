@@ -38,7 +38,6 @@ public class ListServer implements Runnable {
      * The ServerSocket used.
      */
     private ServerSocket servSock;
-    
     /**
      * The listener, used to deliver incoming filelists.
      */
@@ -46,63 +45,69 @@ public class ListServer implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (true) {
-                Socket client = servSock.accept(); // Wait for next list, blocks
-                try {
-                    ObjectInputStream input = new ObjectInputStream(client.getInputStream());
-                    try {
-                        TransFileList list = (TransFileList) input.readObject();
-                        if (list != null) {
-                            listener.listReceived(list, client.getInetAddress());
-                        }
-                    } catch (ClassNotFoundException ex) {
-                        ex.printStackTrace();
-                    } catch (ClassCastException ex) {
-                        ex.printStackTrace();
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+	try {
+	    while (true) {
+		Socket client = servSock.accept(); // Wait for next list, blocks
+		try {
+		    ObjectInputStream input = new ObjectInputStream(client.getInputStream());
+		    try {
+			TransFileList list = (TransFileList) input.readObject();
+			if (list != null) {
+			    listener.listReceived(list, client.getInetAddress());
+			} else {
+			    // List-request
+			    listener.listRequested();
+			}
+		    } catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+		    } catch (ClassCastException ex) {
+			ex.printStackTrace();
+		    }
+		} catch (IOException ex) {
+		    ex.printStackTrace();
+		}
+	    }
+	} catch (IOException ex) {
+	    ex.printStackTrace();
+	}
     }
 
     /**
      * Binds the Socket to port 27717.
      * Used for the single-instance-check.
+     *
      * @throws BindException
      */
     private void bindSocket() throws BindException {
-        try {
-            servSock = new ServerSocket(27717);
-        } catch (IOException ex) {
-            if (ex instanceof BindException) {
-                throw new BindException();
-            }
-        }
+	try {
+	    servSock = new ServerSocket(27717);
+	} catch (IOException ex) {
+	    if (ex instanceof BindException) {
+		throw new BindException();
+	    }
+	}
     }
 
     /**
      * Creates a new ListServer with the given parameters.
+     *
      * @param listener the listener used to deliver incoming filelists
      */
     public ListServer(ListServerListener listener) {
-        this.listener = listener;
+	this.listener = listener;
     }
 
     /**
      * Starts the ListServer.
      * Binds to port 27717.
+     *
      * @throws BindException if port is already occupied
      */
     public void start() throws BindException {
-        Thread thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.setName("listserver");
-        this.bindSocket();
-        thread.start();
+	Thread thread = new Thread(this);
+	thread.setDaemon(true);
+	thread.setName("listserver");
+	this.bindSocket();
+	thread.start();
     }
 }
