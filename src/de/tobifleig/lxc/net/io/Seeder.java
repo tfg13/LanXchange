@@ -93,7 +93,7 @@ public class Seeder extends Transceiver {
             // transfer complete
             out.writeByte('e');
             out.flush();
-	    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "b/s");
+	    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
             listener.finished(true);
             System.out.println("Seeder: Done seeding.");
         } catch (IOException ex) {

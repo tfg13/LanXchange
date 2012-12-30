@@ -105,7 +105,7 @@ public class Leecher extends Transceiver {
 		    }
 		} else if (cmd == 'e') {
 		    // done
-		    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "b/s");
+		    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
 		    System.out.println("Leecher: Done receiving.");
 		    listener.finished(true);
 		    break;
