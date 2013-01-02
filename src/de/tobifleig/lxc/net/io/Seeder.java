@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
