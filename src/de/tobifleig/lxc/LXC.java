@@ -46,7 +46,7 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 147;
+    public static final int versionId = 148;
     /**
      * The Platform we are running on.
      */
@@ -84,7 +84,7 @@ public class LXC {
 
 	initLogging(args);
 
-	System.out.println("This is LanXchange v1.00 RC3 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012 Tobias Fleig - License GPLv3 or later");
+	System.out.println("This is LanXchange v1.00 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig - License GPLv3 or later");
 
 	platform.readConfiguration(args);
 
