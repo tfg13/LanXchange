@@ -56,7 +56,7 @@ public class FileManager {
      */
     public void computeFileList(TransFileList receivedList, LXCInstance sender) {
 	List<LXCFile> rawList = receivedList.getAll();
-	recentFileLists.put(sender, rawList);
+	recentFileLists.put(sender, new ArrayList<LXCFile>(rawList)); // store a copy!
 	Iterator<LXCFile> iter = files.iterator();
 	// Remove all files no longer offerd by this instance
 	while (iter.hasNext()) {
