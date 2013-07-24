@@ -29,28 +29,45 @@ import de.tobifleig.lxc.data.LXCFile;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 public interface NetworkManagerListener {
-    
+
     /**
      * A new file list was received.
+     *
      * @param list the list
      * @param sender the origin of this list
      */
     public void listReceived(TransFileList list, LXCInstance sender);
-    
+
     /**
      * Files in the Lists were changed, gui-update required.
      */
     public void triggerGui();
-    
+
     /**
      * Gets called when the networksystem removes an LXCInstance.
+     *
      * @param removedInstance the removed instance
      */
     public void instanceRemoved(LXCInstance removedInstance);
 
     /**
      * Called when a download was completed successfully.
+     *
      * @param file the file
      */
     public void downloadComplete(LXCFile file);
+
+    /**
+     * Called when a upload was aborted because a file no longer exists.
+     * Show a message an tell the user whats going on.
+     *
+     * @file The file that was removed.
+     */
+    public void uploadFailedFileMissing(LXCFile file);
+
+    /**
+     * Called when a download was aborted because remote could no longer find a file.
+     * Show a message an tell the user whats going on.
+     */
+    public void downloadFailedFileMissing();
 }

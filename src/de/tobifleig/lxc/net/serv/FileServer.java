@@ -50,67 +50,67 @@ public class FileServer implements Runnable {
      * @param fileManager the filemanager, used to check if files are available for download
      */
     public FileServer(FileServerListener listener, FileManager fileManager) {
-	this.listener = listener;
-	this.fileManager = fileManager;
+        this.listener = listener;
+        this.fileManager = fileManager;
     }
 
     @Override
     public void run() {
-	try {
-	    ServerSocket servSock = new ServerSocket();
-	    servSock.setReceiveBufferSize(212992);
-	    servSock.setPerformancePreferences(0, 0, 1);
-	    servSock.bind(new InetSocketAddress(27719));
+        try {
+            ServerSocket servSock = new ServerSocket();
+            servSock.setReceiveBufferSize(212992);
+            servSock.setPerformancePreferences(0, 0, 1);
+            servSock.bind(new InetSocketAddress(27719));
 
-	    while (true) {
-		Socket client = servSock.accept();
-		client.setSendBufferSize(212992);
-		ObjectInputStream input;
-		ObjectOutputStream output;
-		try {
-		    output = new ObjectOutputStream(new BufferedOutputStream(client.getOutputStream()));
-		    output.flush();
-		    input = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
-		    try {
-			LXCFile file = (LXCFile) input.readObject();
-			if (file != null) {
-			    // get version number
-			    int version = file.getLxcTransVersion();
-			    // file still available?
-			    file = fileManager.localRepresentation(file);
-			    if (file != null && file.isLocal()) {
-				// send ACK, start transfer
-				output.writeByte('y');
-				output.flush();
-				listener.downloadRequest(file, output, input, client.getInetAddress(), version);
-			    } else {
-				// refuse request
-				output.writeByte('n');
-				output.flush();
-			    }
-			}
-		    } catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		    } catch (ClassCastException ex) {
-			ex.printStackTrace();
-		    }
-		} catch (IOException ex) {
-		    ex.printStackTrace();
-		}
-	    }
+            while (true) {
+                Socket client = servSock.accept();
+                client.setSendBufferSize(212992);
+                ObjectInputStream input;
+                ObjectOutputStream output;
+                try {
+                    output = new ObjectOutputStream(new BufferedOutputStream(client.getOutputStream()));
+                    output.flush();
+                    input = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
+                    try {
+                        LXCFile file = (LXCFile) input.readObject();
+                        if (file != null) {
+                            // get version number
+                            int version = file.getLxcTransVersion();
+                            // file still available?
+                            file = fileManager.localRepresentation(file);
+                            if (file != null && file.isLocal()) {
+                                // send ACK, start transfer
+                                output.writeByte('y');
+                                output.flush();
+                                listener.downloadRequest(file, output, input, client.getInetAddress(), version);
+                            } else {
+                                // refuse request
+                                output.writeByte('n');
+                                output.flush();
+                            }
+                        }
+                    } catch (ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    } catch (ClassCastException ex) {
+                        ex.printStackTrace();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
 
-	} catch (Exception ex) {
-	    ex.printStackTrace();
-	}
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
      * Starts this server.
      */
     public void start() {
-	Thread thread = new Thread(this);
-	thread.setDaemon(true);
-	thread.setName("fileserver");
-	thread.start();
+        Thread thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.setName("fileserver");
+        thread.start();
     }
 }

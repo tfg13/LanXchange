@@ -37,96 +37,101 @@ public class Leecher extends Transceiver {
 
     @Override
     public void run() {
-	System.out.println("Leecher: Starting transmission... (version " + transVersion + ")");
+        System.out.println("Leecher: Starting transmission... (version " + transVersion + ")");
 
-	long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
-	try {
+        try {
 
-	    // Create list for base-files (will likely go away in future releases)
-	    file.createFiles();
+            // Create list for base-files (will likely go away in future releases)
+            file.createFiles();
 
-	    while (true) {
-		byte cmd = in.readByte();
+            while (true) {
+                byte cmd = in.readByte();
 
-		if (cmd == 'f' || cmd == 'F') {
-		    // next file
-		    // read date if version >= 1
-		    long date = file.getLxcTransVersion() >= 1 ? in.readLong() : System.currentTimeMillis();
-		    // read size
-		    long size = in.readLong();
-		    // read path
-		    String path = in.readUTF();
-		    // convert path
-		    path = path.replace("/", File.separator);
-		    path = path.replace("\\", File.separator);
-		    // create file / parent folders
-		    File target = new File(targetFolder, path);
-		    target.getParentFile().mkdirs();
-		    // remember base-files (deprecated)
-		    if (cmd == 'F') {
-			file.getFiles().add(target);
-		    }
-		    // transfer file content (real data)
-		    BufferedOutputStream fileout;
-		    byte[] buffer = new byte[4096];
-		    try {
-			fileout = new BufferedOutputStream(new FileOutputStream(target), 8388608);
-			while (size > 0) {
-			    int read;
-			    if (size >= buffer.length) {
-				read = in.read(buffer);
-			    } else {
-				read = in.read(buffer, 0, (int) size);
-			    }
-			    fileout.write(buffer, 0, read);
-			    size -= read;
-			    transferedBytes += read;
-			    listener.progress();
-			}
-			fileout.flush();
-			fileout.close();
-			target.setLastModified(date);
-		    } catch (IOException ex) {
-			ex.printStackTrace();
-		    }
-		} else if (cmd == 'd' || cmd == 'D') {
-		    // folder
-		    String path = in.readUTF();
-		    // convert path
-		    path = path.replace("/", File.separator);
-		    path = path.replace("\\", File.separator);
-		    // create folder
-		    File target = new File(targetFolder, path);
-		    target.mkdirs();
-		    // add to base list, deprecated
-		    if (cmd == 'D') {
-			file.getFiles().add(target);
-		    }
-		} else if (cmd == 'e') {
-		    // done
-		    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
-		    System.out.println("Leecher: Done receiving.");
-		    listener.finished(true);
-		    break;
-		} else {
-		    System.out.println("Leecher: Unused command: " + cmd);
-		}
-	    }
+                if (cmd == 'f' || cmd == 'F') {
+                    // next file
+                    // read date if version >= 1
+                    long date = file.getLxcTransVersion() >= 1 ? in.readLong() : System.currentTimeMillis();
+                    // read size
+                    long size = in.readLong();
+                    // read path
+                    String path = in.readUTF();
+                    // convert path
+                    path = path.replace("/", File.separator);
+                    path = path.replace("\\", File.separator);
+                    // create file / parent folders
+                    File target = new File(targetFolder, path);
+                    target.getParentFile().mkdirs();
+                    // remember base-files (deprecated)
+                    if (cmd == 'F') {
+                        file.getFiles().add(target);
+                    }
+                    // transfer file content (real data)
+                    BufferedOutputStream fileout;
+                    byte[] buffer = new byte[4096];
+                    try {
+                        fileout = new BufferedOutputStream(new FileOutputStream(target), 8388608);
+                        while (size > 0) {
+                            int read;
+                            if (size >= buffer.length) {
+                                read = in.read(buffer);
+                            } else {
+                                read = in.read(buffer, 0, (int) size);
+                            }
+                            fileout.write(buffer, 0, read);
+                            size -= read;
+                            transferedBytes += read;
+                            listener.progress();
+                        }
+                        fileout.flush();
+                        fileout.close();
+                        target.setLastModified(date);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                } else if (cmd == 'd' || cmd == 'D') {
+                    // folder
+                    String path = in.readUTF();
+                    // convert path
+                    path = path.replace("/", File.separator);
+                    path = path.replace("\\", File.separator);
+                    // create folder
+                    File target = new File(targetFolder, path);
+                    target.mkdirs();
+                    // add to base list, deprecated
+                    if (cmd == 'D') {
+                        file.getFiles().add(target);
+                    }
+                } else if (cmd == 'e') {
+                    // done
+                    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
+                    System.out.println("Leecher: Done receiving.");
+                    listener.finished(true, false);
+                    break;
+                } else if (cmd == 's') {
+                    // error, client no longer has the file
+                    System.out.println("Error: Remote reports missing file, aborting transfer.");
+                    listener.finished(false, true);
+                    break;
+                } else {
+                    System.out.println("Leecher: Unused command: " + cmd);
+                }
+            }
 
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    listener.finished(false);
-	} finally {
-	    try {
-		in.close();
-	    } catch (Exception ex) {
-	    }
-	    try {
-		out.close();
-	    } catch (Exception ex) {
-	    }
-	}
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            listener.finished(false, false);
+        } finally {
+            try {
+                in.close();
+            } catch (Exception ex) {
+            }
+            try {
+                out.close();
+            } catch (Exception ex) {
+            }
+        }
     }
 
     /**
@@ -148,29 +153,29 @@ public class Leecher extends Transceiver {
      * @param transVersion version of the transfer protocol {@link LXCTransceiver}
      */
     public Leecher(ObjectInputStream input, ObjectOutputStream output, LXCFile transFile, File targetFolder, int transVersion) {
-	this.file = transFile;
-	this.out = output;
-	this.in = input;
-	this.targetFolder = targetFolder;
-	this.transVersion = transVersion;
+        this.file = transFile;
+        this.out = output;
+        this.in = input;
+        this.targetFolder = targetFolder;
+        this.transVersion = transVersion;
 
-	this.totalBytes = file.getFileSize();
+        this.totalBytes = file.getFileSize();
     }
 
     @Override
     public void start() {
-	Thread thread = new Thread(this);
-	thread.setName("leecher_" + file.getShownName());
-	thread.start();
+        Thread thread = new Thread(this);
+        thread.setName("leecher_" + file.getShownName());
+        thread.start();
     }
 
     @Override
     public void abort() {
-	// Just kill it
-	System.out.println("Leecher: Aborting download upon user-request. Exceptions will occur!");
-	try {
-	    in.close();
-	} catch (Exception ex) {
-	}
+        // Just kill it
+        System.out.println("Leecher: Aborting download upon user-request. Exceptions will occur!");
+        try {
+            in.close();
+        } catch (Exception ex) {
+        }
     }
 }

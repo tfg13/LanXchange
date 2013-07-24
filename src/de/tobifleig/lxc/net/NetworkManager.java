@@ -85,66 +85,72 @@ public class NetworkManager {
      * @param fileManager the filemanager who must be informed about received filelists etc.
      */
     public NetworkManager(NetworkManagerListener listener, FileManager fileManager) {
-	this.listener = listener;
-	this.fileManager = fileManager;
-	jobs = new HashMap<Transceiver, LXCJob>();
-	instances = new InstanceManager(new InstanceManagerListener() {
-	    @Override
-	    public void instanceAdded(LXCInstance newInstance) {
-		broadcastList();
-		// request list
-		sendList(null, newInstance);
-	    }
+        this.listener = listener;
+        this.fileManager = fileManager;
+        jobs = new HashMap<Transceiver, LXCJob>();
+        instances = new InstanceManager(new InstanceManagerListener() {
+            @Override
+            public void instanceAdded(LXCInstance newInstance) {
+                broadcastList();
+                // request list
+                sendList(null, newInstance);
+            }
 
-	    @Override
-	    public void instanceRemoved(LXCInstance removedInstance) {
-		NetworkManager.this.listener.instanceRemoved(removedInstance);
-	    }
-	});
-	fileServer = new FileServer(new FileServerListener() {
-	    @Override
-	    public void downloadRequest(final LXCFile file, ObjectOutputStream outStream, ObjectInputStream inStream, InetAddress address, int transVersion) {
-		final Seeder seed = new Seeder(outStream, inStream, file, transVersion);
-		TransceiverListener leechListener = new TransceiverListener() {
-		    @Override
-		    public void progress() {
-			NetworkManager.this.listener.triggerGui();
-		    }
+            @Override
+            public void instanceRemoved(LXCInstance removedInstance) {
+                NetworkManager.this.listener.instanceRemoved(removedInstance);
+            }
+        });
+        fileServer = new FileServer(new FileServerListener() {
+            @Override
+            public void downloadRequest(final LXCFile file, ObjectOutputStream outStream, ObjectInputStream inStream, InetAddress address, int transVersion) {
+                final Seeder seed = new Seeder(outStream, inStream, file, transVersion);
+                TransceiverListener seedListener = new TransceiverListener() {
+                    @Override
+                    public void progress() {
+                        NetworkManager.this.listener.triggerGui();
+                    }
 
-		    @Override
-		    public void finished(boolean success) {
-			file.removeJob(jobs.get(seed));
-			NetworkManager.this.listener.triggerGui();
-		    }
-		};
-		seed.setListener(leechListener);
+                    @Override
+                    public void finished(boolean success, boolean removeFile) {
+                        file.removeJob(jobs.get(seed));
+                        if (removeFile) {
+                            // File no longer available --> remove
+                            NetworkManager.this.fileManager.removeLocal(file);
+                            broadcastList();
+                            NetworkManager.this.listener.uploadFailedFileMissing(file);
+                        }
+                        NetworkManager.this.listener.triggerGui();
+                    }
+                };
+                seed.setListener(seedListener);
 
-		LXCJob job = new LXCJob(seed, instances.getByAddress(address));
-		jobs.put(seed, job);
-		file.addJob(job);
+                LXCJob job = new LXCJob(seed, instances.getByAddress(address));
+                jobs.put(seed, job);
+                file.addJob(job);
 
-		seed.start();
-	    }
-	}, fileManager);
-	listServer = new ListServer(new ListServerListener() {
-	    @Override
-	    public void listReceived(TransFileList list, InetAddress host) {
-		NetworkManager.this.listener.listReceived(list, instances.getOrCreateInstance(host, list.getOriginId()));
-	    }
+                seed.start();
+            }
+        }, fileManager);
+        listServer = new ListServer(new ListServerListener() {
+            @Override
+            public void listReceived(TransFileList list, InetAddress host) {
+                NetworkManager.this.listener.listReceived(list, instances.getOrCreateInstance(host, list.getOriginId()));
+            }
 
-	    @Override
-	    public void listRequested() {
-		broadcastList();
-	    }
-	});
-	pingServer = new PingServer(new PingServerListener() {
-	    @Override
-	    public void pingReceived(byte[] data, InetAddress host) {
-		instances.computePing(data, host);
-	    }
-	});
-	multicaster = new HeartbeatSender();
-	interfacesurveillance = new InterfaceManager(pingServer, multicaster);
+            @Override
+            public void listRequested() {
+                broadcastList();
+            }
+        });
+        pingServer = new PingServer(new PingServerListener() {
+            @Override
+            public void pingReceived(byte[] data, InetAddress host) {
+                instances.computePing(data, host);
+            }
+        });
+        multicaster = new HeartbeatSender();
+        interfacesurveillance = new InterfaceManager(pingServer, multicaster);
     }
 
     /**
@@ -154,17 +160,17 @@ public class NetworkManager {
      * @return true, if started. false if already running.
      */
     public boolean checkSingletonAndStart() {
-	try {
-	    listServer.start();
-	    fileServer.start();
-	    multicaster.start();
-	    interfacesurveillance.start();
-	    instances.start();
-	    return true;
-	} catch (BindException ex) {
-	    // already running
-	    return false;
-	}
+        try {
+            listServer.start();
+            fileServer.start();
+            multicaster.start();
+            interfacesurveillance.start();
+            instances.start();
+            return true;
+        } catch (BindException ex) {
+            // already running
+            return false;
+        }
     }
 
     /**
@@ -175,7 +181,7 @@ public class NetworkManager {
      * It is known that this is considered bad practice and therefore it will likely be changed in future releases.
      */
     public void stop() {
-	multicaster.stop();
+        multicaster.stop();
     }
 
     /**
@@ -188,63 +194,66 @@ public class NetworkManager {
      * @return true, if connection could be established
      */
     public boolean connectAndDownload(final LXCFile file, File targetFolder) {
-	try {
-	    Socket server = new Socket();
-	    server.setPerformancePreferences(0, 0, 1);
-	    server.setSendBufferSize(212992);
-	    server.setReceiveBufferSize(212992);
-	    server.connect(new InetSocketAddress(file.getInstance().getDownloadAddress(), 27719));
-	    ObjectOutputStream output = new ObjectOutputStream(new BufferedOutputStream(server.getOutputStream()));
-	    output.flush();
-	    ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(server.getInputStream()));
+        try {
+            Socket server = new Socket();
+            server.setPerformancePreferences(0, 0, 1);
+            server.setSendBufferSize(212992);
+            server.setReceiveBufferSize(212992);
+            server.connect(new InetSocketAddress(file.getInstance().getDownloadAddress(), 27719));
+            ObjectOutputStream output = new ObjectOutputStream(new BufferedOutputStream(server.getOutputStream()));
+            output.flush();
+            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(server.getInputStream()));
 
-	    // send request
-	    output.writeObject(file);
-	    output.flush();
+            // send request
+            output.writeObject(file);
+            output.flush();
 
-	    // read answer
-	    byte result = input.readByte();
+            // read answer
+            byte result = input.readByte();
 
-	    if (result == 'n') {
-		// request refused
-		System.out.println("Request refused!");
-		file.setLocked(false);
-	    } else if (result == 'y') {
-		// accepted
-		final Leecher leech = new Leecher(input, output, file, targetFolder, file.getLxcTransVersion());
-		TransceiverListener leechListener = new TransceiverListener() {
-		    @Override
-		    public void progress() {
-			listener.triggerGui();
-		    }
+            if (result == 'n') {
+                // request refused
+                System.out.println("Request refused!");
+                file.setLocked(false);
+            } else if (result == 'y') {
+                // accepted
+                final Leecher leech = new Leecher(input, output, file, targetFolder, file.getLxcTransVersion());
+                TransceiverListener leechListener = new TransceiverListener() {
+                    @Override
+                    public void progress() {
+                        listener.triggerGui();
+                    }
 
-		    @Override
-		    public void finished(boolean success) {
-			file.setLocked(false);
-			if (success) {
-			    file.setAvailable(true);
-			    listener.downloadComplete(file);
-			}
-			file.removeJob(jobs.get(leech));
-			listener.triggerGui();
-		    }
-		};
-		leech.setListener(leechListener);
-		LXCJob job = new LXCJob(leech, file.getInstance());
-		jobs.put(leech, job);
-		file.addJob(job);
-		leech.start();
-	    }
-	} catch (NoRouteToHostException ex) {
-	    System.out.println("Download aborted. No route to host.");
-	    file.setLocked(false);
-	    return false;
-	} catch (IOException ex) {
-	    System.out.println("Download aborted. IOException.");
-	    file.setLocked(false);
-	    ex.printStackTrace();
-	}
-	return true;
+                    @Override
+                    public void finished(boolean success, boolean removeFile) {
+                        file.setLocked(false);
+                        if (success) {
+                            file.setAvailable(true);
+                            listener.downloadComplete(file);
+                        }
+                        file.removeJob(jobs.get(leech));
+                        if (removeFile) {
+                            listener.downloadFailedFileMissing();
+                        }
+                        listener.triggerGui();
+                    }
+                };
+                leech.setListener(leechListener);
+                LXCJob job = new LXCJob(leech, file.getInstance());
+                jobs.put(leech, job);
+                file.addJob(job);
+                leech.start();
+            }
+        } catch (NoRouteToHostException ex) {
+            System.out.println("Download aborted. No route to host.");
+            file.setLocked(false);
+            return false;
+        } catch (IOException ex) {
+            System.out.println("Download aborted. IOException.");
+            file.setLocked(false);
+            ex.printStackTrace();
+        }
+        return true;
     }
 
     /**
@@ -252,19 +261,19 @@ public class NetworkManager {
      * Creates a new Thread for this.
      */
     public void broadcastList() {
-	Thread t = new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		TransFileList list = fileManager.getTransFileList();
-		// Vorbereitungen fertig, senden
-		for (LXCInstance inst : instances.getRemotes()) {
-		    sendList(list, inst);
-		}
-	    }
-	});
-	t.setDaemon(true);
-	t.setName("lxc_helper_listsender");
-	t.start();
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                TransFileList list = fileManager.getTransFileList();
+                // Vorbereitungen fertig, senden
+                for (LXCInstance inst : instances.getRemotes()) {
+                    sendList(list, inst);
+                }
+            }
+        });
+        t.setDaemon(true);
+        t.setName("lxc_helper_listsender");
+        t.start();
     }
 
     /**
@@ -274,17 +283,17 @@ public class NetworkManager {
      * @param dest the destination to send the list to
      */
     private void sendList(TransFileList list, LXCInstance dest) {
-	try {
-	    Socket sock = new Socket();
-	    sock.setSoTimeout(2000);
-	    sock.connect(new InetSocketAddress(dest.getDownloadAddress(), 27717));
-	    ObjectOutputStream outp = new ObjectOutputStream(sock.getOutputStream());
-	    outp.writeObject(list);
-	    outp.flush();
-	    outp.close();
-	    sock.close();
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	}
+        try {
+            Socket sock = new Socket();
+            sock.setSoTimeout(2000);
+            sock.connect(new InetSocketAddress(dest.getDownloadAddress(), 27717));
+            ObjectOutputStream outp = new ObjectOutputStream(sock.getOutputStream());
+            outp.writeObject(list);
+            outp.flush();
+            outp.close();
+            sock.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }

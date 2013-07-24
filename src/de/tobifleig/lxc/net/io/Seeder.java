@@ -36,13 +36,15 @@ public class Seeder extends Transceiver {
     @Override
     public void run() {
         System.out.println("Seeder: Starting transmission... (version " + transVersion + ")");
-	long startTime = System.currentTimeMillis();
-
+        long startTime = System.currentTimeMillis();
+        boolean transferOk = true;
+        boolean fileBroken = false;
         try {
             List<File> files = file.getFiles();
             String parentFile = files.get(0).getParent();
             ArrayList<File> allList = new ArrayList<File>();
             allList.addAll(files);
+
             for (int i = 0; i < allList.size(); i++) {
                 File currentFile = allList.get(i);
                 if (currentFile.isDirectory()) {
@@ -87,42 +89,58 @@ public class Seeder extends Transceiver {
                             } catch (Exception ex) {
                             }
                         }
+                    } else {
+                        System.out.println("Error: Cannot upload \"" + currentFile.getAbsolutePath() + "\", file no longer exists - aborting transfer.");
+                        // Cannot read file, send sorry (newer clients (>=149) display a message; older clients silently discard this.
+                        out.writeByte('s');
+                        out.flush();
+                        // Abort transfer gracefully
+                        transferOk = false;
+                        fileBroken = true;
+                        break;
                     }
                 }
             }
             // transfer complete
             out.writeByte('e');
             out.flush();
-	    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
-            listener.finished(true);
-            System.out.println("Seeder: Done seeding.");
         } catch (IOException ex) {
-            listener.finished(false);
-            System.out.println("Seeder: Lost connection, aborting.");
             ex.printStackTrace();
+            transferOk = false;
         } finally {
             try {
                 out.close();
                 in.close();
-                System.gc(); // Closes filehandlers etc
+                System.gc(); // Closes filehandles etc
             } catch (Exception ex) {
                 // Who cares..
             }
         }
 
+        if (transferOk) {
+            System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
+            listener.finished(true, false);
+            System.out.println("Seeder: Done seeding.");
+        } else {
+            listener.finished(false, fileBroken);
+            System.out.println("Seeder: Lost connection, aborting.");
+        }
+
+
     }
 
     /**
      * Creates a new Seeder with the given parameters.
-     * It is assumed the Streams as fully established
+     * It is assumed the Streams are fully established
      * This means in particular:
-     *  - Both Streams are connected to a remote Leecher
-     *  - The remote side has been preconfigured and can start receiving files immediately
+     * - Both Streams are connected to a remote Leecher
+     * - The remote side has been preconfigured and can start receiving files immediately
      * Please note:
      * This implementation uses two streams (intput+output) for Seeder and Leechers.
      * Obviously only one stream should be required (output for seed, input for leech)
      * Removing the second stream would break compatibilty with previous versions, therefore it is kept.
      * However, it should not be used and may be removed in the future.
+     *
      * @param output the OutputStream, connected and ready
      * @param input the InputStream, connected and ready
      * @param transFile the {@link LXCFile} that is to be transferred
@@ -151,6 +169,7 @@ public class Seeder extends Transceiver {
     /**
      * Turns the given absolute path to be relative to parentPath.
      * This this step is essential, Leecher require paths to be relative.
+     *
      * @param absolute the local, absolute path of the current file
      * @param parentPath the local, absolte path to the parent directory of the particular LXCFile
      * @return a path relative to parentPath
@@ -162,7 +181,7 @@ public class Seeder extends Transceiver {
 
     @Override
     public void abort() {
-	// Just kill it
+        // Just kill it
         System.out.println("Leecher: Aborting upload upon user-request. Exceptions will occur!");
         try {
             in.close();

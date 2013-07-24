@@ -26,17 +26,18 @@ package de.tobifleig.lxc.net.io;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 public interface TransceiverListener {
-    
+
     /**
      * Called by Transceiver everytime the transfer makes some progress.
      * May be called very frequent.
      */
     public void progress();
-    
+
     /**
      * Called by Transceiver upon completion of the download/upload.
+     *
      * @param success true, if succuessful, false if aborted/interrupted
+     * @param removeFile if true, the error was severe and the file should no longer be offered (only used by seeders)
      */
-    public void finished(boolean success);
-
+    public void finished(boolean success, boolean removeFile);
 }

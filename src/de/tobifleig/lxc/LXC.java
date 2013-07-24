@@ -80,69 +80,83 @@ public class LXC {
      * @param args command-line args
      */
     public LXC(Platform platform, final String[] args) {
-	this.platform = platform;
+        this.platform = platform;
 
-	initLogging(args);
+        initLogging(args);
 
-	System.out.println("This is LanXchange v1.00 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig - License GPLv3 or later");
+        System.out.println("This is LanXchange v1.00 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig - License GPLv3 or later");
 
-	platform.readConfiguration(args);
+        platform.readConfiguration(args);
 
-	if (platform.hasAutoUpdates()) {
-	    platform.checkAndPerformUpdates(args);
-	}
+        if (platform.hasAutoUpdates()) {
+            platform.checkAndPerformUpdates(args);
+        }
 
-	gui = platform.getGui(args);
+        gui = platform.getGui(args);
 
-	// set up listeners
-	initListeners();
+        // set up listeners
+        initListeners();
 
-	gui.init(args);
+        gui.init(args);
 
-	askForDownloadTargetSupported = platform.askForDownloadTargetSupported();
-	if (platform.getDefaultDownloadTarget() != null) {
-	    defaultDownloadTarget = new File(platform.getDefaultDownloadTarget());
-	}
+        askForDownloadTargetSupported = platform.askForDownloadTargetSupported();
+        if (platform.getDefaultDownloadTarget() != null) {
+            defaultDownloadTarget = new File(platform.getDefaultDownloadTarget());
+        }
 
-	// create components
-	files = new FileManager();
+        // create components
+        files = new FileManager();
 
-	// init networking
-	network = new NetworkManager(new NetworkManagerListener() {
-	    @Override
-	    public void listReceived(TransFileList list, LXCInstance sender) {
-		files.computeFileList(list, sender);
-		gui.update();
-	    }
+        // init networking
+        network = new NetworkManager(new NetworkManagerListener() {
+            @Override
+            public void listReceived(TransFileList list, LXCInstance sender) {
+                files.computeFileList(list, sender);
+                gui.update();
+            }
 
-	    @Override
-	    public void triggerGui() {
-		gui.update();
-	    }
+            @Override
+            public void triggerGui() {
+                gui.update();
+            }
 
-	    @Override
-	    public void instanceRemoved(LXCInstance removedInstance) {
-		files.instanceRemoved(removedInstance);
-		gui.update();
-	    }
+            @Override
+            public void instanceRemoved(LXCInstance removedInstance) {
+                files.instanceRemoved(removedInstance);
+                gui.update();
+            }
 
-	    @Override
-	    public void downloadComplete(LXCFile file) {
-		LXC.this.platform.downloadComplete(file);
-	    }
-	}, files);
+            @Override
+            public void downloadComplete(LXCFile file) {
+                LXC.this.platform.downloadComplete(file);
+            }
 
-	// start networking
-	if (!network.checkSingletonAndStart()) {
-	    // It is not possible to run multiple instances at the same time.
-	    // Warn user and exit.
-	    gui.showError("LXC is already running!");
-	    System.exit(1);
-	}
-	System.out.println("My instance-id is " + LXCInstance.local.id);
+            @Override
+            public void downloadFailedFileMissing() {
+                gui.showError("At least one file could not be downloaded because it is no longer offered.");
+            }
 
-	// startup completed, display gui
-	gui.display();
+            @Override
+            public void uploadFailedFileMissing(LXCFile file) {
+                if (file.getFiles().size() == 1) {
+                    gui.showError("Uploading \"" + file.getShownName() + "\" failed, LXC cannot locate this file anymore (did you move/delete it?)\n To avoid future errors, this file is no longer offered.");
+                } else {
+                    gui.showError("Uploading \"" + file.getShownName() + "\" failed, at least one file cannot be located anymore (did you move/delete it?)\n To avoid future errors, these files are no longer offered.");
+                }
+            }
+        }, files);
+
+        // start networking
+        if (!network.checkSingletonAndStart()) {
+            // It is not possible to run multiple instances at the same time.
+            // Warn user and exit.
+            gui.showError("LXC is already running!");
+            System.exit(1);
+        }
+        System.out.println("My instance-id is " + LXCInstance.local.id);
+
+        // startup completed, display gui
+        gui.display();
     }
 
     /**
@@ -151,111 +165,111 @@ public class LXC {
      * @param args the start-params
      */
     private void initLogging(final String[] args) {
-	// logging disabled?
-	boolean logging = true;
-	for (String s : args) {
-	    if (s.equals("-nolog")) {
-		logging = false;
-		break;
-	    }
-	}
-	// write to logfile
-	if (logging) {
-	    try {
-		File logfile = new File("lxc.log");
-		if (!logfile.exists()) {
-		    logfile.createNewFile();
-		}
-		PrintStream logger = new PrintStream(logfile);
-		System.setOut(logger);
-		System.setErr(logger);
-	    } catch (IOException ex) {
-		ex.printStackTrace();
-	    }
-	} else {
-	    System.out.println("Logging to file disabled.");
-	}
+        // logging disabled?
+        boolean logging = true;
+        for (String s : args) {
+            if (s.equals("-nolog")) {
+                logging = false;
+                break;
+            }
+        }
+        // write to logfile
+        if (logging) {
+            try {
+                File logfile = new File("lxc.log");
+                if (!logfile.exists()) {
+                    logfile.createNewFile();
+                }
+                PrintStream logger = new PrintStream(logfile);
+                System.setOut(logger);
+                System.setErr(logger);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            System.out.println("Logging to file disabled.");
+        }
     }
 
     /**
      * Init listeners for all components.
      */
     private void initListeners() {
-	gui.setGuiListener(new GuiListener() {
-	    @Override
-	    public void offerFile(LXCFile newFile) {
-		files.addLocal(newFile);
-		network.broadcastList();
-		gui.update();
-	    }
+        gui.setGuiListener(new GuiListener() {
+            @Override
+            public void offerFile(LXCFile newFile) {
+                files.addLocal(newFile);
+                network.broadcastList();
+                gui.update();
+            }
 
-	    @Override
-	    public void shutdown() {
-		if (files.transferRunning()) {
-		    if (!gui.confirmCloseWithTransfersRunning()) {
-			return;
-		    }
-		}
-		LXC.this.shutdown();
-	    }
+            @Override
+            public void shutdown() {
+                if (files.transferRunning()) {
+                    if (!gui.confirmCloseWithTransfersRunning()) {
+                        return;
+                    }
+                }
+                LXC.this.shutdown();
+            }
 
-	    @Override
-	    public void resetFile(LXCFile file) {
-		files.resetAvailableFile(file);
-	    }
+            @Override
+            public void resetFile(LXCFile file) {
+                files.resetAvailableFile(file);
+            }
 
-	    @Override
-	    public void removeFile(LXCFile oldFile) {
-		files.removeLocal(oldFile);
-		network.broadcastList();
-	    }
+            @Override
+            public void removeFile(LXCFile oldFile) {
+                files.removeLocal(oldFile);
+                network.broadcastList();
+            }
 
-	    @Override
-	    public void downloadFile(LXCFile file, boolean chooseTarget) {
-		File targetFolder = defaultDownloadTarget;
-		if (askForDownloadTargetSupported && chooseTarget || defaultDownloadTarget == null) {
-		    // let user choose a (different) target
-		    targetFolder = gui.getFileTarget(file);
-		    if (targetFolder == null) {
-			// abort
-			file.setLocked(false);
-			return;
-		    }
-		}
-		if (!network.connectAndDownload(file, targetFolder)) {
-		    gui.showError("Download failed, host unreachable.");
-		}
-	    }
+            @Override
+            public void downloadFile(LXCFile file, boolean chooseTarget) {
+                File targetFolder = defaultDownloadTarget;
+                if (askForDownloadTargetSupported && chooseTarget || defaultDownloadTarget == null) {
+                    // let user choose a (different) target
+                    targetFolder = gui.getFileTarget(file);
+                    if (targetFolder == null) {
+                        // abort
+                        file.setLocked(false);
+                        return;
+                    }
+                }
+                if (!network.connectAndDownload(file, targetFolder)) {
+                    gui.showError("Download failed, host unreachable.");
+                }
+            }
 
-	    @Override
-	    public void reloadConfiguration() {
-		askForDownloadTargetSupported = platform.askForDownloadTargetSupported();
-		if (platform.getDefaultDownloadTarget() != null) {
-		    defaultDownloadTarget = new File(platform.getDefaultDownloadTarget());
-		} else {
-		    defaultDownloadTarget = null;
-		}
-	    }
+            @Override
+            public void reloadConfiguration() {
+                askForDownloadTargetSupported = platform.askForDownloadTargetSupported();
+                if (platform.getDefaultDownloadTarget() != null) {
+                    defaultDownloadTarget = new File(platform.getDefaultDownloadTarget());
+                } else {
+                    defaultDownloadTarget = null;
+                }
+            }
 
-	    @Override
-	    public List<LXCFile> getFileList() {
-		return files.getList();
-	    }
-	});
+            @Override
+            public List<LXCFile> getFileList() {
+                return files.getList();
+            }
+        });
     }
 
     /**
      * Stops LanXchange.
      */
     private void shutdown() {
-	network.stop();
+        network.stop();
 
-	// write configuration
+        // write configuration
 
-	platform.writeConfiguration();
+        platform.writeConfiguration();
 
-	// done, exit
-	System.out.println("LXC done. Thank you.");
-	System.exit(0);
+        // done, exit
+        System.out.println("LXC done. Thank you.");
+        System.exit(0);
     }
 }
