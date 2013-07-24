@@ -216,13 +216,16 @@ public class GenericPCPlatform implements Platform {
      * any arguments you want to pass to LanXchange
      */
     public static void main(String[] args) {
-        // check permissions for own folder. will be removed soon
-        File home = new File(".");
-        if (!home.canWrite()) {
+        // check permission for own folder
+        try {
+            File.createTempFile("testacl", null, new File(".")).delete();
+            // Can write
+        } catch (IOException ex) {
+            // Cannot write
             System.out.println("ERROR: Cannot write to my directory ("
-                    + home.getAbsolutePath()
+                    + new File(".").getAbsolutePath()
                     + "). Try running LXC in your home directory.");
-            gui.showError("Cannot write to my folder. Please move to your home directory or start as administrator.");
+            gui.showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
             System.exit(1);
         }
         LXC lxc = new LXC(new GenericPCPlatform(), args);
