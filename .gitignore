@@ -7,3 +7,4 @@ lxc.log
 /bin/
 /gen/
 /libs/android-support-v4.jar
+/dist/
