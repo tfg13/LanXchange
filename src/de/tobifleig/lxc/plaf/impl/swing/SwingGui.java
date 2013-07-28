@@ -20,7 +20,6 @@
  */
 package de.tobifleig.lxc.plaf.impl.swing;
 
-import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
@@ -76,74 +75,73 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
      * Creates new form LXCGui3
      */
     public SwingGui() {
-	// set look and feel
-	try {
-	    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	} catch (Exception ex) {
-	    ex.printStackTrace();
-	}
-	try {
-	    ubuFont = Font.createFont(Font.TRUETYPE_FONT, new File("Ubuntu-R.ttf"));
-	} catch (FontFormatException ex) {
-	    ex.printStackTrace();
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	}
-	if (ubuFont == null) {
-	    System.out.println("WARNING: Cannot find fontfile \"Ubuntu-R.ttf\"!");
-	    ubuFont = Font.decode("Sans");
-	}
-	initComponents();
+        // set look and feel
+        try {
+            // Do not set L&F on linux, on some systems (ubuntu) this gets you a very ugly GTK file chooser
+            if (!System.getProperty("os.name").toLowerCase().equals("linux")) {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
+            ubuFont = Font.createFont(Font.TRUETYPE_FONT, new File("Ubuntu-R.ttf"));
+        } catch (FontFormatException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        if (ubuFont == null) {
+            System.out.println("WARNING: Cannot find fontfile \"Ubuntu-R.ttf\"!");
+            ubuFont = Font.decode("Sans");
+        }
+        initComponents();
     }
 
     private void start() {
-	guiTimer = new Timer();
-	guiTimer.schedule(new TimerTask() {
+        guiTimer = new Timer();
+        guiTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (schedTrigger) {
+                    // fps?
+                    if (fullFps) {
+                        if (System.currentTimeMillis() - lastRepaint > 100) {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    panel.repaint();
+                                }
+                            });
+                            lastRepaint = System.currentTimeMillis();
+                            schedTrigger = false;
+                        }
+                    } else {
+                        if (System.currentTimeMillis() - lastRepaint > 1000) {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    panel.repaint();
+                                }
+                            });
+                            lastRepaint = System.currentTimeMillis();
+                            schedTrigger = false;
+                        }
+                    }
+                }
+            }
+        }, 3000, 100);
 
-	    @Override
-	    public void run() {
-		if (schedTrigger) {
-		    // fps?
-		    if (fullFps) {
-			if (System.currentTimeMillis() - lastRepaint > 100) {
-			    SwingUtilities.invokeLater(new Runnable() {
-
-				@Override
-				public void run() {
-				    panel.repaint();
-				}
-			    });
-			    lastRepaint = System.currentTimeMillis();
-			    schedTrigger = false;
-			}
-		    } else {
-			if (System.currentTimeMillis() - lastRepaint > 1000) {
-			    SwingUtilities.invokeLater(new Runnable() {
-
-				@Override
-				public void run() {
-				    panel.repaint();
-				}
-			    });
-			    lastRepaint = System.currentTimeMillis();
-			    schedTrigger = false;
-			}
-		    }
-		}
-	    }
-	}, 3000, 100);
-
-	this.addWindowStateListener(new WindowStateListener() {
-
-	    @Override
-	    public void windowStateChanged(WindowEvent e) {
-		if (e.getNewState() != WindowEvent.WINDOW_ICONIFIED) {
-		    fullFps = true;
-		} else {
-		    fullFps = false;
-		}
-	    }
-	});
+        this.addWindowStateListener(new WindowStateListener() {
+            @Override
+            public void windowStateChanged(WindowEvent e) {
+                if (e.getNewState() != WindowEvent.WINDOW_ICONIFIED) {
+                    fullFps = true;
+                } else {
+                    fullFps = false;
+                }
+            }
+        });
     }
 
     /**
@@ -175,86 +173,84 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
 
     @Override
     public void init(String[] args) {
-	panel.setTransferHandler(new DropTransferHandler(new FileDropListener() {
+        panel.setTransferHandler(new DropTransferHandler(new FileDropListener() {
+            @Override
+            public void displayCalcing() {
+                panel.setCalcing(true);
+            }
 
-	    @Override
-	    public void displayCalcing() {
-		panel.setCalcing(true);
-	    }
-
-	    @Override
-	    public void newCalcedFile(LXCFile file) {
-		panel.setCalcing(false);
-		listener.offerFile(file);
-	    }
-	}));
-	try {
-	    setIconImage(ImageIO.read(new File("img/logo.png")));
-	} catch (Exception ex) {
-	    ex.printStackTrace();
-	}
-	addWindowListener(new WindowAdapter() {
-
-	    @Override
-	    public void windowClosing(WindowEvent e) {
-		listener.shutdown();
-	    }
-	});
+            @Override
+            public void newCalcedFile(LXCFile file) {
+                panel.setCalcing(false);
+                listener.offerFile(file);
+            }
+        }));
+        try {
+            setIconImage(ImageIO.read(new File("img/logo.png")));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                listener.shutdown();
+            }
+        });
     }
 
     @Override
     public void display() {
-	panel.setFileList(listener.getFileList());
-	panel.setUsedFont(ubuFont);
-	setVisible(true);
-	panel.start();
-	start();
+        panel.setFileList(listener.getFileList());
+        panel.setUsedFont(ubuFont);
+        setVisible(true);
+        panel.start();
+        start();
     }
 
     @Override
     public void showError(String error) {
-	JOptionPane.showMessageDialog(this, error, "LXC - Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, error, "LXC - Error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
     public void setGuiListener(GuiListener listener) {
-	this.listener = listener;
-	panel.setGuiListener(listener);
+        this.listener = listener;
+        panel.setGuiListener(listener);
     }
 
     @Override
     public void update() {
-	schedTrigger = true;
+        schedTrigger = true;
     }
 
     @Override
     public File getFileTarget(LXCFile file) {
-	JFileChooser cf = new JFileChooser();
-	cf.setApproveButtonText("Choose target");
-	cf.setApproveButtonToolTipText("Download files into selected directory");
-	cf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	cf.setMultiSelectionEnabled(false);
-	cf.setDialogTitle("Target directory for \"" + file.getShownName() + "\"");
-	int chooseResult = cf.showDialog(this, null);
-	if (chooseResult == JFileChooser.APPROVE_OPTION) {
-	    if (cf.getSelectedFile().canWrite()) {
-		return cf.getSelectedFile();
-	    } else {
-		// inform user
-		showError("Cannot write there, please selected another target or start LXC as Administrator");
-		// cancel
-		System.out.println("Canceled, cannot write (permission denied)");
-		return null;
-	    }
-	} else {
-	    // cancel
-	    System.out.println("Canceled by user.");
-	    return null;
-	}
+        JFileChooser cf = new JFileChooser();
+        cf.setApproveButtonText("Choose target");
+        cf.setApproveButtonToolTipText("Download files into selected directory");
+        cf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        cf.setMultiSelectionEnabled(false);
+        cf.setDialogTitle("Target directory for \"" + file.getShownName() + "\"");
+        int chooseResult = cf.showDialog(this, null);
+        if (chooseResult == JFileChooser.APPROVE_OPTION) {
+            if (cf.getSelectedFile().canWrite()) {
+                return cf.getSelectedFile();
+            } else {
+                // inform user
+                showError("Cannot write there, please selected another target or start LXC as Administrator");
+                // cancel
+                System.out.println("Canceled, cannot write (permission denied)");
+                return null;
+            }
+        } else {
+            // cancel
+            System.out.println("Canceled by user.");
+            return null;
+        }
     }
 
     @Override
     public boolean confirmCloseWithTransfersRunning() {
-	return (JOptionPane.showConfirmDialog(rootPane, "Exiting now will kill all running transfers. Quit anyway?", "Transfers running", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION);
+        return (JOptionPane.showConfirmDialog(rootPane, "Exiting now will kill all running transfers. Quit anyway?", "Transfers running", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION);
     }
 }
