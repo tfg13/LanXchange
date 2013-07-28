@@ -1,3 +1,2 @@
 stop using system.exit()
 leecher:82: "ArrayOutOfBoundsException" can indicate a failed transfer, but is catched and ignored. That catch was meant to allow file transfers continue if single files fail. Seems that catching IOException is a bad idea...
-possible memory leak in interfacemanager. needs further investigation

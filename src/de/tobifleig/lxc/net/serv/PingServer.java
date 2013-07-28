@@ -22,6 +22,7 @@ package de.tobifleig.lxc.net.serv;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,7 +45,8 @@ public class PingServer {
     /**
      * Creates a new PingServer.
      * PingServers listen for Ping/KeepAlive-Signals by other instances.
-     * @param listener 
+     *
+     * @param listener
      */
     public PingServer(PingServerListener listener) {
         this.listener = listener;
@@ -58,10 +60,16 @@ public class PingServer {
      */
     public void updateInterfaces(List<NetworkInterface> interf) {
         // close interfaces that should no longer be used
+        ArrayList<NetworkInterface> removeList = new ArrayList<NetworkInterface>();
         for (NetworkInterface inter : listenSockets.keySet()) {
             if (!interf.contains(inter)) {
-                listenSockets.get(inter).close();
+                removeList.add(inter);
             }
+        }
+        // remove sockets now (mark+sweep-method avoids concurrentmodificationexception)
+        for (NetworkInterface inter : removeList) {
+            listenSockets.get(inter).close();
+            listenSockets.remove(inter);
         }
         // open new interfaces
         for (NetworkInterface inter : interf) {
@@ -78,7 +86,6 @@ public class PingServer {
      */
     private void listenTo(final NetworkInterface inter) {
         Thread t = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 try {
