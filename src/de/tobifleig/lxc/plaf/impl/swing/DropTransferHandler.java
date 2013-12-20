@@ -25,6 +25,7 @@ import de.tobifleig.lxc.data.LXCFile;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.InvalidDnDOperationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -117,6 +118,7 @@ public class DropTransferHandler extends TransferHandler {
     private boolean hasURIListFlavor(DataFlavor[] flavors) {
 	for (int i = 0; i < flavors.length; i++) {
 	    if (uriListFlavor.equals(flavors[i])) {
+                System.out.println("URI detected: " + flavors[i]);
 		return true;
 	    }
 	}
@@ -171,10 +173,18 @@ public class DropTransferHandler extends TransferHandler {
 	try {
 	    if (hasFileFlavor(t.getTransferDataFlavors()) || hasURIListFlavor(t.getTransferDataFlavors())) {
 
-		List<File> files;
+		List<File> files = null;
 		if (hasFileFlavor(t.getTransferDataFlavors())) {
 		    // Windows & OS X & Linux
-		    files = (java.util.List<File>) t.getTransferData(fileFlavor);
+                    try {
+                        files = (java.util.List<File>) t.getTransferData(fileFlavor);
+                    } catch (InvalidDnDOperationException ex) {
+                        // OpenJDK bug 7188838
+                        // no known resulution, fall back to manual uri-lists if possible
+                        if (hasURIListFlavor(t.getTransferDataFlavors())) {
+                            files = textURIListToFileList((String) t.getTransferData(uriListFlavor));
+                        }
+                    }
 		} else {
 		    // old, buggy vms on Linux
 		    files = textURIListToFileList((String) t.getTransferData(uriListFlavor));
@@ -207,7 +217,11 @@ public class DropTransferHandler extends TransferHandler {
 	    System.out.println("importData: unsupported data flavor");
 	} catch (IOException ieo) {
 	    System.out.println("importData: I/O exception");
-	}
+	} catch (RuntimeException ex) {
+            // the event dispatcher silently discards this exception, therefore we catch it here
+            System.out.println("importData: Runtime Exception. Details:");
+            ex.printStackTrace();
+        }
 	return false;
     }
 
@@ -227,6 +241,10 @@ public class DropTransferHandler extends TransferHandler {
 		continue;
 	    }
 	    try {
+                if (s.charAt(0) == '\0') {
+                    // ignore this line, this is JDK bug 7188838
+                    continue;
+                }
 		URI uri = new URI(s);
 		File file = new File(uri);
 		list.add(file);
