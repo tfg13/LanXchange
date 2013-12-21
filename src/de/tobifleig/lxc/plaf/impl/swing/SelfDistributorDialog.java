@@ -6,6 +6,7 @@
 package de.tobifleig.lxc.plaf.impl.swing;
 
 import java.awt.event.ActionListener;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -21,6 +22,7 @@ public class SelfDistributorDialog extends javax.swing.JDialog {
     public SelfDistributorDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        jLabel2.setIcon(new ImageIcon("img/selfdist.png"));
     }
 
     protected void setAddresses(String hostnameAddress, String ipAddress) {
