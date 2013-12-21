@@ -144,7 +144,7 @@ public final class SelfDistributor {
             // get hostname & own ip
             String hostname = InetAddress.getLocalHost().getHostName();
             String ip = InetAddress.getLocalHost().getHostAddress();
-            dialog.setAddresses(hostname + ":8087/lxc.zip", ip + ":8087/lxc.zip");
+            dialog.setAddresses("http://" + hostname + ":8087/lxc.zip", "http://" + ip + ":8087/lxc.zip");
         } catch (UnknownHostException ex) {
             ex.printStackTrace();
         }
