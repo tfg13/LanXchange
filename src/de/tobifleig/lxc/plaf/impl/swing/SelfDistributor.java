@@ -10,9 +10,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -143,7 +146,7 @@ public final class SelfDistributor {
         try {
             // get hostname & own ip
             String hostname = InetAddress.getLocalHost().getHostName();
-            String ip = InetAddress.getLocalHost().getHostAddress();
+            String ip = getBestLocalIp();
             dialog.setAddresses("http://" + hostname + ":8087/lxc.zip", "http://" + ip + ":8087/lxc.zip");
         } catch (UnknownHostException ex) {
             ex.printStackTrace();
@@ -174,6 +177,39 @@ public final class SelfDistributor {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    /**
+     * This tries to figure out a local Ip address.
+     * The problem with InetAddress.getLocalHost().getHostAddress() is that it sometimes returns loopback addresses.
+     *
+     * @return the best known local address
+     */
+    private static String getBestLocalIp() {
+        try {
+            // use default method if it produces serious results:
+            InetAddress auto = InetAddress.getLocalHost();
+            if (!auto.isLoopbackAddress()) {
+                return auto.getHostAddress();
+            }
+            // Manual search:
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface inter = networkInterfaces.nextElement();
+                Enumeration<InetAddress> inetAddresses = inter.getInetAddresses();
+                while (inetAddresses.hasMoreElements()) {
+                    InetAddress cand = inetAddresses.nextElement();
+                    if (!cand.isLoopbackAddress() && cand instanceof Inet4Address) {
+                        // just pick this one
+                        return cand.getHostAddress();
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        System.out.println("selfdist: Unable to guess local ip!");
+        return "127.0.0.1";
     }
 
     /**
