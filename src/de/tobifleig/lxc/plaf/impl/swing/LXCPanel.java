@@ -21,11 +21,18 @@
 package de.tobifleig.lxc.plaf.impl.swing;
 
 import de.tobifleig.lxc.LXC;
-import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
 import de.tobifleig.lxc.plaf.GuiListener;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -67,20 +74,21 @@ public class LXCPanel extends JPanel {
     private transient Image screw;
     private transient Image download;
     private transient Image cancel;
-    private Color background;
-    private Color selBackground;
+    private transient Image selfdist_small;
+    private final Color background;
+    private final Color selBackground;
     private Font f1;
     private Font f2;
     private FontMetrics mer;
     private FontMetrics mer2;
     private int selectedIndex = -1;
     private int subJobDeleteSelected = -1;
+    private int traySelected = -1;
     boolean detailSelected = false;
     boolean running = false;
     boolean helpHovered = false;
-    private FileManager fileManager;
     private GuiListener guiListener;
-    private OptionsDialog options;
+    private final OptionsDialog options;
     private boolean calcing;
 
     @Override
@@ -93,20 +101,37 @@ public class LXCPanel extends JPanel {
             g2.fillRect(0, 0, this.getWidth(), this.getHeight());
             // center LXC-Logo
             g2.drawImage(logo, (this.getWidth() / 2) - (logo.getWidth(this) / 2), (this.getHeight() / 2) - (logo.getHeight(this) / 2), this);
-            // Text "LanXchange" (bottom, center)
-            g2.drawImage(txt, (this.getWidth() / 2) - (txt.getWidth(this) / 2), this.getHeight() - txt.getHeight(this), this);
+
+            g2.setColor(background);
+            g2.fillRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
+            g2.setPaint(grad);
+            g2.drawRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
+            g2.setPaint(null);
+            if (traySelected == -1) {
+                // Text "LanXchange" (bottom, center)
+                g2.drawImage(txt, (this.getWidth() / 2) - (txt.getWidth(this) / 2), this.getHeight() - txt.getHeight(this) - 2, this);
+            }
             // help button
-            if (help != null) {
-                g2.drawImage(help, 0, this.getHeight() - 21, this);
-                g2.setColor(Color.BLACK);
-                g2.drawLine(0, this.getHeight() - 35, 35, this.getHeight());
+            g2.drawImage(help, 5, this.getHeight() - 25, this);
+            // selfdist button
+            // hover?
+            if (traySelected == 0) {
+                g2.setColor(selBackground);
+                g2.fillRect(this.getWidth() - 59, this.getHeight() - 30, 29, 30);
+                g2.setColor(Color.GRAY);
+                g2.drawString("self distribution", this.getWidth() / 2 - (mer.stringWidth("Self Distribution") / 2), this.getHeight() - 10);
             }
+            g2.drawImage(selfdist_small, this.getWidth() - 55, this.getHeight() - 25, this);
             // settings button
-            if (screw != null) {
-                g2.drawImage(screw, this.getWidth() - 21, this.getHeight() - 21, this);
-                g2.setColor(Color.BLACK);
-                g2.drawLine(this.getWidth() - 35, this.getHeight(), this.getWidth(), this.getHeight() - 35);
+            // hover?
+            if (traySelected == 1) {
+                g2.setColor(selBackground);
+                g2.fillRect(this.getWidth() - 30, this.getHeight() - 30, 30, 30);
+                g2.setColor(Color.GRAY);
+                g2.drawString("settings", this.getWidth() / 2 - (mer.stringWidth("settings") / 2), this.getHeight() - 10);
             }
+            g2.drawImage(screw, this.getWidth() - 25, this.getHeight() - 25, this);
+
             // header
             if (!allFiles.isEmpty()) {
                 g2.setColor(background);
@@ -352,6 +377,7 @@ public class LXCPanel extends JPanel {
             screw = ImageIO.read(new File("img/screw.png"));
             download = ImageIO.read(new File("img/download.png"));
             cancel = ImageIO.read(new File("img/cancel.png"));
+            selfdist_small = ImageIO.read(new File("img/selfdist_small.png"));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -369,7 +395,10 @@ public class LXCPanel extends JPanel {
 
             @Override
             public void mouseReleased(final MouseEvent e) {
-                if (e.getX() > getWidth() - 21 && e.getY() > getHeight() - 21) {
+                if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                    // display selfdist
+                    SelfDistributor.showGui((JFrame) SwingUtilities.getRoot(LXCPanel.this));
+                } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
                     // display settings
                     options.showAndWait();
                     guiListener.reloadConfiguration();
@@ -437,16 +466,33 @@ public class LXCPanel extends JPanel {
             @Override
             public void mouseMoved(MouseEvent e) {
                 // help-button?
-                if (e.getX() < 21 && e.getY() > LXCPanel.this.getHeight() - 21) {
+                if (e.getX() < 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
                     if (!helpHovered) {
                         selfTrigger();
                         helpHovered = true;
+                    }
+                } else if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                    // self-distribution button
+                    if (traySelected != 0) {
+                        traySelected = 0;
+                        selfTrigger();
+                    }
+                } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                    // settings button
+                    if (traySelected != 1) {
+                        traySelected = 1;
+                        selfTrigger();
                     }
                 } else {
                     // turn off help
                     if (helpHovered) {
                         selfTrigger();
                         helpHovered = false;
+                    }
+                    // turn off hovers
+                    if (traySelected != -1) {
+                        traySelected = -1;
+                        selfTrigger();
                     }
                     int newSelIndex = 0;
                     int my = e.getY();

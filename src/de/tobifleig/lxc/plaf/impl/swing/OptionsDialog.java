@@ -44,31 +44,31 @@ public class OptionsDialog extends javax.swing.JDialog {
      * @param modal
      */
     public OptionsDialog(java.awt.Frame parent, boolean modal) {
-	super(parent, modal);
-	initComponents();
-	addWindowListener(new WindowAdapter() {
+        super(parent, modal);
+        initComponents();
+        addWindowListener(new WindowAdapter() {
 
-	    @Override
-	    public void windowClosing(java.awt.event.WindowEvent e) {
-		setVisible(false);
-	    }
-	});
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                setVisible(false);
+            }
+        });
     }
 
     /**
      * Displays this dialog and block until it is closed.
      */
     public void showAndWait() {
-	// Read settings:
-	if (!Configuration.containsKey("defaulttarget") || "unset".equals(Configuration.getStringSetting("defaulttarget"))) {
-	    jRadioButton1.setSelected(true);
-	} else {
-	    jRadioButton2.setSelected(true);
-	    jTextField1.setText(Configuration.getStringSetting("defaulttarget"));
-	}
-	jCheckBox1.setSelected("true".equals(Configuration.getStringSetting("allowupdates")));
-	setLocationRelativeTo(getParent());
-	setVisible(true);
+        // Read settings:
+        if (!Configuration.containsKey("defaulttarget") || "unset".equals(Configuration.getStringSetting("defaulttarget"))) {
+            jRadioButton1.setSelected(true);
+        } else {
+            jRadioButton2.setSelected(true);
+            jTextField1.setText(Configuration.getStringSetting("defaulttarget"));
+        }
+        jCheckBox1.setSelected("true".equals(Configuration.getStringSetting("allowupdates")));
+        setLocationRelativeTo(getParent());
+        setVisible(true);
     }
 
     /**
@@ -245,47 +245,47 @@ public class OptionsDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
 private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-    setVisible(false);
+        setVisible(false);
 }//GEN-LAST:event_jButton1ActionPerformed
 
 private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-    // check path, if any
-    if (jRadioButton2.isSelected()) {
-	File path = new File(jTextField1.getText());
-	if (!path.isDirectory()) {
-	    JOptionPane.showMessageDialog(rootPane, "Path must point to a valid directory", "illegal path", JOptionPane.ERROR_MESSAGE);
-	    return;
-	}
-    }
-    // write settings
-    Configuration.putStringSetting("allowupdates", jCheckBox1.isSelected() ? "true" : "false");
-    Configuration.putStringSetting("defaulttarget", jRadioButton2.isSelected() ? jTextField1.getText() : "unset");
-    setVisible(false);
+        // check path, if any
+        if (jRadioButton2.isSelected()) {
+            File path = new File(jTextField1.getText());
+            if (!path.isDirectory()) {
+                JOptionPane.showMessageDialog(rootPane, "Path must point to a valid directory", "illegal path", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        // write settings
+        Configuration.putStringSetting("allowupdates", jCheckBox1.isSelected() ? "true" : "false");
+        Configuration.putStringSetting("defaulttarget", jRadioButton2.isSelected() ? jTextField1.getText() : "unset");
+        setVisible(false);
 }//GEN-LAST:event_jButton2ActionPerformed
 
 private void jRadioButton2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jRadioButton2ItemStateChanged
-    if (jRadioButton2.isSelected()) {
-	jLabel3.setForeground(Color.black);
-	jLabel4.setForeground(Color.black);
-	jLabel5.setForeground(Color.black);
-	jTextField1.setEnabled(true);
-	jButton4.setEnabled(true);
-    } else {
-	jLabel3.setForeground(Color.gray);
-	jLabel4.setForeground(Color.gray);
-	jLabel5.setForeground(Color.gray);
-	jTextField1.setEnabled(false);
-	jButton4.setEnabled(false);
-    }
+        if (jRadioButton2.isSelected()) {
+            jLabel3.setForeground(Color.black);
+            jLabel4.setForeground(Color.black);
+            jLabel5.setForeground(Color.black);
+            jTextField1.setEnabled(true);
+            jButton4.setEnabled(true);
+        } else {
+            jLabel3.setForeground(Color.gray);
+            jLabel4.setForeground(Color.gray);
+            jLabel5.setForeground(Color.gray);
+            jTextField1.setEnabled(false);
+            jButton4.setEnabled(false);
+        }
 }//GEN-LAST:event_jRadioButton2ItemStateChanged
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-	JFileChooser chooser = new JFileChooser();
-	chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	chooser.setMultiSelectionEnabled(false);
-	if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-	    jTextField1.setText(chooser.getSelectedFile().getAbsolutePath());
-	}
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setMultiSelectionEnabled(false);
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            jTextField1.setText(chooser.getSelectedFile().getAbsolutePath());
+        }
     }//GEN-LAST:event_jButton4ActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
