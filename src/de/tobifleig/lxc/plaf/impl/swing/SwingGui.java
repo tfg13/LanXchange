@@ -33,9 +33,12 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.imageio.ImageIO;
+import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 
 /**
@@ -173,6 +176,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
 
     @Override
     public void init(String[] args) {
+        // setup dnd
         panel.setTransferHandler(new DropTransferHandler(new FileDropListener() {
             @Override
             public void displayCalcing() {
@@ -185,6 +189,9 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                 listener.offerFile(file);
             }
         }));
+        // setup pasting
+        panel.getActionMap().put(TransferHandler.getPasteAction().getValue(Action.NAME), TransferHandler.getPasteAction());
+        panel.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), TransferHandler.getPasteAction().getValue(Action.NAME));
         try {
             setIconImage(ImageIO.read(new File("img/logo.png")));
         } catch (Exception ex) {

@@ -63,20 +63,20 @@ public class DropTransferHandler extends TransferHandler {
      * @param listener the listener to pass events to
      */
     public DropTransferHandler(FileDropListener listener) {
-	this.listener = listener;
-	fileFlavor = DataFlavor.javaFileListFlavor;
-	stringFlavor = DataFlavor.stringFlavor;
+        this.listener = listener;
+        fileFlavor = DataFlavor.javaFileListFlavor;
+        stringFlavor = DataFlavor.stringFlavor;
 
-	try {
-	    uriListFlavor = new DataFlavor(URI_LIST_MIME_TYPE);
-	} catch (ClassNotFoundException e) {
-	    e.printStackTrace();
-	}
+        try {
+            uriListFlavor = new DataFlavor(URI_LIST_MIME_TYPE);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public Transferable createTransferable(JComponent c) {
-	return null;
+        return null;
     }
 
     /**
@@ -86,12 +86,12 @@ public class DropTransferHandler extends TransferHandler {
      * @return ture, if FileListFlavor is contained
      */
     private boolean hasFileFlavor(DataFlavor[] flavors) {
-	for (int i = 0; i < flavors.length; i++) {
-	    if (fileFlavor.equals(flavors[i])) {
-		return true;
-	    }
-	}
-	return false;
+        for (int i = 0; i < flavors.length; i++) {
+            if (fileFlavor.equals(flavors[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -101,12 +101,12 @@ public class DropTransferHandler extends TransferHandler {
      * @return ture, if StringFlavor is contained
      */
     private boolean hasStringFlavor(DataFlavor[] flavors) {
-	for (int i = 0; i < flavors.length; i++) {
-	    if (stringFlavor.equals(flavors[i])) {
-		return true;
-	    }
-	}
-	return false;
+        for (int i = 0; i < flavors.length; i++) {
+            if (stringFlavor.equals(flavors[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -116,18 +116,18 @@ public class DropTransferHandler extends TransferHandler {
      * @return ture, if URIListFlavor is contained
      */
     private boolean hasURIListFlavor(DataFlavor[] flavors) {
-	for (int i = 0; i < flavors.length; i++) {
-	    if (uriListFlavor.equals(flavors[i])) {
+        for (int i = 0; i < flavors.length; i++) {
+            if (uriListFlavor.equals(flavors[i])) {
                 System.out.println("URI detected: " + flavors[i]);
-		return true;
-	    }
-	}
-	return false;
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public int getSourceActions(JComponent c) {
-	return COPY_OR_MOVE;
+        return COPY_OR_MOVE;
     }
 
     @Override
@@ -136,46 +136,45 @@ public class DropTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(JComponent c, DataFlavor[] flavors) {
-	if (hasFileFlavor(flavors)) {
-	    return true;
-	}
-	if (hasStringFlavor(flavors)) {
-	    return true;
-	}
-	if (hasURIListFlavor(flavors)) {
-	    return true;
-	}
-	return false;
+        if (hasFileFlavor(flavors)) {
+            return true;
+        }
+        if (hasStringFlavor(flavors)) {
+            return true;
+        }
+        if (hasURIListFlavor(flavors)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean importData(JComponent c, Transferable t) {
 
-	if ("true".equals(Configuration.getStringSetting("debug_printDropFlavors"))) {
-	    DataFlavor[] dlist = t.getTransferDataFlavors();
-	    System.out.println("Printing flavors: " + dlist.length);
-	    for (DataFlavor f : dlist) {
-		try {
-		    System.out.println(f.getMimeType());
-		    System.out.println(t.getTransferData(f));
-		    System.out.println();
-		} catch (Exception ex) {
-		}
-	    }
-	}
+        if ("true".equals(Configuration.getStringSetting("debug_printDropFlavors"))) {
+            DataFlavor[] dlist = t.getTransferDataFlavors();
+            System.out.println("Printing flavors: " + dlist.length);
+            for (DataFlavor f : dlist) {
+                try {
+                    System.out.println(f.getMimeType());
+                    System.out.println(t.getTransferData(f));
+                    System.out.println();
+                } catch (Exception ex) {
+                }
+            }
+        }
 
+        if (!canImport(c, t.getTransferDataFlavors())) {
+            return false;
+        }
 
-	if (!canImport(c, t.getTransferDataFlavors())) {
-	    return false;
-	}
+        try {
+            if (hasFileFlavor(t.getTransferDataFlavors()) || hasURIListFlavor(t.getTransferDataFlavors())) {
 
-	try {
-	    if (hasFileFlavor(t.getTransferDataFlavors()) || hasURIListFlavor(t.getTransferDataFlavors())) {
-
-		List<File> files = null;
-		if (hasFileFlavor(t.getTransferDataFlavors())) {
-		    // Windows & OS X & Linux
+                List<File> files = null;
+                if (hasFileFlavor(t.getTransferDataFlavors())) {
+                    // Windows & OS X & Linux
                     try {
                         files = (java.util.List<File>) t.getTransferData(fileFlavor);
                     } catch (InvalidDnDOperationException ex) {
@@ -185,44 +184,44 @@ public class DropTransferHandler extends TransferHandler {
                             files = textURIListToFileList((String) t.getTransferData(uriListFlavor));
                         }
                     }
-		} else {
-		    // old, buggy vms on Linux
-		    files = textURIListToFileList((String) t.getTransferData(uriListFlavor));
-		}
+                } else {
+                    // old, buggy vms on Linux
+                    files = textURIListToFileList((String) t.getTransferData(uriListFlavor));
+                }
 
-		// create LXCFile in new thread, constructor blocks until size-calcing is finished!
-		final File first = files.get(0);
-		final List<File> fileList = files;
-		Thread thread = new Thread(new Runnable() {
+                // create LXCFile in new thread, constructor blocks until size-calcing is finished!
+                final File first = files.get(0);
+                final List<File> fileList = files;
+                Thread thread = new Thread(new Runnable() {
 
-		    @Override
-		    public void run() {
-			listener.displayCalcing();
-			LXCFile tempFile = new LXCFile(fileList, first.getName());
-			listener.newCalcedFile(tempFile);
-		    }
-		}, "lxc_helper_sizecalcer");
-		thread.setPriority(Thread.NORM_PRIORITY - 1);
-		thread.start();
+                    @Override
+                    public void run() {
+                        listener.displayCalcing();
+                        LXCFile tempFile = new LXCFile(fileList, first.getName());
+                        listener.newCalcedFile(tempFile);
+                    }
+                }, "lxc_helper_sizecalcer");
+                thread.setPriority(Thread.NORM_PRIORITY - 1);
+                thread.start();
 
-		return false;
+                return false;
 
-	    } else if (hasStringFlavor(t.getTransferDataFlavors())) {
+            } else if (hasStringFlavor(t.getTransferDataFlavors())) {
 
-		System.out.println("Unsupported Drop-Operation. Sry");
+                System.out.println("Unsupported Drop-Operation. Sry");
 
-		return true;
-	    }
-	} catch (UnsupportedFlavorException ufe) {
-	    System.out.println("importData: unsupported data flavor");
-	} catch (IOException ieo) {
-	    System.out.println("importData: I/O exception");
-	} catch (RuntimeException ex) {
+                return true;
+            }
+        } catch (UnsupportedFlavorException ufe) {
+            System.out.println("importData: unsupported data flavor");
+        } catch (IOException ieo) {
+            System.out.println("importData: I/O exception");
+        } catch (RuntimeException ex) {
             // the event dispatcher silently discards this exception, therefore we catch it here
             System.out.println("importData: Runtime Exception. Details:");
             ex.printStackTrace();
         }
-	return false;
+        return false;
     }
 
     /**
@@ -233,27 +232,27 @@ public class DropTransferHandler extends TransferHandler {
      * @return a real file list
      */
     private java.util.List<File> textURIListToFileList(String data) {
-	java.util.List<File> list = new ArrayList<File>(1);
-	for (StringTokenizer st = new StringTokenizer(data, "\r\n"); st.hasMoreTokens();) {
-	    String s = st.nextToken();
-	    if (s.startsWith("#")) {
-		// the line is a comment (as per the RFC 2483)
-		continue;
-	    }
-	    try {
+        java.util.List<File> list = new ArrayList<File>(1);
+        for (StringTokenizer st = new StringTokenizer(data, "\r\n"); st.hasMoreTokens();) {
+            String s = st.nextToken();
+            if (s.startsWith("#")) {
+                // the line is a comment (as per the RFC 2483)
+                continue;
+            }
+            try {
                 if (s.charAt(0) == '\0') {
                     // ignore this line, this is JDK bug 7188838
                     continue;
                 }
-		URI uri = new URI(s);
-		File file = new File(uri);
-		list.add(file);
-	    } catch (URISyntaxException e) {
-		e.printStackTrace();
-	    } catch (IllegalArgumentException e) {
-		e.printStackTrace();
-	    }
-	}
-	return list;
+                URI uri = new URI(s);
+                File file = new File(uri);
+                list.add(file);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
 }
