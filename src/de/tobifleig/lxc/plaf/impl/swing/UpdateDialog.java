@@ -43,32 +43,32 @@ public class UpdateDialog extends javax.swing.JDialog {
      * @param nextVersion
      */
     public UpdateDialog(java.awt.Frame parent, boolean modal, String nextVersion) {
-	super(parent, false);
-	initComponents();
-	jLabel1.setIcon(new ImageIcon("img/update.png"));
-	jLabel13.setIcon(new ImageIcon("img/done.png"));
-	jLabel14.setIcon(jLabel13.getIcon());
-	jLabel16.setIcon(jLabel13.getIcon());
-	jPanel3.setVisible(false);
-	jLabel3.setText(nextVersion);
-	setSize(getWidth(), jPanel2.getSize().height + 130);
-	setLocationRelativeTo(parent);
-	addWindowListener(new java.awt.event.WindowAdapter() {
+        super(parent, false);
+        initComponents();
+        jLabel1.setIcon(new ImageIcon("img/update.png"));
+        jLabel13.setIcon(new ImageIcon("img/done.png"));
+        jLabel14.setIcon(jLabel13.getIcon());
+        jLabel16.setIcon(jLabel13.getIcon());
+        jPanel3.setVisible(false);
+        jLabel3.setText(nextVersion);
+        setSize(getWidth(), jPanel2.getSize().height + 130);
+        setLocationRelativeTo(parent);
+        addWindowListener(new java.awt.event.WindowAdapter() {
 
-	    @Override
-	    public void windowClosing(java.awt.event.WindowEvent e) {
-		buttonKlicked(false);
-	    }
-	});
-	setVisible(true);
-	synchronized (this) {
-	    while (!button) {
-		try {
-		    wait();
-		} catch (InterruptedException ex) {
-		}
-	    }
-	}
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                buttonKlicked(false);
+            }
+        });
+        setVisible(true);
+        synchronized (this) {
+            while (!button) {
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
     }
 
     /**
@@ -284,19 +284,19 @@ public class UpdateDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-	buttonKlicked(true);
+        buttonKlicked(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-	buttonKlicked(false);
+        buttonKlicked(false);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void buttonKlicked(boolean update) {
-	this.update = update;
-	button = true;
-	synchronized (this) {
-	    notifyAll();
-	}
+        this.update = update;
+        button = true;
+        synchronized (this) {
+            notifyAll();
+        }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -323,52 +323,52 @@ public class UpdateDialog extends javax.swing.JDialog {
     // End of variables declaration//GEN-END:variables
 
     boolean isUpdate() {
-	return update;
+        return update;
     }
 
     void toProgressView() {
-	jPanel2.removeAll();
-	jPanel2.setLayout(null);
-	jPanel2.add(jPanel3);
-	jPanel3.setBounds(0, 0, jPanel3.getPreferredSize().width, jPanel3.getPreferredSize().height);
-	jPanel3.setVisible(true);
-	jLabel10.setVisible(false);
-	jLabel11.setVisible(false);
-	jLabel12.setVisible(false);
-	jLabel13.setVisible(false);
-	jLabel14.setVisible(false);
-	jLabel16.setVisible(false);
-	repaint();
+        jPanel2.removeAll();
+        jPanel2.setLayout(null);
+        jPanel2.add(jPanel3);
+        jPanel3.setBounds(0, 0, jPanel3.getPreferredSize().width, jPanel3.getPreferredSize().height);
+        jPanel3.setVisible(true);
+        jLabel10.setVisible(false);
+        jLabel11.setVisible(false);
+        jLabel12.setVisible(false);
+        jLabel13.setVisible(false);
+        jLabel14.setVisible(false);
+        jLabel16.setVisible(false);
+        repaint();
     }
 
     void setStatusToVerify() {
-	jLabel10.setVisible(true);
-	jLabel13.setVisible(true);
+        jLabel10.setVisible(true);
+        jLabel13.setVisible(true);
     }
 
     void setStatusToInstall() {
-	jLabel11.setVisible(true);
-	jLabel14.setVisible(true);
+        jLabel11.setVisible(true);
+        jLabel14.setVisible(true);
     }
 
     void setStatusToRestart() {
-	jLabel12.setVisible(true);
-	jLabel16.setVisible(true);
+        jLabel12.setVisible(true);
+        jLabel16.setVisible(true);
     }
 
     void setRestartTime(int i, boolean manual) {
-	if (manual) {
-	    jLabel12.setText("OK! Please restart LXC. Terminating in: " + i);
-	} else {
-	    jLabel12.setText("OK! Restart in: " + i);
-	}
+        if (manual) {
+            jLabel12.setText("OK! Please restart LXC. Terminating in: " + i);
+        } else {
+            jLabel12.setText("OK! Restart in: " + i);
+        }
     }
 
     void setStatusToError() {
-	jLabel10.setForeground(Color.RED);
-	jLabel11.setText("ERROR. Update corrupted or manipulated!");
-	jLabel12.setText("For your security, will not be installed");
-	jLabel11.setVisible(true);
-	jLabel12.setVisible(true);
+        jLabel10.setForeground(Color.RED);
+        jLabel11.setText("ERROR. Update corrupted or manipulated!");
+        jLabel12.setText("For your security, will not be installed");
+        jLabel11.setVisible(true);
+        jLabel12.setVisible(true);
     }
 }

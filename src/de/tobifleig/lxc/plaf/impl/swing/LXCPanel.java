@@ -154,7 +154,7 @@ public class LXCPanel extends JPanel {
                 g2.setColor(Color.BLACK);
                 String noFilesText1 = "nothing found in your home network";
                 g2.drawString(noFilesText1, this.getWidth() / 2 - mer2.stringWidth(noFilesText1) / 2, 40 + mer2.getAscent() + 4);
-                String noFilesText2 = "drop files here to start sharing";
+                String noFilesText2 = "drop or paste files here to start sharing";
                 g2.drawString(noFilesText2, this.getWidth() / 2 - mer2.stringWidth(noFilesText2) / 2, 40 + mer2.getAscent() + 15);
             }
             int y = 20; // y-coordinate
@@ -300,7 +300,7 @@ public class LXCPanel extends JPanel {
                 g2.drawString("currently available in your", 15, this.getHeight() - 140);
                 g2.drawString("home network.", 15, this.getHeight() - 130);
                 g2.drawString("To download files, simply", 15, this.getHeight() - 110);
-                g2.drawString("click them with your mouse.", 15, this.getHeight() - 100);
+                g2.drawString("click on them with your mouse.", 15, this.getHeight() - 100);
                 g2.drawString("", 15, this.getHeight() - 90);
                 g2.drawString("To offer files yourself,", 15, this.getHeight() - 80);
                 g2.drawString("drag them into this window.", 15, this.getHeight() - 70);

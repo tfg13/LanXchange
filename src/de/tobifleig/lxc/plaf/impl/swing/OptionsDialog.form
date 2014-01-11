@@ -141,7 +141,7 @@
           <ComponentRef name="buttonGroup1"/>
         </Property>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="ask everytime"/>
+        <Property name="text" type="java.lang.String" value="always ask"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
     </Component>

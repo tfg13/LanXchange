@@ -107,7 +107,7 @@ public class OptionsDialog extends javax.swing.JDialog {
 
         buttonGroup1.add(jRadioButton1);
         jRadioButton1.setSelected(true);
-        jRadioButton1.setText("ask everytime");
+        jRadioButton1.setText("always ask");
         jRadioButton1.setToolTipText("");
 
         buttonGroup1.add(jRadioButton2);
@@ -287,6 +287,7 @@ private void jRadioButton2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-
             jTextField1.setText(chooser.getSelectedFile().getAbsolutePath());
         }
     }//GEN-LAST:event_jButton4ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
