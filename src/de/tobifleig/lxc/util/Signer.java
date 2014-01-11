@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -43,31 +43,31 @@ public class Signer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-	// Sign file
+        // Sign file
 
-	KeyFactory fact = KeyFactory.getInstance("RSA");
-	FileInputStream ins = new FileInputStream(new File("lxc_updates.priv"));
-	byte[] b = new byte[ins.available()];
-	ins.read(b);
-	ins.close();
-	PKCS8EncodedKeySpec priKeySpec = new PKCS8EncodedKeySpec(b);
-	PrivateKey priKey = fact.generatePrivate(priKeySpec);
+        KeyFactory fact = KeyFactory.getInstance("RSA");
+        FileInputStream ins = new FileInputStream(new File("lxc_updates.priv"));
+        byte[] b = new byte[ins.available()];
+        ins.read(b);
+        ins.close();
+        PKCS8EncodedKeySpec priKeySpec = new PKCS8EncodedKeySpec(b);
+        PrivateKey priKey = fact.generatePrivate(priKeySpec);
 
-	Signature sign = Signature.getInstance("SHA256withRSA");
-	sign.initSign(priKey);
+        Signature sign = Signature.getInstance("SHA256withRSA");
+        sign.initSign(priKey);
 
-	FileInputStream in = new FileInputStream("lxc.zip");
-	int bufSize = 1024;
-	byte[] buffer = new byte[bufSize];
-	int n = in.read(buffer, 0, bufSize);
-	while (n != -1) {
-	    sign.update(buffer, 0, n);
-	    n = in.read(buffer, 0, bufSize);
-	}
-	in.close();
-	FileOutputStream out = new FileOutputStream("lxc.sign");
-	byte[] signb = sign.sign();
-	out.write(signb);
-	out.close();
+        FileInputStream in = new FileInputStream("lxc.zip");
+        int bufSize = 1024;
+        byte[] buffer = new byte[bufSize];
+        int n = in.read(buffer, 0, bufSize);
+        while (n != -1) {
+            sign.update(buffer, 0, n);
+            n = in.read(buffer, 0, bufSize);
+        }
+        in.close();
+        FileOutputStream out = new FileOutputStream("lxc.sign");
+        byte[] signb = sign.sign();
+        out.write(signb);
+        out.close();
     }
 }

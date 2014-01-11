@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -59,33 +59,33 @@ public class InterfaceManager {
      * @param multi the multicaster
      */
     InterfaceManager(PingServer serv, HeartbeatSender multi) {
-	pingListener = serv;
-	pingMulticaster = multi;
+        pingListener = serv;
+        pingMulticaster = multi;
     }
 
     /**
      * Iterates over all known interfaces and decides, which should be used.
      */
     private void updateInterfaces() {
-	try {
-	    ArrayList<NetworkInterface> nextList = new ArrayList<NetworkInterface>();
-	    Enumeration<NetworkInterface> interf = NetworkInterface.getNetworkInterfaces();
-	    while (interf.hasMoreElements()) {
-		NetworkInterface inter = interf.nextElement();
-		if (inter.isUp() && !inter.isLoopback() && !inter.isPointToPoint()) {
-		    nextList.add(inter);
-		}
-	    }
-	    // any changes?
-	    if (!nextList.equals(usedInterfaces)) {
-		System.out.println("Interfaces have changed!");
-		usedInterfaces = nextList;
-		pingListener.updateInterfaces(usedInterfaces);
-		pingMulticaster.updateInterfaces(usedInterfaces);
-	    }
-	} catch (SocketException ex) {
-	    ex.printStackTrace();
-	}
+        try {
+            ArrayList<NetworkInterface> nextList = new ArrayList<NetworkInterface>();
+            Enumeration<NetworkInterface> interf = NetworkInterface.getNetworkInterfaces();
+            while (interf.hasMoreElements()) {
+                NetworkInterface inter = interf.nextElement();
+                if (inter.isUp() && !inter.isLoopback() && !inter.isPointToPoint()) {
+                    nextList.add(inter);
+                }
+            }
+            // any changes?
+            if (!nextList.equals(usedInterfaces)) {
+                System.out.println("Interfaces have changed!");
+                usedInterfaces = nextList;
+                pingListener.updateInterfaces(usedInterfaces);
+                pingMulticaster.updateInterfaces(usedInterfaces);
+            }
+        } catch (SocketException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -93,16 +93,16 @@ public class InterfaceManager {
      * From now on, new NetworkInterfaces will be detected and the assigned servers will be informed about any changes.
      */
     void start() {
-	// first execution is synchronous
-	updateInterfaces();
-	// repeat async
-	Timer t = new Timer(true);
-	t.schedule(new TimerTask() {
+        // first execution is synchronous
+        updateInterfaces();
+        // repeat async
+        Timer t = new Timer(true);
+        t.schedule(new TimerTask() {
 
-	    @Override
-	    public void run() {
-		updateInterfaces();
-	    }
-	}, 5000, 5000);
+            @Override
+            public void run() {
+                updateInterfaces();
+            }
+        }, 5000, 5000);
     }
 }

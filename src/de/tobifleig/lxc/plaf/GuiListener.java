@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -35,6 +35,7 @@ public interface GuiListener {
      * Called within gui.display().
      * Must return a (non-modifiable) list of all managed files.
      * This method is only called once, so the list must be backed be the real, internal state of FileManager.
+     *
      * @return a List containing all managed files.
      */
     public List<LXCFile> getFileList();

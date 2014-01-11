@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -36,7 +36,7 @@ public class Configuration {
      * the backing Hashmap
      */
     private static HashMap<String, String> map = new HashMap<String, String>();
-    
+
     /**
      * private constructor
      */
@@ -45,6 +45,7 @@ public class Configuration {
 
     /**
      * Reads a Setting, returns its value as long.
+     *
      * @param setting the setting to read
      * @return the saved value, or 0 (default)
      */
@@ -59,6 +60,7 @@ public class Configuration {
 
     /**
      * Reads a Settings, returns its value as String
+     *
      * @param setting the setting to read
      * @return the saved value, or null (default)
      */
@@ -70,29 +72,32 @@ public class Configuration {
         }
         return ret;
     }
-    
+
     /**
      * Puts a long-setting.
      * overrides previous stored settings
+     *
      * @param setting the key
      * @param value the value
      */
     public static void putLongSetting(String setting, long value) {
         putStringSetting(setting, String.valueOf(value));
     }
-    
+
     /**
      * Puts a String-setting.
      * overrides previous stored settings
+     *
      * @param setting the key
      * @param value the value
      */
     public static void putStringSetting(String setting, String value) {
         map.put(setting, value);
     }
-    
+
     /**
      * Returns true, if the given setting is contained in this configuration.
+     *
      * @param setting the key
      * @return true, if set
      */
@@ -102,6 +107,7 @@ public class Configuration {
 
     /**
      * Returns an Iterator over all keys contained in this configuration.
+     *
      * @return an Iterator over all keys contained in this configuration
      */
     public static Iterator<String> getKeyIterator() {

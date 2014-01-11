@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -27,7 +27,12 @@ import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.swing.LXCUpdater;
 import de.tobifleig.lxc.plaf.impl.swing.SwingGui;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;

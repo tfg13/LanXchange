@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -78,10 +78,11 @@ public abstract class Transceiver implements Runnable {
      * Used to trigger gui-updates on progress.
      */
     protected TransceiverListener listener;
-    
+
     /**
      * Sets the Listener.
      * Must be called before any other methods!
+     *
      * @param listener the new listener
      */
     public void setListener(TransceiverListener listener) {
@@ -90,7 +91,8 @@ public abstract class Transceiver implements Runnable {
 
     /**
      * Returns the current progress of this filetransfer.
-     * @return the current progress of this filetransfer. 
+     *
+     * @return the current progress of this filetransfer.
      */
     public float getProgress() {
         return (1.0f * transferedBytes / totalBytes);
@@ -98,6 +100,7 @@ public abstract class Transceiver implements Runnable {
 
     /**
      * Returns the current transfer speed.
+     *
      * @return the current transfer speed
      */
     public int getCurrentSpeed() {
@@ -126,13 +129,13 @@ public abstract class Transceiver implements Runnable {
             nextArrayPos = 0;
         }
     }
-    
+
     /**
      * Aborts the transfer.
      * Has no effect if the transfer is already finished.
      */
     public abstract void abort();
-    
+
     /**
      * Starts this Transceiver.
      * Creates a new thread, returns immediately.

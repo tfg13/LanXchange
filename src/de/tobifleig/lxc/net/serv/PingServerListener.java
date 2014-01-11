@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -28,9 +28,10 @@ import java.net.InetAddress;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 public interface PingServerListener {
-    
+
     /**
      * Called, when a ping is received.
+     *
      * @param data the data contained
      * @param host the origin of this ping
      */

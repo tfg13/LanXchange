@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -26,15 +26,17 @@ package de.tobifleig.lxc.net;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 interface InstanceManagerListener {
-    
+
     /**
      * Called, when a new LXCInstance is detected/created
+     *
      * @param newInstance the new LXCInstance
      */
     void instanceAdded(LXCInstance newInstance);
-    
+
     /**
      * Called, when a known LXCInstance goes offline (by user or timeout)
+     *
      * @param removedInstance the removed LXCInstance
      */
     void instanceRemoved(LXCInstance removedInstance);

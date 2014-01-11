@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -45,31 +45,31 @@ public class ListServer implements Runnable {
 
     @Override
     public void run() {
-	try {
-	    while (true) {
-		Socket client = servSock.accept(); // Wait for next list, blocks
-		try {
-		    ObjectInputStream input = new ObjectInputStream(client.getInputStream());
-		    try {
-			TransFileList list = (TransFileList) input.readObject();
-			if (list != null) {
-			    listener.listReceived(list, client.getInetAddress());
-			} else {
-			    // List-request
-			    listener.listRequested();
-			}
-		    } catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		    } catch (ClassCastException ex) {
-			ex.printStackTrace();
-		    }
-		} catch (IOException ex) {
-		    ex.printStackTrace();
-		}
-	    }
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	}
+        try {
+            while (true) {
+                Socket client = servSock.accept(); // Wait for next list, blocks
+                try {
+                    ObjectInputStream input = new ObjectInputStream(client.getInputStream());
+                    try {
+                        TransFileList list = (TransFileList) input.readObject();
+                        if (list != null) {
+                            listener.listReceived(list, client.getInetAddress());
+                        } else {
+                            // List-request
+                            listener.listRequested();
+                        }
+                    } catch (ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    } catch (ClassCastException ex) {
+                        ex.printStackTrace();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -79,13 +79,13 @@ public class ListServer implements Runnable {
      * @throws BindException
      */
     private void bindSocket() throws BindException {
-	try {
-	    servSock = new ServerSocket(27717);
-	} catch (IOException ex) {
-	    if (ex instanceof BindException) {
-		throw new BindException();
-	    }
-	}
+        try {
+            servSock = new ServerSocket(27717);
+        } catch (IOException ex) {
+            if (ex instanceof BindException) {
+                throw new BindException();
+            }
+        }
     }
 
     /**
@@ -94,7 +94,7 @@ public class ListServer implements Runnable {
      * @param listener the listener used to deliver incoming filelists
      */
     public ListServer(ListServerListener listener) {
-	this.listener = listener;
+        this.listener = listener;
     }
 
     /**
@@ -104,10 +104,10 @@ public class ListServer implements Runnable {
      * @throws BindException if port is already occupied
      */
     public void start() throws BindException {
-	Thread thread = new Thread(this);
-	thread.setDaemon(true);
-	thread.setName("listserver");
-	this.bindSocket();
-	thread.start();
+        Thread thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.setName("listserver");
+        this.bindSocket();
+        thread.start();
     }
 }

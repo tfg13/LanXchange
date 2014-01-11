@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -47,46 +47,50 @@ public class TransFileList implements Serializable {
 
     /**
      * Create a new TransFileList based on the given List of offered LXCFiles.
+     *
      * @param ownList a List of all offerd LXCFiles
      */
     public TransFileList(List<LXCFile> ownList) {
-	list = new ArrayList<LXCFile>(ownList);
-	originId = LXCInstance.local.id;
+        list = new ArrayList<LXCFile>(ownList);
+        originId = LXCInstance.local.id;
     }
 
     /**
      * Sets the LXCInstance of all Files in this list.
      * This is used by remote instances to insert their local representation of this instance.
+     *
      * @param instance the instance to insert in all LXCFiles.
      */
     public void setInstance(LXCInstance instance) {
-	for (LXCFile file : list) {
-	    file.setInstance(instance);
-	}
+        for (LXCFile file : list) {
+            file.setInstance(instance);
+        }
     }
 
     /**
      * Limits the protocolVersion of all LXCFiles in this list to the maximum supported.
      */
     public void limitTransVersions() {
-	for (LXCFile file : list) {
-	    file.limitTransVersion();
-	}
+        for (LXCFile file : list) {
+            file.limitTransVersion();
+        }
     }
 
     /**
      * Retrieves the internal representation of this List.
+     *
      * @return the internal list of all offered LXCFiles
      */
     public List<LXCFile> getAll() {
-	return list;
+        return list;
     }
-    
+
     /**
      * Returns the id of the LXCInstance that created this list.
+     *
      * @return the id of the LXCInstance that created this list
      */
     public int getOriginId() {
-	return originId;
+        return originId;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -117,33 +117,33 @@ public class LXCFile implements Serializable {
      * @param shownN the name that is shown
      */
     public LXCFile(List<File> files, String shownN) {
-	this.files = files;
-	// Create name
-	shownName = shownN;
-	if (files.size() > 1) {
-	    shownName = shownName.concat(" + " + (files.size() - 1));
-	}
+        this.files = files;
+        // Create name
+        shownName = shownN;
+        if (files.size() > 1) {
+            shownName = shownName.concat(" + " + (files.size() - 1));
+        }
 
-	// set type
-	if (files.size() > 1) {
-	    type = LXCFile.TYPE_MULTI;
-	} else if (files.get(0).isDirectory()) {
-	    type = LXCFile.TYPE_FOLDER;
-	} else {
-	    type = LXCFile.TYPE_FILE;
-	}
+        // set type
+        if (files.size() > 1) {
+            type = LXCFile.TYPE_MULTI;
+        } else if (files.get(0).isDirectory()) {
+            type = LXCFile.TYPE_FOLDER;
+        } else {
+            type = LXCFile.TYPE_FILE;
+        }
 
-	// misc
-	sourceFile = files.get(0).getParent();
-	content = new LinkedList<String>();
+        // misc
+        sourceFile = files.get(0).getParent();
+        content = new LinkedList<String>();
 
-	// this constructor only creates local files
-	instance = LXCInstance.local;
+        // this constructor only creates local files
+        instance = LXCInstance.local;
 
-	// calculate size
-	for (File file : files) {
-	    fileSize += getSize(file);
-	}
+        // calculate size
+        for (File file : files) {
+            fileSize += getSize(file);
+        }
 
     }
 
@@ -154,7 +154,7 @@ public class LXCFile implements Serializable {
      * @deprecated Allows external access to internal variables
      */
     public void createFiles() {
-	files = new ArrayList<File>();
+        files = new ArrayList<File>();
     }
 
     /**
@@ -163,10 +163,10 @@ public class LXCFile implements Serializable {
      * @param job the new job
      */
     public void addJob(LXCJob job) {
-	if (jobs == null) {
-	    jobs = new ArrayList<LXCJob>();
-	}
-	jobs.add(job);
+        if (jobs == null) {
+            jobs = new ArrayList<LXCJob>();
+        }
+        jobs.add(job);
     }
 
     /**
@@ -175,7 +175,7 @@ public class LXCFile implements Serializable {
      * @param job the job to be removed
      */
     public void removeJob(LXCJob job) {
-	jobs.remove(job);
+        jobs.remove(job);
     }
 
     /**
@@ -184,10 +184,10 @@ public class LXCFile implements Serializable {
      * @return a List with all LXCJobs
      */
     public List<LXCJob> getJobs() {
-	if (jobs == null) {
-	    jobs = new ArrayList<LXCJob>();
-	}
-	return jobs;
+        if (jobs == null) {
+            jobs = new ArrayList<LXCJob>();
+        }
+        return jobs;
     }
 
     /**
@@ -197,27 +197,27 @@ public class LXCFile implements Serializable {
      * @return a relative path
      */
     private String cutRelativePath(String absolute) {
-	String res = absolute.substring(sourceFile.length() + 1);
-	return res;
+        String res = absolute.substring(sourceFile.length() + 1);
+        return res;
     }
 
     @Override
     public boolean equals(Object obj) {
-	if (obj instanceof LXCFile) {
-	    LXCFile test = (LXCFile) obj;
-	    return (shownName.equals(test.shownName) && fileSize == test.fileSize && content.equals(test.content));
-	} else {
-	    return false;
-	}
+        if (obj instanceof LXCFile) {
+            LXCFile test = (LXCFile) obj;
+            return (shownName.equals(test.shownName) && fileSize == test.fileSize && content.equals(test.content));
+        } else {
+            return false;
+        }
     }
 
     @Override
     public int hashCode() {
-	int hash = 5;
-	hash = 71 * hash + (this.shownName != null ? this.shownName.hashCode() : 0);
-	hash = 71 * hash + (int) (this.fileSize ^ (this.fileSize >>> 32));
-	hash = 71 * hash + (this.content != null ? this.content.hashCode() : 0);
-	return hash;
+        int hash = 5;
+        hash = 71 * hash + (this.shownName != null ? this.shownName.hashCode() : 0);
+        hash = 71 * hash + (int) (this.fileSize ^ (this.fileSize >>> 32));
+        hash = 71 * hash + (this.content != null ? this.content.hashCode() : 0);
+        return hash;
     }
 
     /**
@@ -226,7 +226,7 @@ public class LXCFile implements Serializable {
      * @param available new state of the flag
      */
     public void setAvailable(boolean available) {
-	isAvailable = available;
+        isAvailable = available;
     }
 
     /**
@@ -239,32 +239,32 @@ public class LXCFile implements Serializable {
      */
     private long getSize(File realFile) {
 
-	long size = 0;
-	File[] filelist = realFile.listFiles();
-	ArrayList<File> filealist = new ArrayList<File>();
-	if (filelist != null) {
-	    filealist.addAll(Arrays.asList(filelist));
-	} else {
-	    filealist.add(realFile);
-	}
-	for (int i = 0; i < filealist.size(); i++) {
-	    File file = filealist.get(i);
-	    if (file.isDirectory()) {
-		content.add(cutRelativePath(file.getAbsolutePath()) + "/");
-		File[] contents = file.listFiles();
-		if (contents == null) {
-		    // content of directory must not be read
-		    System.out.println("cannot read " + file.getAbsolutePath() + ", ignoring");
-		    continue;
-		}
-		filealist.addAll(Arrays.asList(contents));
-		continue;
-	    } else {
-		content.add(cutRelativePath(file.getAbsolutePath()));
-	    }
-	    size += file.length();
-	}
-	return size;
+        long size = 0;
+        File[] filelist = realFile.listFiles();
+        ArrayList<File> filealist = new ArrayList<File>();
+        if (filelist != null) {
+            filealist.addAll(Arrays.asList(filelist));
+        } else {
+            filealist.add(realFile);
+        }
+        for (int i = 0; i < filealist.size(); i++) {
+            File file = filealist.get(i);
+            if (file.isDirectory()) {
+                content.add(cutRelativePath(file.getAbsolutePath()) + "/");
+                File[] contents = file.listFiles();
+                if (contents == null) {
+                    // content of directory must not be read
+                    System.out.println("cannot read " + file.getAbsolutePath() + ", ignoring");
+                    continue;
+                }
+                filealist.addAll(Arrays.asList(contents));
+                continue;
+            } else {
+                content.add(cutRelativePath(file.getAbsolutePath()));
+            }
+            size += file.length();
+        }
+        return size;
     }
 
     /**
@@ -273,7 +273,7 @@ public class LXCFile implements Serializable {
      * @return the available-flag
      */
     public boolean isAvailable() {
-	return isAvailable;
+        return isAvailable;
     }
 
     /**
@@ -282,7 +282,7 @@ public class LXCFile implements Serializable {
      * @return the source file
      */
     public String getSourceFile() {
-	return sourceFile;
+        return sourceFile;
     }
 
     /**
@@ -291,7 +291,7 @@ public class LXCFile implements Serializable {
      * @return the shown name
      */
     public String getShownName() {
-	return shownName;
+        return shownName;
     }
 
     /**
@@ -300,7 +300,7 @@ public class LXCFile implements Serializable {
      * @return
      */
     public int getType() {
-	return type;
+        return type;
     }
 
     /**
@@ -309,7 +309,7 @@ public class LXCFile implements Serializable {
      * @return the size of this file
      */
     public long getFileSize() {
-	return fileSize;
+        return fileSize;
     }
 
     /**
@@ -319,24 +319,24 @@ public class LXCFile implements Serializable {
      * @return a human-readable String containing the size (like 12,3 MiB)
      */
     public static String getFormattedSize(long fSize) {
-	DecimalFormat form = new DecimalFormat("0.0");
-	if (fSize < 1024) {
-	    return fSize + " B";
-	} else if (fSize < 1048576) {
-	    String size = form.format(fSize / 1024d);
-	    return size + " KiB";
-	} else if (fSize < 1073741824) {
-	    String size = form.format(fSize / 1048576d);
-	    return size + " MiB";
-	} else if (fSize < 1099511627776l) {
-	    String size = form.format(fSize / 1073741824d);
-	    return size + " GiB";
-	} else if (fSize < 1125899906842625l) {
-	    String size = form.format(fSize / 1099511627776d);
-	    return size + " TiB";
-	} else {
-	    return "unknown";
-	}
+        DecimalFormat form = new DecimalFormat("0.0");
+        if (fSize < 1024) {
+            return fSize + " B";
+        } else if (fSize < 1048576) {
+            String size = form.format(fSize / 1024d);
+            return size + " KiB";
+        } else if (fSize < 1073741824) {
+            String size = form.format(fSize / 1048576d);
+            return size + " MiB";
+        } else if (fSize < 1099511627776l) {
+            String size = form.format(fSize / 1073741824d);
+            return size + " GiB";
+        } else if (fSize < 1125899906842625l) {
+            String size = form.format(fSize / 1099511627776d);
+            return size + " TiB";
+        } else {
+            return "unknown";
+        }
     }
 
     /**
@@ -345,7 +345,7 @@ public class LXCFile implements Serializable {
      * @return the instance
      */
     public LXCInstance getInstance() {
-	return instance;
+        return instance;
     }
 
     /**
@@ -354,7 +354,7 @@ public class LXCFile implements Serializable {
      * @param instance the instance to set
      */
     public void setInstance(LXCInstance instance) {
-	this.instance = instance;
+        this.instance = instance;
     }
 
     /**
@@ -363,7 +363,7 @@ public class LXCFile implements Serializable {
      * @return the locked-flag
      */
     public boolean isLocked() {
-	return locked;
+        return locked;
     }
 
     /**
@@ -372,7 +372,7 @@ public class LXCFile implements Serializable {
      * @param locked the new state
      */
     public void setLocked(boolean locked) {
-	this.locked = locked;
+        this.locked = locked;
     }
 
     /**
@@ -381,7 +381,7 @@ public class LXCFile implements Serializable {
      * @return the file-list
      */
     public List<File> getFiles() {
-	return files;
+        return files;
     }
 
     /**
@@ -390,16 +390,16 @@ public class LXCFile implements Serializable {
      * @return the lxcTransVersion
      */
     public int getLxcTransVersion() {
-	return lxcTransVersion;
+        return lxcTransVersion;
     }
 
     /**
      * Limits the protocol version to the maximum supported by this local client.
      */
     public void limitTransVersion() {
-	if (lxcTransVersion > lxcTransVersionMax) {
-	    lxcTransVersion = lxcTransVersionMax;
-	}
+        if (lxcTransVersion > lxcTransVersionMax) {
+            lxcTransVersion = lxcTransVersionMax;
+        }
     }
 
     /**
@@ -409,6 +409,6 @@ public class LXCFile implements Serializable {
      * @return true, if local
      */
     public boolean isLocal() {
-	return instance.id == LXCInstance.local.id;
+        return instance.id == LXCInstance.local.id;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -21,7 +21,13 @@
 package de.tobifleig.lxc.net.io;
 
 import de.tobifleig.lxc.data.LXCFile;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -125,7 +131,6 @@ public class Seeder extends Transceiver {
             listener.finished(false, fileBroken);
             System.out.println("Seeder: Lost connection, aborting.");
         }
-
 
     }
 

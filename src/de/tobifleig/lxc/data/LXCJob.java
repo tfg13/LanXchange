@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -51,13 +51,13 @@ public class LXCJob {
      * @param remote the connected remote
      */
     public LXCJob(Transceiver trans, LXCInstance remote) {
-	this.trans = trans;
-	this.remote = remote;
-	if (trans instanceof Seeder) {
-	    isSeeder = true;
-	} else {
-	    isSeeder = false;
-	}
+        this.trans = trans;
+        this.remote = remote;
+        if (trans instanceof Seeder) {
+            isSeeder = true;
+        } else {
+            isSeeder = false;
+        }
     }
 
     /**
@@ -66,7 +66,7 @@ public class LXCJob {
      * @return true if upload, false if download
      */
     public boolean isIsSeeder() {
-	return isSeeder;
+        return isSeeder;
     }
 
     /**
@@ -75,7 +75,7 @@ public class LXCJob {
      * @return the remote LXCInstance
      */
     public LXCInstance getRemote() {
-	return remote;
+        return remote;
     }
 
     /**
@@ -84,13 +84,13 @@ public class LXCJob {
      * @return the Transceiver
      */
     public Transceiver getTrans() {
-	return trans;
+        return trans;
     }
 
     /**
      * Immediately aborts the transfer.
      */
     public void abortTransfer() {
-	trans.abort();
+        trans.abort();
     }
 }

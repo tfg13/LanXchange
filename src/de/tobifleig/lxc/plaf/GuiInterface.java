@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -20,7 +20,6 @@
  */
 package de.tobifleig.lxc.plaf;
 
-import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import java.io.File;
 
@@ -32,9 +31,10 @@ import java.io.File;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 public interface GuiInterface {
-    
+
     /**
      * Initialize the user-inferface.
+     *
      * @param args LXC's arguments
      */
     public void init(String[] args);
@@ -44,9 +44,10 @@ public interface GuiInterface {
      * Must be called after init
      */
     public void display();
-    
+
     /**
      * Displays an error.
+     *
      * @param error the message to show
      */
     public void showError(String error);
@@ -54,7 +55,8 @@ public interface GuiInterface {
     /**
      * Sets the listener.
      * Must be called before display().
-     * @param guiListener 
+     *
+     * @param guiListener
      */
     public void setGuiListener(GuiListener guiListener);
 
@@ -68,6 +70,7 @@ public interface GuiInterface {
     /**
      * Finds out where to save the given file.
      * optional, only required if the corresponding guiListener ever calls downloadFile with chooseTarget=true
+     *
      * @param file the file that is to be downloaded
      * @return the folder to save this file in
      */
@@ -75,6 +78,7 @@ public interface GuiInterface {
 
     /**
      * Asks "are you sure" if a user tries to quit LXC while transfers are running.
+     *
      * @return true, if user really wants to quit and cancel all running transfers
      */
     public boolean confirmCloseWithTransfersRunning();

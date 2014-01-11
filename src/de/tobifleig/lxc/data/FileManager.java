@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -22,7 +22,12 @@ package de.tobifleig.lxc.data;
 
 import de.tobifleig.lxc.net.LXCInstance;
 import de.tobifleig.lxc.net.TransFileList;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Manages own & remote LXCFiles
@@ -44,8 +49,8 @@ public class FileManager {
      * Creates a new FileManager.
      */
     public FileManager() {
-	files = new LinkedList<LXCFile>();
-	recentFileLists = new HashMap<LXCInstance, List<LXCFile>>();
+        files = new LinkedList<LXCFile>();
+        recentFileLists = new HashMap<LXCInstance, List<LXCFile>>();
     }
 
     /**
@@ -55,31 +60,31 @@ public class FileManager {
      * @param sender the origin of this list
      */
     public void computeFileList(TransFileList receivedList, LXCInstance sender) {
-	List<LXCFile> rawList = receivedList.getAll();
-	recentFileLists.put(sender, new ArrayList<LXCFile>(rawList)); // store a copy!
-	Iterator<LXCFile> iter = files.iterator();
-	// Remove all files no longer offerd by this instance
-	while (iter.hasNext()) {
-	    LXCFile file = iter.next();
-	    if (sender.equals(file.getInstance())) {
-		if (!rawList.contains(file)) {
-		    // no longer offered, remove it, if not download{ing,ed}
-		    if (file.getJobs().isEmpty() && !file.isAvailable()) {
-			iter.remove();
-		    } else {
-			// keep, ignore in next step:
-			rawList.remove(file);
-		    }
-		} else {
-		    // already known, ignore in next step
-		    rawList.remove(file);
-		}
-	    }
-	}
+        List<LXCFile> rawList = receivedList.getAll();
+        recentFileLists.put(sender, new ArrayList<LXCFile>(rawList)); // store a copy!
+        Iterator<LXCFile> iter = files.iterator();
+        // Remove all files no longer offerd by this instance
+        while (iter.hasNext()) {
+            LXCFile file = iter.next();
+            if (sender.equals(file.getInstance())) {
+                if (!rawList.contains(file)) {
+                    // no longer offered, remove it, if not download{ing,ed}
+                    if (file.getJobs().isEmpty() && !file.isAvailable()) {
+                        iter.remove();
+                    } else {
+                        // keep, ignore in next step:
+                        rawList.remove(file);
+                    }
+                } else {
+                    // already known, ignore in next step
+                    rawList.remove(file);
+                }
+            }
+        }
 
-	receivedList.setInstance(sender);
-	receivedList.limitTransVersions();
-	files.addAll(rawList);
+        receivedList.setInstance(sender);
+        receivedList.limitTransVersions();
+        files.addAll(rawList);
     }
 
     /**
@@ -88,17 +93,17 @@ public class FileManager {
      * @param instance the instance which files should be no longer available
      */
     public void instanceRemoved(LXCInstance instance) {
-	recentFileLists.remove(instance);
-	Iterator<LXCFile> iter = files.iterator();
-	while (iter.hasNext()) {
-	    LXCFile file = iter.next();
-	    if (file.getInstance().equals(instance)) {
-		// only delete if not download{ing,ed}
-		if (file.getJobs().isEmpty() && !file.isAvailable()) {
-		    iter.remove();
-		}
-	    }
-	}
+        recentFileLists.remove(instance);
+        Iterator<LXCFile> iter = files.iterator();
+        while (iter.hasNext()) {
+            LXCFile file = iter.next();
+            if (file.getInstance().equals(instance)) {
+                // only delete if not download{ing,ed}
+                if (file.getJobs().isEmpty() && !file.isAvailable()) {
+                    iter.remove();
+                }
+            }
+        }
     }
 
     /**
@@ -109,11 +114,11 @@ public class FileManager {
      * @return the local representation, or null if file not available
      */
     public LXCFile localRepresentation(LXCFile remoteRepresentation) {
-	int index = files.indexOf(remoteRepresentation);
-	if (index != -1) {
-	    return files.get(index);
-	}
-	return null;
+        int index = files.indexOf(remoteRepresentation);
+        if (index != -1) {
+            return files.get(index);
+        }
+        return null;
     }
 
     /**
@@ -122,13 +127,13 @@ public class FileManager {
      * @return a TransFileList containing all LXCFiles
      */
     public TransFileList getTransFileList() {
-	ArrayList<LXCFile> offeredFiles = new ArrayList<LXCFile>();
-	for (LXCFile file : files) {
-	    if (file.isLocal()) {
-		offeredFiles.add(file);
-	    }
-	}
-	return new TransFileList(offeredFiles);
+        ArrayList<LXCFile> offeredFiles = new ArrayList<LXCFile>();
+        for (LXCFile file : files) {
+            if (file.isLocal()) {
+                offeredFiles.add(file);
+            }
+        }
+        return new TransFileList(offeredFiles);
     }
 
     /**
@@ -139,7 +144,7 @@ public class FileManager {
      * @return a list of all known files, backed but unmodifiable
      */
     public List<LXCFile> getList() {
-	return Collections.unmodifiableList(files);
+        return Collections.unmodifiableList(files);
     }
 
     /**
@@ -148,13 +153,13 @@ public class FileManager {
      * @param newfile the new file
      */
     public void addLocal(LXCFile newfile) {
-	// do not allow duplicates
-	for (LXCFile file : files) {
-	    if (file.equals(newfile)) {
-		return;
-	    }
-	}
-	files.add(newfile);
+        // do not allow duplicates
+        for (LXCFile file : files) {
+            if (file.equals(newfile)) {
+                return;
+            }
+        }
+        files.add(newfile);
     }
 
     /**
@@ -163,7 +168,7 @@ public class FileManager {
      * @param file a file offered by the local instance
      */
     public void removeLocal(LXCFile file) {
-	files.remove(file);
+        files.remove(file);
     }
 
     /**
@@ -172,12 +177,12 @@ public class FileManager {
      * @return true, if still transferring
      */
     public boolean transferRunning() {
-	for (LXCFile file : files) {
-	    if (!file.getJobs().isEmpty()) {
-		return true;
-	    }
-	}
-	return false;
+        for (LXCFile file : files) {
+            if (!file.getJobs().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -189,15 +194,15 @@ public class FileManager {
      * @param file the available, non-local file to reset
      */
     public void resetAvailableFile(LXCFile file) {
-	if (file.isAvailable() && !file.isLocal() && !file.isLocked()) {
-	    file.setAvailable(false);
-	    if (!recentFileLists.containsKey(file.getInstance()) || !recentFileLists.get(file.getInstance()).contains(file)) {
-		files.remove(file);
-	    }
-	} else {
-	    throw new IllegalArgumentException("Cannot reset given file! (debug: "
-		    + file.getShownName() + " " + file.isAvailable() + " "
-		    + file.isLocal() + " " + file.isLocked());
-	}
+        if (file.isAvailable() && !file.isLocal() && !file.isLocked()) {
+            file.setAvailable(false);
+            if (!recentFileLists.containsKey(file.getInstance()) || !recentFileLists.get(file.getInstance()).contains(file)) {
+                files.remove(file);
+            }
+        } else {
+            throw new IllegalArgumentException("Cannot reset given file! (debug: "
+                    + file.getShownName() + " " + file.isAvailable() + " "
+                    + file.isLocal() + " " + file.isLocked());
+        }
     }
 }

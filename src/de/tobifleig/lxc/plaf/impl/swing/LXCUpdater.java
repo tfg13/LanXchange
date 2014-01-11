@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -21,7 +21,13 @@
 package de.tobifleig.lxc.plaf.impl.swing;
 
 import de.tobifleig.lxc.LXC;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -69,168 +75,168 @@ public final class LXCUpdater {
      * @throws Exception may throw a bunch of exceptions, this class requires, working internet, github, signature checks etc.
      */
     public static void checkAndPerformUpdate(SwingGui gui, boolean forceUpdate, boolean overrideVerification, boolean restartable) throws Exception {
-	if (forceUpdate) {
-	    System.out.println("Info: Forcing update...");
-	}
+        if (forceUpdate) {
+            System.out.println("Info: Forcing update...");
+        }
 
-	// Contact update server, download version file
-	Scanner scanner = new Scanner(new URL("https://raw.github.com/tfg13/LanXchange/master/update/v").openStream(), "utf8");
-	int gotver = Integer.parseInt(scanner.nextLine());
-	String title = scanner.nextLine();
-	scanner.close();
-	// compare version number
-	if (gotver > LXC.versionId || forceUpdate) {
-	    System.out.println("Newer Version available!");
-	    UpdateDialog updateGui = new UpdateDialog(gui, true, title);
-	    // prompt user
-	    if (updateGui.isUpdate()) {
-		updateGui.toProgressView();
-		// download update
-		URL url = new URL("https://raw.github.com/tfg13/LanXchange/master/update/update_master.zip");
-		FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		conn.connect();
-		int responseCode = conn.getResponseCode();
-		if (responseCode == HttpURLConnection.HTTP_OK) {
-		    byte tmp_buffer[] = new byte[4096];
-		    InputStream is = conn.getInputStream();
-		    int n;
-		    while ((n = is.read(tmp_buffer)) > 0) {
-			os.write(tmp_buffer, 0, n);
-			os.flush();
-		    }
-		}
-		os.close();
-		// verify signature
-		updateGui.setStatusToVerify();
-		// extract update & signature file
-		File psource = new File("update_dl.zip");
-		ZipFile masterZip = new ZipFile(psource);
-		ZipEntry updatecontent = masterZip.getEntry("lxc.zip");
-		byte[] buffer = new byte[1024];
-		BufferedInputStream masterbins = new BufferedInputStream(masterZip.getInputStream(updatecontent));
-		BufferedOutputStream masterbout = new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip")));
-		for (int len; (len = masterbins.read(buffer)) != -1;) {
-		    masterbout.write(buffer, 0, len);
-		}
-		masterbins.close();
-		masterbout.close();
-		ZipEntry signfile = masterZip.getEntry("lxc.sign");
-		byte[] buffer2 = new byte[1024];
-		BufferedInputStream signbins = new BufferedInputStream(masterZip.getInputStream(signfile));
-		BufferedOutputStream signbout = new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip.sign")));
-		for (int len; (len = signbins.read(buffer2)) != -1;) {
-		    signbout.write(buffer2, 0, len);
-		}
-		signbins.close();
-		signbout.close();
-		masterZip.close();
-		// the check itself
-		KeyFactory fact = KeyFactory.getInstance("RSA");
-		FileInputStream ins = new FileInputStream(new File("lxc_updates.pub"));
-		byte[] b = new byte[ins.available()];
-		ins.read(b);
-		ins.close();
-		X509EncodedKeySpec priKeySpec = new X509EncodedKeySpec(b);
-		PublicKey pubKey = fact.generatePublic(priKeySpec);
+        // Contact update server, download version file
+        Scanner scanner = new Scanner(new URL("https://raw.github.com/tfg13/LanXchange/master/update/v").openStream(), "utf8");
+        int gotver = Integer.parseInt(scanner.nextLine());
+        String title = scanner.nextLine();
+        scanner.close();
+        // compare version number
+        if (gotver > LXC.versionId || forceUpdate) {
+            System.out.println("Newer Version available!");
+            UpdateDialog updateGui = new UpdateDialog(gui, true, title);
+            // prompt user
+            if (updateGui.isUpdate()) {
+                updateGui.toProgressView();
+                // download update
+                URL url = new URL("https://raw.github.com/tfg13/LanXchange/master/update/update_master.zip");
+                FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.connect();
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    byte tmp_buffer[] = new byte[4096];
+                    InputStream is = conn.getInputStream();
+                    int n;
+                    while ((n = is.read(tmp_buffer)) > 0) {
+                        os.write(tmp_buffer, 0, n);
+                        os.flush();
+                    }
+                }
+                os.close();
+                // verify signature
+                updateGui.setStatusToVerify();
+                // extract update & signature file
+                File psource = new File("update_dl.zip");
+                ZipFile masterZip = new ZipFile(psource);
+                ZipEntry updatecontent = masterZip.getEntry("lxc.zip");
+                byte[] buffer = new byte[1024];
+                BufferedInputStream masterbins = new BufferedInputStream(masterZip.getInputStream(updatecontent));
+                BufferedOutputStream masterbout = new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip")));
+                for (int len; (len = masterbins.read(buffer)) != -1;) {
+                    masterbout.write(buffer, 0, len);
+                }
+                masterbins.close();
+                masterbout.close();
+                ZipEntry signfile = masterZip.getEntry("lxc.sign");
+                byte[] buffer2 = new byte[1024];
+                BufferedInputStream signbins = new BufferedInputStream(masterZip.getInputStream(signfile));
+                BufferedOutputStream signbout = new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip.sign")));
+                for (int len; (len = signbins.read(buffer2)) != -1;) {
+                    signbout.write(buffer2, 0, len);
+                }
+                signbins.close();
+                signbout.close();
+                masterZip.close();
+                // the check itself
+                KeyFactory fact = KeyFactory.getInstance("RSA");
+                FileInputStream ins = new FileInputStream(new File("lxc_updates.pub"));
+                byte[] b = new byte[ins.available()];
+                ins.read(b);
+                ins.close();
+                X509EncodedKeySpec priKeySpec = new X509EncodedKeySpec(b);
+                PublicKey pubKey = fact.generatePublic(priKeySpec);
 
-		Signature sign = Signature.getInstance("SHA256withRSA");
-		sign.initVerify(pubKey);
+                Signature sign = Signature.getInstance("SHA256withRSA");
+                sign.initVerify(pubKey);
 
-		FileInputStream in = new FileInputStream("temp_update.zip");
-		int bufSize = 1024;
-		byte[] sbuffer = new byte[bufSize];
-		int n = in.read(sbuffer, 0, bufSize);
-		while (n != -1) {
-		    sign.update(sbuffer, 0, n);
-		    n = in.read(sbuffer, 0, bufSize);
-		}
-		in.close();
+                FileInputStream in = new FileInputStream("temp_update.zip");
+                int bufSize = 1024;
+                byte[] sbuffer = new byte[bufSize];
+                int n = in.read(sbuffer, 0, bufSize);
+                while (n != -1) {
+                    sign.update(sbuffer, 0, n);
+                    n = in.read(sbuffer, 0, bufSize);
+                }
+                in.close();
 
-		FileInputStream inss = new FileInputStream(new File("temp_update.zip.sign"));
-		byte[] bs = new byte[inss.available()];
-		inss.read(bs);
-		inss.close();
-		// signature ok?
-		if (sign.verify(bs) || overrideVerification) {
-		    updateGui.setStatusToInstall();
-		    // extract update
-		    File source = new File("temp_update.zip");
-		    File target = new File(".");
-		    byte[] buffer3 = new byte[1024];
-		    ZipFile zipFile = new ZipFile(source);
-		    try {
-			Enumeration<? extends ZipEntry> zipEntryEnum = zipFile.entries();
+                FileInputStream inss = new FileInputStream(new File("temp_update.zip.sign"));
+                byte[] bs = new byte[inss.available()];
+                inss.read(bs);
+                inss.close();
+                // signature ok?
+                if (sign.verify(bs) || overrideVerification) {
+                    updateGui.setStatusToInstall();
+                    // extract update
+                    File source = new File("temp_update.zip");
+                    File target = new File(".");
+                    byte[] buffer3 = new byte[1024];
+                    ZipFile zipFile = new ZipFile(source);
+                    try {
+                        Enumeration<? extends ZipEntry> zipEntryEnum = zipFile.entries();
 
-			while (zipEntryEnum.hasMoreElements()) {
-			    try {
-				ZipEntry zipEntry = zipEntryEnum.nextElement();
-				File file = new File(target, zipEntry.getName());
-				if (zipEntry.isDirectory()) {
-				    file.mkdirs();
-				} else {
-				    new File(file.getParent()).mkdirs(); // create folder, if required
-				    BufferedInputStream bins = new BufferedInputStream(zipFile.getInputStream(zipEntry));
-				    BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(file));
-				    for (int len; (len = bins.read(buffer3)) != -1;) {
-					bout.write(buffer3, 0, len);
-				    }
-				    bins.close();
-				    bout.close();
-				}
-			    } catch (IOException ex) {
-				System.out.println("Update-Error: Cannot unpack file!");
-				ex.printStackTrace();
-			    }
-			}
-		    } catch (Exception ex) {
-			ex.printStackTrace();
-		    } finally {
-			zipFile.close();
-		    }
+                        while (zipEntryEnum.hasMoreElements()) {
+                            try {
+                                ZipEntry zipEntry = zipEntryEnum.nextElement();
+                                File file = new File(target, zipEntry.getName());
+                                if (zipEntry.isDirectory()) {
+                                    file.mkdirs();
+                                } else {
+                                    new File(file.getParent()).mkdirs(); // create folder, if required
+                                    BufferedInputStream bins = new BufferedInputStream(zipFile.getInputStream(zipEntry));
+                                    BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(file));
+                                    for (int len; (len = bins.read(buffer3)) != -1;) {
+                                        bout.write(buffer3, 0, len);
+                                    }
+                                    bins.close();
+                                    bout.close();
+                                }
+                            } catch (IOException ex) {
+                                System.out.println("Update-Error: Cannot unpack file!");
+                                ex.printStackTrace();
+                            }
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    } finally {
+                        zipFile.close();
+                    }
 
-		    // delete tempfiles
-		    new File("temp_update.zip.sign").delete();
-		    new File("temp_update.zip").delete();
-		    new File("update_dl.zip").delete();
+                    // delete tempfiles
+                    new File("temp_update.zip.sign").delete();
+                    new File("temp_update.zip").delete();
+                    new File("update_dl.zip").delete();
 
-		    // cleanup, delete outdated files
-		    for (String s : oldFiles) {
-			File f = new File(s);
-			if (f.exists()) {
-			    f.delete();
-			}
-		    }
+                    // cleanup, delete outdated files
+                    for (String s : oldFiles) {
+                        File f = new File(s);
+                        if (f.exists()) {
+                            f.delete();
+                        }
+                    }
 
-		    //done
-		    updateGui.setStatusToRestart();
-		    updateGui.setRestartTime(5, !restartable);
-		    Thread.sleep(1000);
-		    updateGui.setRestartTime(4, !restartable);
-		    Thread.sleep(1000);
-		    updateGui.setRestartTime(3, !restartable);
-		    Thread.sleep(1000);
-		    updateGui.setRestartTime(2, !restartable);
-		    Thread.sleep(1000);
-		    updateGui.setRestartTime(1, !restartable);
-		    Thread.sleep(1000);
-		    updateGui.setRestartTime(0, !restartable);
-		    System.exit(6);
+                    //done
+                    updateGui.setStatusToRestart();
+                    updateGui.setRestartTime(5, !restartable);
+                    Thread.sleep(1000);
+                    updateGui.setRestartTime(4, !restartable);
+                    Thread.sleep(1000);
+                    updateGui.setRestartTime(3, !restartable);
+                    Thread.sleep(1000);
+                    updateGui.setRestartTime(2, !restartable);
+                    Thread.sleep(1000);
+                    updateGui.setRestartTime(1, !restartable);
+                    Thread.sleep(1000);
+                    updateGui.setRestartTime(0, !restartable);
+                    System.exit(6);
 
-		} else {
-		    System.out.println("ERROR: Bad signature! File corrupted (OR MANIPULATED!!!). Will not update!");
-		    updateGui.setStatusToError();
-		    return;
-		}
-	    } else {
-		System.out.println("Update rejected by user");
-	    }
-	    updateGui.setVisible(false);
-	    updateGui.dispose();
-	} else {
-	    System.out.println("You have the latest version");
-	}
+                } else {
+                    System.out.println("ERROR: Bad signature! File corrupted (OR MANIPULATED!!!). Will not update!");
+                    updateGui.setStatusToError();
+                    return;
+                }
+            } else {
+                System.out.println("Update rejected by user");
+            }
+            updateGui.setVisible(false);
+            updateGui.dispose();
+        } else {
+            System.out.println("You have the latest version");
+        }
 
     }
 

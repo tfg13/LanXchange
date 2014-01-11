@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -21,7 +21,11 @@
 package de.tobifleig.lxc.net;
 
 import java.net.InetAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Handles known/unknown remote/local instances.
@@ -51,53 +55,54 @@ class InstanceManager {
 
     /**
      * Creates a new InstanceManger with the given parameters.
+     *
      * @param listener the listener to pass events to
      */
     InstanceManager(InstanceManagerListener listener) {
-	this.instances = new HashMap<InetAddress, LXCInstance>();
-	this.listener = listener;
-	this.timer = new Timer("lxc_heartbeat_helper", true);
-	remoteView = new Iterable<LXCInstance>() {
+        this.instances = new HashMap<InetAddress, LXCInstance>();
+        this.listener = listener;
+        this.timer = new Timer("lxc_heartbeat_helper", true);
+        remoteView = new Iterable<LXCInstance>() {
 
-	    @Override
-	    public Iterator<LXCInstance> iterator() {
-		return new Iterator<LXCInstance>() {
-		    private Iterator<LXCInstance> baseIter = instances.values().iterator();
-		    private HashMap<LXCInstance, Object> seenInstances = new HashMap<LXCInstance, Object>();
-		    private LXCInstance next = computeNext();
+            @Override
+            public Iterator<LXCInstance> iterator() {
+                return new Iterator<LXCInstance>() {
+                    private Iterator<LXCInstance> baseIter = instances.values().iterator();
+                    private HashMap<LXCInstance, Object> seenInstances = new HashMap<LXCInstance, Object>();
+                    private LXCInstance next = computeNext();
 
-		    @Override
-		    public boolean hasNext() {
-			return next != null;
-		    }
+                    @Override
+                    public boolean hasNext() {
+                        return next != null;
+                    }
 
-		    @Override
-		    public LXCInstance next() {
-			try {
-			    return next;
-			} finally {
-			    next = computeNext();
-			}
-		    }
+                    @Override
+                    public LXCInstance next() {
+                        try {
+                            return next;
+                        } finally {
+                            next = computeNext();
+                        }
+                    }
 
-		    @Override
-		    public void remove() {
-			throw new UnsupportedOperationException("Not supported.");
-		    }
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException("Not supported.");
+                    }
 
-		    private LXCInstance computeNext() {
-			while (baseIter.hasNext()) {
-			    LXCInstance candidate = baseIter.next();
-			    if (!candidate.isLocal() && !seenInstances.containsKey(candidate)) {
-				seenInstances.put(candidate, null);
-				return candidate;
-			    }
-			}
-			return null;
-		    }
-		};
-	    }
-	};
+                    private LXCInstance computeNext() {
+                        while (baseIter.hasNext()) {
+                            LXCInstance candidate = baseIter.next();
+                            if (!candidate.isLocal() && !seenInstances.containsKey(candidate)) {
+                                seenInstances.put(candidate, null);
+                                return candidate;
+                            }
+                        }
+                        return null;
+                    }
+                };
+            }
+        };
     }
 
     /**
@@ -105,30 +110,30 @@ class InstanceManager {
      * Periodically checks all known instances for timeouts.
      */
     void start() {
-	timer.schedule(new TimerTask() {
+        timer.schedule(new TimerTask() {
 
-	    @Override
-	    public void run() {
-		synchronized (InstanceManager.this) {
-		    // check instances
-		    ArrayList<LXCInstance> timedOut = new ArrayList<LXCInstance>();
-		    for (LXCInstance inst : instances.values()) {
-			if (inst.isLocal()) {
-			    continue;
-			}
-			if (System.currentTimeMillis() - inst.getHeartbeatTime() > 60000) {
-			    // timeout
-			    System.out.println("Instance " + inst.id + " timed out, removing");
-			    timedOut.add(inst);
-			}
-		    }
-		    // delete timeouts
-		    for (LXCInstance del : timedOut) {
-			removeInstance(del.id);
-		    }
-		}
-	    }
-	}, 30000, 30000);
+            @Override
+            public void run() {
+                synchronized (InstanceManager.this) {
+                    // check instances
+                    ArrayList<LXCInstance> timedOut = new ArrayList<LXCInstance>();
+                    for (LXCInstance inst : instances.values()) {
+                        if (inst.isLocal()) {
+                            continue;
+                        }
+                        if (System.currentTimeMillis() - inst.getHeartbeatTime() > 60000) {
+                            // timeout
+                            System.out.println("Instance " + inst.id + " timed out, removing");
+                            timedOut.add(inst);
+                        }
+                    }
+                    // delete timeouts
+                    for (LXCInstance del : timedOut) {
+                        removeInstance(del.id);
+                    }
+                }
+            }
+        }, 30000, 30000);
     }
 
     /**
@@ -139,19 +144,19 @@ class InstanceManager {
      * @param origin the origin of this ping
      */
     void computePing(byte[] data, InetAddress origin) {
-	// unpack id:
-	int id = (data[3] & 0xFF)
-		+ ((data[2] & 0xFF) << 8)
-		+ ((data[1] & 0xFF) << 16)
-		+ ((data[0]) << 24);
-	// mode:
-	if (data[4] == 'h') {
-	    // regular heartbeat
-	    gotHeartbeat(origin, id);
-	} else if (data[4] == 'o') {
-	    // offline
-	    removeInstance(id);
-	}
+        // unpack id:
+        int id = (data[3] & 0xFF)
+                + ((data[2] & 0xFF) << 8)
+                + ((data[1] & 0xFF) << 16)
+                + ((data[0]) << 24);
+        // mode:
+        if (data[4] == 'h') {
+            // regular heartbeat
+            gotHeartbeat(origin, id);
+        } else if (data[4] == 'o') {
+            // offline
+            removeInstance(id);
+        }
     }
 
     /**
@@ -161,7 +166,7 @@ class InstanceManager {
      * @return all known distinct remote LXCInstances
      */
     Iterable<LXCInstance> getRemotes() {
-	return remoteView;
+        return remoteView;
     }
 
     /**
@@ -172,7 +177,7 @@ class InstanceManager {
      * @return the requested LXCInstance, or null
      */
     synchronized LXCInstance getByAddress(InetAddress address) {
-	return instances.get(address);
+        return instances.get(address);
     }
 
     /**
@@ -184,11 +189,11 @@ class InstanceManager {
      * @return the LXCInstance for this id
      */
     synchronized LXCInstance getOrCreateInstance(InetAddress address, int id) {
-	if (instances.containsKey(address) && id == instances.get(address).id) {
-	    return instances.get(address);
-	}
-	// create new (list detection)
-	return addInstance(address, id);
+        if (instances.containsKey(address) && id == instances.get(address).id) {
+            return instances.get(address);
+        }
+        // create new (list detection)
+        return addInstance(address, id);
     }
 
     /**
@@ -199,35 +204,35 @@ class InstanceManager {
      * @param id the id of the remote instance
      */
     synchronized private void gotHeartbeat(InetAddress address, int id) {
-	if (instances.containsKey(address) && id == instances.get(address).id) {
-	    instances.get(address).heartBeat();
-	} else {
-	    addInstance(address, id);
-	}
+        if (instances.containsKey(address) && id == instances.get(address).id) {
+            instances.get(address).heartBeat();
+        } else {
+            addInstance(address, id);
+        }
     }
 
     synchronized private LXCInstance addInstance(InetAddress address, int id) {
-	// try to merge with existing:
-	for (LXCInstance inst : instances.values()) {
-	    if (inst.id == id) {
-		inst.addAddress(address);
-		instances.put(address, inst);
-		return inst;
-	    }
-	}
-	// create new:
-	LXCInstance newremote = new LXCInstance(address, id);
-	// check for override:
-	if (instances.containsKey(address)) {
-	    // delete first
-	    System.out.println("Overriding old instance at " + address + " " + id);
-	    removeAddress(address);
-	}
-	instances.put(address, newremote);
-	System.out.println("New Instance at " + address + " id: " + id);
-	// Send a file list to this new instance
-	listener.instanceAdded(newremote);
-	return newremote;
+        // try to merge with existing:
+        for (LXCInstance inst : instances.values()) {
+            if (inst.id == id) {
+                inst.addAddress(address);
+                instances.put(address, inst);
+                return inst;
+            }
+        }
+        // create new:
+        LXCInstance newremote = new LXCInstance(address, id);
+        // check for override:
+        if (instances.containsKey(address)) {
+            // delete first
+            System.out.println("Overriding old instance at " + address + " " + id);
+            removeAddress(address);
+        }
+        instances.put(address, newremote);
+        System.out.println("New Instance at " + address + " id: " + id);
+        // Send a file list to this new instance
+        listener.instanceAdded(newremote);
+        return newremote;
     }
 
     /**
@@ -236,33 +241,33 @@ class InstanceManager {
      * @param adr the overridden address
      */
     private void removeAddress(InetAddress adr) {
-	LXCInstance instance = instances.get(adr);
-	int instCount = 0;
-	for (LXCInstance other : instances.values()) {
-	    if (other.equals(instance)) {
-		// Still present!
-		instCount++;
-	    }
-	}
-	if (instCount <= 1) {
-	    // the only known address was removed - kill it
-	    removeInstance(instance.id);
-	}
+        LXCInstance instance = instances.get(adr);
+        int instCount = 0;
+        for (LXCInstance other : instances.values()) {
+            if (other.equals(instance)) {
+                // Still present!
+                instCount++;
+            }
+        }
+        if (instCount <= 1) {
+            // the only known address was removed - kill it
+            removeInstance(instance.id);
+        }
     }
 
     /**
      * Removes the instance with the given id.
      */
     synchronized private void removeInstance(int id) {
-	System.out.println("Instance " + id + " removed");
-	Iterator<LXCInstance> iter = instances.values().iterator();
-	while (iter.hasNext()) {
-	    LXCInstance inst = iter.next();
-	    if (inst.id == id) {
-		iter.remove();
-		listener.instanceRemoved(inst);
-		break;
-	    }
-	}
+        System.out.println("Instance " + id + " removed");
+        Iterator<LXCInstance> iter = instances.values().iterator();
+        while (iter.hasNext()) {
+            LXCInstance inst = iter.next();
+            if (inst.id == id) {
+                iter.remove();
+                listener.instanceRemoved(inst);
+                break;
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -67,24 +67,24 @@ public class LXCInstance {
      * @param id the unique id, as transfered by the instance itself
      */
     LXCInstance(final InetAddress initialAddress, final int id) {
-	this.id = id;
-	addresses.add(initialAddress);
-	heartbeatTime = System.currentTimeMillis();
-	isLocal = false;
-	// set a basic name and start a lookup
-	name = String.valueOf(id);
-	lookupName(initialAddress);
+        this.id = id;
+        addresses.add(initialAddress);
+        heartbeatTime = System.currentTimeMillis();
+        isLocal = false;
+        // set a basic name and start a lookup
+        name = String.valueOf(id);
+        lookupName(initialAddress);
     }
 
     /**
      * Creates a local LXCInstance.
      */
     private LXCInstance() {
-	Random r = new Random();
-	r.setSeed(System.currentTimeMillis());
-	this.id = r.nextInt();
-	name = "localhost";
-	isLocal = true;
+        Random r = new Random();
+        r.setSeed(System.currentTimeMillis());
+        this.id = r.nextInt();
+        name = "localhost";
+        isLocal = true;
     }
 
     /**
@@ -93,11 +93,11 @@ public class LXCInstance {
      * @return an address of this LXCInstance
      */
     InetAddress getDownloadAddress() {
-	/*
-	 * It may be a GoodIdea(tm) to add some code here that picks the best address, not just the first.
-	 * Example: If a remote instance is reachable by WLAN and LAN, you want the download to happen over LAN.
-	 */
-	return addresses.get(0);
+        /*
+         * It may be a GoodIdea(tm) to add some code here that picks the best address, not just the first.
+         * Example: If a remote instance is reachable by WLAN and LAN, you want the download to happen over LAN.
+         */
+        return addresses.get(0);
     }
 
     /**
@@ -106,9 +106,9 @@ public class LXCInstance {
      * @param address the new address
      */
     void addAddress(InetAddress address) {
-	if (!addresses.contains(address)) {
-	    addresses.add(address);
-	}
+        if (!addresses.contains(address)) {
+            addresses.add(address);
+        }
     }
 
     /**
@@ -117,7 +117,7 @@ public class LXCInstance {
      * @return true, if local
      */
     public boolean isLocal() {
-	return isLocal;
+        return isLocal;
     }
 
     /**
@@ -126,35 +126,35 @@ public class LXCInstance {
      * @return the time of the last heartbeat
      */
     long getHeartbeatTime() {
-	return heartbeatTime;
+        return heartbeatTime;
     }
 
     /**
      * Call this to indicate a heartbeat was received.
      */
     void heartBeat() {
-	heartbeatTime = System.currentTimeMillis();
+        heartbeatTime = System.currentTimeMillis();
     }
 
     @Override
     public String toString() {
-	return id + " " + name;
+        return id + " " + name;
     }
 
     @Override
     public int hashCode() {
-	int hash = 3;
-	hash = 37 * hash + this.id;
-	return hash;
+        int hash = 3;
+        hash = 37 * hash + this.id;
+        return hash;
     }
 
     @Override
     public boolean equals(Object o) {
-	if (o instanceof LXCInstance) {
-	    LXCInstance i = (LXCInstance) o;
-	    return i.id == this.id;
-	}
-	return false;
+        if (o instanceof LXCInstance) {
+            LXCInstance i = (LXCInstance) o;
+            return i.id == this.id;
+        }
+        return false;
     }
 
     /**
@@ -163,7 +163,7 @@ public class LXCInstance {
      * @return the name
      */
     public String getName() {
-	return name;
+        return name;
     }
 
     /**
@@ -171,14 +171,14 @@ public class LXCInstance {
      * Performs a asynchronous lookup in a seperate thread.
      */
     private void lookupName(final InetAddress initialAddress) {
-	Thread lookupThread = new Thread(new Runnable() {
+        Thread lookupThread = new Thread(new Runnable() {
 
-	    @Override
-	    public void run() {
-		name = initialAddress.getHostName();
-	    }
-	}, "lxc_helper_lookup" + this.id);
-	lookupThread.setDaemon(true);
-	lookupThread.start();
+            @Override
+            public void run() {
+                name = initialAddress.getHostName();
+            }
+        }, "lxc_helper_lookup" + this.id);
+        lookupThread.setDaemon(true);
+        lookupThread.start();
     }
 }
