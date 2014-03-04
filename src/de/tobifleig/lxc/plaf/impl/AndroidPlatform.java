@@ -164,14 +164,18 @@ public class AndroidPlatform extends ListActivity {
                 return guiListener == null ? 0 : (files.getLocalList().size() + files.getRemoteList().size()) + 2;
             }
 
-            @Override
-            public boolean isEnabled(int position) {
-                return true;
-            }
+			@Override
+			public boolean isEnabled(int position) {
+				// cannot click on category headers
+				if (position == 0 || position == files.getLocalList().size() + 1) {
+					return false;
+				}
+				return true;
+			}
 
             @Override
             public boolean areAllItemsEnabled() {
-                return true;
+                return false;
             }
         });
 
