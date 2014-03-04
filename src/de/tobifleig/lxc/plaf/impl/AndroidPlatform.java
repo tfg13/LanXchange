@@ -214,8 +214,7 @@ public class AndroidPlatform extends ListActivity {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                AndroidPlatform.this.onLongListItemClick(null, arg1, arg2, arg3);
-                return true;
+                return AndroidPlatform.this.onLongListItemClick(null, arg1, arg2, arg3);
             }
         });
 
@@ -427,13 +426,23 @@ public class AndroidPlatform extends ListActivity {
         }
     }
 
-    public void onLongListItemClick(ListView l, View v, int position, long id) {
-        // only clicks to first list for now
+    public boolean onLongListItemClick(ListView l, View v, int position, long id) {
+        // clicks for first list
         if (position != 0 && position <= files.getLocalList().size()) {
             final LXCFile file = files.getLocalList().get(position - 1);
             guiListener.removeFile(file);
             updateGui();
+            return true;
+        } else if (position >= files.getLocalList().size() + 2) {
+            // clicks for second list, only valid for downloaded files
+            final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
+            if (file.isAvailable()) {
+                guiListener.resetFile(file);
+                updateGui();
+                return true;
+            }
         }
+        return false;
     }
 
     /**
