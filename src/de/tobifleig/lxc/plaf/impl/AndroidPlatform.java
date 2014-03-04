@@ -127,7 +127,7 @@ public class AndroidPlatform extends ListActivity {
                 }
                 // element own files?
                 if (n <= files.getLocalList().size()) {
-                    return createRemoteListItem(files.getLocalList().get(n - 1), group);
+                    return createLocalListItem(files.getLocalList().get(n - 1), group);
                 }
                 // second header
                 if (n == files.getLocalList().size() + 1) {
@@ -194,6 +194,24 @@ public class AndroidPlatform extends ListActivity {
                 updateGui();
             }
         }, quickShare);
+    }
+
+    private View createLocalListItem(LXCFile file, ViewGroup group) {
+        View item = infl.inflate(R.layout.file_item, group, false);
+        ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
+        ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
+        // set image
+        if (file.getType() == LXCFile.TYPE_FILE) {
+            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
+        } else if (file.getType() == LXCFile.TYPE_FOLDER) {
+            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.folder);
+        } else { // multi
+            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.multifile);
+        }
+        // Status text is different for own files
+        TextView statusText = (TextView) item.findViewById(R.id.TextView01);
+        statusText.setText(R.string.ui_holdtoremove);
+        return item;
     }
 
     private View createRemoteListItem(LXCFile file, ViewGroup group) {

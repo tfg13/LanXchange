@@ -16,5 +16,6 @@
     <string name="error_cantopen_title">Unknown filetype</string>
     <string name="error_cantopen_text">No app can open this file.\n(it was downloaded, though)</string>
     <string name="error_cantopen_ok">OK</string>
+    <string name="ui_holdtoremove">Hold to remove</string>
 
 </resources>
