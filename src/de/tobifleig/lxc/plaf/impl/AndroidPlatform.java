@@ -31,11 +31,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -288,21 +286,25 @@ public class AndroidPlatform extends ListActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int item) {
                     Intent pickIntent = new Intent();
-                    pickIntent.setAction(Intent.ACTION_PICK);
+                    pickIntent.setAction(Intent.ACTION_GET_CONTENT);
                     switch (item) {
                     case 0: // Video
-                        pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                        pickIntent.setType("video/*");
+                        //pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
                         break;
                     case 1: // Audio
-                        pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                        //pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                        pickIntent.setType("audio/*");
                         startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
                         break;
                     case 2: // Images
-                        pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        pickIntent.setType("image/*");
+                        //pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
                         break;
                     case 3: // Other files
+                        pickIntent.setType("file/*");
                         startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
                         break;
                     }
@@ -323,19 +325,8 @@ public class AndroidPlatform extends ListActivity {
             // User pressed "back"/"cancel" etc
             return;
         }
-        switch (requestCode) {
-        case RETURNCODE_MEDIAINTENT:
-            String[] proj = { MediaStore.Images.Media.DATA };
-            Cursor cursor = managedQuery(data.getData(), proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            offerFile(cursor.getString(column_index));
-            break;
-        case RETURNCODE_FILEINTENT:
-            String filePath = data.getData().toString();
-            offerFile(filePath.substring(filePath.indexOf('/')));
-            break;
-        }
+        String filePath = data.getData().getPath();
+        offerFile(filePath.substring(filePath.indexOf('/')));
     }
 
     /**
