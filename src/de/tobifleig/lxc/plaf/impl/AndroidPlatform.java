@@ -197,12 +197,14 @@ public class AndroidPlatform extends ListActivity {
         ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
         ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
         // set image
-        if (file.getType() == LXCFile.TYPE_FILE) {
+        if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FILE) {
             ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
-        } else if (file.getType() == LXCFile.TYPE_FOLDER) {
+        } else if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FOLDER) {
             ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.folder);
-        } else { // multi
+        } else if (!file.isAvailable()) { // multi
             ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.multifile);
+        } else {
+            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.done));
         }
         // Show status
         ProgressBar progressBar = (ProgressBar) item.findViewById(R.id.progressBar1);
@@ -338,6 +340,8 @@ public class AndroidPlatform extends ListActivity {
         if (position >= files.getLocalList().size() + 2) {
             final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
             if (!file.isLocal() && !file.isAvailable()) {
+                file.setLocked(true);
+                updateGui();
                 Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -371,7 +375,6 @@ public class AndroidPlatform extends ListActivity {
             @Override
             public void run() {
                 if (observer != null) {
-                    System.out.println("UPDATE");
                     files.listChanged();
                     observer.onChanged();
                 }
