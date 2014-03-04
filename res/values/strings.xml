@@ -13,5 +13,8 @@
     <string name="ui_connecting">Connecting</string>
     <string name="ui_downloading">Downloading: </string>
     <string name="ui_available">Tap to open</string>
+    <string name="error_cantopen_title">Unknown filetype</string>
+    <string name="error_cantopen_text">No app can open this file.\n(it was downloaded, though)</string>
+    <string name="error_cantopen_ok">OK</string>
 
 </resources>

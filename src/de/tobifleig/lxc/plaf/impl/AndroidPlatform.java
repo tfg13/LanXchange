@@ -28,9 +28,12 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.DataSetObserver;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.Gravity;
@@ -39,6 +42,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -351,6 +355,31 @@ public class AndroidPlatform extends ListActivity {
                 t.setName("lxc_helper_initdl_" + file.getShownName());
                 t.setDaemon(true);
                 t.start();
+            } else if (!file.isLocal() && file.isAvailable()) {
+                // open file
+                Intent openIntent = new Intent();
+                openIntent.setAction(Intent.ACTION_VIEW);
+                Uri fileUri = Uri.fromFile(file.getFiles().get(0));
+                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(file.getFiles().get(0).getAbsolutePath()));
+                openIntent.setDataAndType(fileUri, mimeType);
+                System.out.println("Starting intent for uri " + fileUri + " mimeType is " + mimeType);
+                // check if intent can be processed
+                List<ResolveInfo> list = getPackageManager().queryIntentActivities(openIntent, 0);
+                if (list.isEmpty()) {
+                    // cannot be opened
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.error_cantopen_title);
+                    builder.setMessage(R.string.error_cantopen_text);
+                    builder.setPositiveButton(R.string.error_cantopen_ok, new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do noting
+                        }
+                    });
+                    builder.show();
+                } else {
+                    startActivity(openIntent);
+                }
             }
         }
     }
