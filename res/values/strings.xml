@@ -17,5 +17,8 @@
     <string name="error_cantopen_text">No app can open this file.\n(it was downloaded, though)</string>
     <string name="error_cantopen_ok">OK</string>
     <string name="ui_holdtoremove">Hold to remove</string>
+    <string name="error_cantoffer_title">Unknown data</string>
+    <string name="error_cantoffer_text">Sorry, you can only share local files with LanXchange.</string>
+    <string name="error_cantoffer_ok">OK</string>
 
 </resources>

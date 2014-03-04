@@ -72,6 +72,39 @@ public class AndroidPlatform extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check intent first
+        String quickShare = null;
+        Intent launchIntent = getIntent();
+        if (launchIntent.getAction() != null) {
+            if  (launchIntent.getAction().equals(Intent.ACTION_SEND) || launchIntent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
+                Object data = launchIntent.getExtras().get(Intent.EXTRA_STREAM);
+                if (data != null && (data.toString().startsWith("file://") || data.toString().startsWith("content:"))) {
+                    // Make file available asap:
+                    String uri = launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString();
+                    if (uri.startsWith("file://")) {
+                        quickShare = launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString().substring(8); // remove "file://"
+                    } else if (uri.startsWith("content:")) {
+                        quickShare = Uri.parse(uri).getPath();
+                    }
+                    System.out.println("Quicksharepath:" + quickShare);
+                } else {
+                    // cannot compute input, display error
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.error_cantoffer_title);
+                    builder.setMessage(R.string.error_cantoffer_text);
+                    builder.setPositiveButton(R.string.error_cantoffer_ok, new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do noting
+                        }
+                    });
+                    builder.show();
+                    // todo: quit if not already running
+                }
+            }
+        }
+
         TextView emptyText = new TextView(this);
         emptyText.setText(R.string.nofiles);
         emptyText.setGravity(Gravity.CENTER);
@@ -174,16 +207,6 @@ public class AndroidPlatform extends ListActivity {
                 return false;
             }
         });
-
-        // Check intent
-        String quickShare = null;
-        Intent launchIntent = getIntent();
-        if (launchIntent.getAction() != null && launchIntent.getAction().equals(Intent.ACTION_SEND)) {
-            // Make file available asap:
-            quickShare = launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString().substring(8); // remove
-            // "file://"
-            System.out.println("Quicksharepath:" + quickShare);
-        }
 
         AndroidSingleton.onCreateMainActivity(this, new GuiInterfaceBridge() {
 
