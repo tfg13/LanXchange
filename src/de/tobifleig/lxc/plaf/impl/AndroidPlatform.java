@@ -41,6 +41,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -110,6 +111,7 @@ public class AndroidPlatform extends ListActivity {
         emptyText.setGravity(Gravity.CENTER);
 
         getListView().setEmptyView(emptyText);
+        getListView().setLongClickable(true);
         // getListView().setPadding(20, 0, 20, 0);
 
         ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
@@ -205,6 +207,15 @@ public class AndroidPlatform extends ListActivity {
             @Override
             public boolean areAllItemsEnabled() {
                 return false;
+            }
+        });
+
+        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+                AndroidPlatform.this.onLongListItemClick(null, arg1, arg2, arg3);
+                return true;
             }
         });
 
@@ -413,6 +424,15 @@ public class AndroidPlatform extends ListActivity {
                     startActivity(openIntent);
                 }
             }
+        }
+    }
+
+    public void onLongListItemClick(ListView l, View v, int position, long id) {
+        // only clicks to first list for now
+        if (position != 0 && position <= files.getLocalList().size()) {
+            final LXCFile file = files.getLocalList().get(position - 1);
+            guiListener.removeFile(file);
+            updateGui();
         }
     }
 
