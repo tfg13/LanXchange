@@ -48,6 +48,7 @@ import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
+import de.tobifleig.lxc.plaf.impl.android.FileListWrapper;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
 
 /**
@@ -63,7 +64,7 @@ public class AndroidPlatform extends ListActivity {
     private static final int RETURNCODE_MEDIAINTENT = 12346;
     private LayoutInflater infl;
     private GuiListener guiListener;
-    private List<LXCFile> files;
+    private FileListWrapper files;
     private DataSetObserver observer;
 
     @Override
@@ -74,6 +75,7 @@ public class AndroidPlatform extends ListActivity {
         emptyText.setGravity(Gravity.CENTER);
 
         getListView().setEmptyView(emptyText);
+        getListView().setPadding(20, 0, 20, 0);
 
         ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
         root.addView(emptyText);
@@ -96,7 +98,7 @@ public class AndroidPlatform extends ListActivity {
 
             @Override
             public boolean isEmpty() {
-                return guiListener == null || files.isEmpty();
+                return guiListener == null || (files.getLocalList().isEmpty() && files.getRemoteList().isEmpty());
             }
 
             @Override
@@ -112,12 +114,30 @@ public class AndroidPlatform extends ListActivity {
             }
 
             @Override
-            public View getView(int arg0, View arg1, ViewGroup arg2) {
-                View item = infl.inflate(R.layout.file_item, arg2, false);
-
-                ((TextView) item.findViewById(R.id.filename)).setText(files.get(arg0).getShownName());
-                ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(files.get(arg0).getFileSize()));
-
+            public View getView(int n, View view, ViewGroup group) {
+            	// insert header
+            	if (n == 0) {
+            		TextView yourfiles = (TextView) infl.inflate(R.layout.listheader, group, false);
+            		yourfiles.setText(R.string.ui_yourfiles);
+            		return yourfiles;
+            	}
+            	// element own files?
+            	if (n <= files.getLocalList().size()) {
+            		View item = infl.inflate(R.layout.file_item, group, false);
+            		((TextView) item.findViewById(R.id.filename)).setText(files.getLocalList().get(n - 1).getShownName());
+                    ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(files.getLocalList().get(n - 1).getFileSize()));
+                    return item;
+            	}
+            	// second header
+            	if (n == files.getLocalList().size() + 1) {
+            		TextView sharedwithyou = (TextView) infl.inflate(R.layout.listheader, group, false);
+            		sharedwithyou.setText(R.string.ui_sharedwithyou);
+            		return sharedwithyou;
+            	}
+            	// network files
+                View item = infl.inflate(R.layout.file_item, group, false);
+                ((TextView) item.findViewById(R.id.filename)).setText(files.getRemoteList().get(n - (2 + files.getLocalList().size())).getShownName());
+                ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(files.getRemoteList().get(n - (2 + files.getLocalList().size())).getFileSize()));
                 return item;
             }
 
@@ -141,7 +161,7 @@ public class AndroidPlatform extends ListActivity {
 
             @Override
             public int getCount() {
-                return guiListener == null ? 0 : files.size();
+                return guiListener == null ? 0 : (files.getLocalList().size() + files.getRemoteList().size()) + 2;
             }
 
             @Override
@@ -282,18 +302,18 @@ public class AndroidPlatform extends ListActivity {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        final LXCFile file = files.get(position);
-        if (!file.isLocal() && !file.isAvailable()) {
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    guiListener.downloadFile(file, false);
-                }
-            });
-            t.setName("lxc_helper_initdl_" + file.getShownName());
-            t.setDaemon(true);
-            t.start();
-        }
+//        final LXCFile file = files.get(position);
+//        if (!file.isLocal() && !file.isAvailable()) {
+//            Thread t = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    guiListener.downloadFile(file, false);
+//                }
+//            });
+//            t.setName("lxc_helper_initdl_" + file.getShownName());
+//            t.setDaemon(true);
+//            t.start();
+//        }
     }
 
     /**
@@ -305,12 +325,13 @@ public class AndroidPlatform extends ListActivity {
      *            out future GuiListener
      */
     public void setGuiListener(GuiListener guiListener) {
-        files = guiListener.getFileList();
+        files = new FileListWrapper(guiListener.getFileList());
         this.guiListener = guiListener;
         updateGui();
     }
 
     private void updateGui() {
+    	files.listChanged();
         getListView().post(new Runnable() {
 
             @Override
