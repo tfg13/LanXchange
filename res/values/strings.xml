@@ -9,5 +9,9 @@
     <string name="menu_add">Offer file(s)</string>
     <string name="ui_yourfiles">Your files</string>
     <string name="ui_sharedwithyou">Shared with you</string>
+    <string name="ui_taptoload">Tap to download</string>
+    <string name="ui_connecting">Connecting</string>
+    <string name="ui_downloading">Downloading: </string>
+    <string name="ui_available">Tap to open</string>
 
 </resources>
