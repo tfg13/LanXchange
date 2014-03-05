@@ -31,9 +31,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -75,19 +77,14 @@ public class AndroidPlatform extends ListActivity {
         super.onCreate(savedInstanceState);
 
         // Check intent first
-        String quickShare = null;
+        Uri quickShare = null;
         Intent launchIntent = getIntent();
         if (launchIntent.getAction() != null) {
             if  (launchIntent.getAction().equals(Intent.ACTION_SEND) || launchIntent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
                 Object data = launchIntent.getExtras().get(Intent.EXTRA_STREAM);
                 if (data != null && (data.toString().startsWith("file://") || data.toString().startsWith("content:"))) {
                     // Make file available asap:
-                    String uri = launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString();
-                    if (uri.startsWith("file://")) {
-                        quickShare = launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString().substring(8); // remove "file://"
-                    } else if (uri.startsWith("content:")) {
-                        quickShare = Uri.parse(uri).getPath();
-                    }
+                    quickShare = Uri.parse(launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString());
                     System.out.println("Quicksharepath:" + quickShare);
                 } else {
                     // cannot compute input, display error
@@ -358,8 +355,7 @@ public class AndroidPlatform extends ListActivity {
             // User pressed "back"/"cancel" etc
             return;
         }
-        String filePath = data.getData().getPath();
-        offerFile(filePath.substring(filePath.indexOf('/')));
+        offerFile(data.getData());
     }
 
     /**
@@ -368,16 +364,69 @@ public class AndroidPlatform extends ListActivity {
      * @param path
      *            the absolute path
      */
-    private void offerFile(String path) {
-        File file = new File(path);
-        if (!file.exists()) {
-            System.err.println("file does not exist!!! + file: " + path);
+    private void offerFile(Uri uri) {
+        String uriString = uri.toString();
+        System.out.println("Uri string is " + uriString);
+        // Files selected with KitKats new document selector no longer
+        // allow access as file. One can find out size + get a inputStream, which should be enough.
+        // Todo: Add in future version of LXC.
+        // For now, LXC cannot handle this file.
+        if (uriString.contains("content://com.android.providers.media.documents")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.error_cantofferkitkat_title);
+            builder.setMessage(R.string.error_cantofferkitkat_text);
+            builder.setPositiveButton(R.string.error_cantofferkitkat_ok, new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // do noting
+                }
+            });
+            builder.show();
+        }
+
+
+        File file = null;
+        if (uriString.startsWith("file://")) {
+            // seems to be useable right away
+            file = new File(uriString.substring(8)); // just strip "file://"
+        } else if (uriString.startsWith("content:")) {
+            // let android resolve this
+            String resolvedPath = getRealPathFromURI(getBaseContext(), uri);
+            if (resolvedPath != null) {
+                file = new File(resolvedPath);
+            }
+        }
+        // one last trick
+        if (file == null || !file.exists()) {
+            file = new File(uri.getPath());
+            // filePath.substring(filePath.indexOf('/'))
+        }
+        // we tried everything
+        if (file == null || !file.exists()) {
+            System.err.println("invalid input:" + uriString);
             return;
         }
         List<File> list = new ArrayList<File>();
         list.add(file);
         LXCFile lxcfile = new LXCFile(list, file.getName());
         guiListener.offerFile(lxcfile);
+    }
+
+    private String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        String result = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            result = cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return result;
     }
 
     @Override
@@ -478,7 +527,7 @@ public class AndroidPlatform extends ListActivity {
      * 
      * @param path
      */
-    public void quickShare(String path) {
-        offerFile(path);
+    public void quickShare(Uri uri) {
+        offerFile(uri);
     }
 }

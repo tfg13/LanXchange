@@ -20,11 +20,11 @@
  */
 package de.tobifleig.lxc.plaf.impl.android;
 
-import de.tobifleig.lxc.data.FileManager;
-import de.tobifleig.lxc.plaf.GuiListener;
-import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import de.tobifleig.lxc.plaf.GuiListener;
+import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
 
 public class AndroidSingleton {
 
@@ -40,7 +40,7 @@ public class AndroidSingleton {
         }
     };
     private static GuiInterfaceBridge currentBridge = genericBridge;
-    private static String quickShare;
+    private static Uri quickShare;
 
     private AndroidSingleton() {
     }
@@ -56,7 +56,7 @@ public class AndroidSingleton {
      * Call this when the main activity is created. Handles initialization in a
      * way that it is only run if needed.
      */
-    public static void onCreateMainActivity(AndroidPlatform activity, GuiInterfaceBridge bridge, String quickShare) {
+    public static void onCreateMainActivity(AndroidPlatform activity, GuiInterfaceBridge bridge, Uri quickShare) {
         AndroidSingleton.quickShare = quickShare;
         AndroidSingleton.activity = activity;
         AndroidSingleton.currentBridge = bridge;

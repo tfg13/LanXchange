@@ -4,7 +4,7 @@
     <string name="hello_world">Android-Version coming soon!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_lxc">LanXchange</string>
-    <string name="nofiles">No files found in your home network. \nTap+ to start sharing</string>
+    <string name="nofiles">No files found in your home network. \nTap + to start sharing</string>
     <string name="menu_stop">Stop LXC</string>
     <string name="menu_add">Offer file(s)</string>
     <string name="ui_yourfiles">Your files</string>
@@ -20,5 +20,8 @@
     <string name="error_cantoffer_title">Unknown data</string>
     <string name="error_cantoffer_text">Sorry, you can only share local files with LanXchange.</string>
     <string name="error_cantoffer_ok">OK</string>
+    <string name="error_cantofferkitkat_title">Unknown data</string>
+    <string name="error_cantofferkitkat_text">You used a new method to select this file which LanXchange can\'t handle (yet). Try selecting the content within another app and use \"Send\" and then select LanXchange).</string>
+    <string name="error_cantofferkitkat_ok">OK</string>
 
 </resources>
