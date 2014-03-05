@@ -358,6 +358,32 @@ public class AndroidPlatform extends ListActivity {
         offerFile(data.getData());
     }
 
+    @Override
+    protected void onNewIntent (Intent intent) {
+        if (intent.getAction() != null) {
+            if  (intent.getAction().equals(Intent.ACTION_SEND) || intent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
+                Object data = intent.getExtras().get(Intent.EXTRA_STREAM);
+                if (data != null && (data.toString().startsWith("file://") || data.toString().startsWith("content:"))) {
+                    // Make file available asap:
+                    offerFile(Uri.parse(intent.getExtras().get(Intent.EXTRA_STREAM).toString()));
+                } else {
+                    // cannot compute input, display error
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.error_cantoffer_title);
+                    builder.setMessage(R.string.error_cantoffer_text);
+                    builder.setPositiveButton(R.string.error_cantoffer_ok, new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do noting
+                        }
+                    });
+                    builder.show();
+                    // todo: quit if not already running
+                }
+            }
+        }
+    }
+
     /**
      * Offers a file.
      * 
