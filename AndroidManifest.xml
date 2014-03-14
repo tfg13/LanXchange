@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".plaf.impl.AndroidPlatform"
-            android:label="@string/title_activity_lxc" android:launchMode="singleInstance">
+            android:label="@string/title_activity_lxc" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
