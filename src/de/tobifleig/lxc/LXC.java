@@ -76,7 +76,7 @@ public class LXC {
      * Create a new instance of LXC with the given command-line options.
      * Should be called by the main-method only.
      *
-     * @param the platform LXC is running on
+     * @param platform the platform LXC is running on
      * @param args command-line args
      */
     public LXC(Platform platform, final String[] args) {
