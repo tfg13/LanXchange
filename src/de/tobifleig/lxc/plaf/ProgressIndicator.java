@@ -18,20 +18,20 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.net.io;
+package de.tobifleig.lxc.plaf;
 
 /**
- * Used to Listen for Transceiver-Events.
+ * Represents a GUI Element that displays transfer progress.
  *
- * @author Tobias Fleig <tobifleig googlemail com>
+ * @author Tobias Fleig <tobifleig@googlemail.com>
  */
-public interface TransceiverListener {
-
+public interface ProgressIndicator {
     /**
-     * Called by Transceiver upon completion of the download/upload.
-     *
-     * @param success true, if succuessful, false if aborted/interrupted
-     * @param removeFile if true, the error was severe and the file should no longer be offered (only used by seeders)
+     * This method is called by running transfers to indicate progess.
+     * This method can be called very frequently.
+     * 
+     * @param percentage progress in percent
      */
-    public void finished(boolean success, boolean removeFile);
+    public void update(int percentage);
+
 }

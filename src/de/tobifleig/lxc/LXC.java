@@ -116,7 +116,7 @@ public class LXC {
             }
 
             @Override
-            public void triggerGui() {
+            public void refreshGui() {
                 gui.update();
             }
 

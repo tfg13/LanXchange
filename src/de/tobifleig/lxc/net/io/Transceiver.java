@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.net.io;
 
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.plaf.ProgressIndicator;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -78,6 +79,10 @@ public abstract class Transceiver implements Runnable {
      * Used to trigger gui-updates on progress.
      */
     protected TransceiverListener listener;
+    /**
+     * Used to display information about transfer progress to the user.
+     */
+    private ProgressIndicator progressIndicator;
 
     /**
      * Sets the Listener.
@@ -90,12 +95,12 @@ public abstract class Transceiver implements Runnable {
     }
 
     /**
-     * Returns the current progress of this filetransfer.
+     * Returns the current progress of this filetransfer in percent
      *
-     * @return the current progress of this filetransfer.
+     * @return the current progress of this filetransfer in percent
      */
-    public float getProgress() {
-        return (1.0f * transferedBytes / totalBytes);
+    public int getProgress() {
+        return (int) (100f * transferedBytes / totalBytes);
     }
 
     /**
@@ -108,6 +113,24 @@ public abstract class Transceiver implements Runnable {
         int avg = lastSpeeds[0] + lastSpeeds[1] + lastSpeeds[2] + lastSpeeds[3] + lastSpeeds[4];
         avg /= 5;
         return avg;
+    }
+
+    /**
+     * Sets the ProgressIndicator used to display progress of running transfers.
+     * Overwrites the old ProgressIndicator, if any.
+     * @param progressIndicator the new ProgressIndicator
+     */
+    public void setProgressIndicator(ProgressIndicator progressIndicator) {
+        this.progressIndicator = progressIndicator;
+    }
+
+    /**
+     * Called by the transfer routine to signal a progressing transfer.
+     */
+    protected void updateProgress() {
+        if (progressIndicator != null) {
+            progressIndicator.update(getProgress());
+        }
     }
 
     /**

@@ -33,6 +33,7 @@ import de.tobifleig.lxc.net.serv.ListServer;
 import de.tobifleig.lxc.net.serv.ListServerListener;
 import de.tobifleig.lxc.net.serv.PingServer;
 import de.tobifleig.lxc.net.serv.PingServerListener;
+import de.tobifleig.lxc.plaf.ProgressIndicator;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -121,11 +122,6 @@ public class NetworkManager {
                 final Seeder seed = new Seeder(outStream, inStream, file, transVersion);
                 TransceiverListener seedListener = new TransceiverListener() {
                     @Override
-                    public void progress() {
-                        NetworkManager.this.listener.triggerGui();
-                    }
-
-                    @Override
                     public void finished(boolean success, boolean removeFile) {
                         file.removeJob(jobs.get(seed));
                         if (removeFile) {
@@ -134,10 +130,17 @@ public class NetworkManager {
                             broadcastList();
                             NetworkManager.this.listener.uploadFailedFileMissing(file);
                         }
-                        NetworkManager.this.listener.triggerGui();
+                        NetworkManager.this.listener.refreshGui();
                     }
                 };
                 seed.setListener(seedListener);
+                seed.setProgressIndicator(new ProgressIndicator() {
+
+                    @Override
+                    public void update(int percentage) {
+                        NetworkManager.this.listener.refreshGui();
+                    }
+                });
 
                 LXCJob job = new LXCJob(seed, instances.getByAddress(address));
                 jobs.put(seed, job);
@@ -234,11 +237,6 @@ public class NetworkManager {
                 final Leecher leech = new Leecher(input, output, file, targetFolder, file.getLxcTransVersion());
                 TransceiverListener leechListener = new TransceiverListener() {
                     @Override
-                    public void progress() {
-                        listener.triggerGui();
-                    }
-
-                    @Override
                     public void finished(boolean success, boolean removeFile) {
                         file.setLocked(false);
                         if (success) {
@@ -249,10 +247,17 @@ public class NetworkManager {
                         if (removeFile) {
                             listener.downloadFailedFileMissing();
                         }
-                        listener.triggerGui();
+                        listener.refreshGui();
                     }
                 };
                 leech.setListener(leechListener);
+                leech.setProgressIndicator(new ProgressIndicator() {
+
+                    @Override
+                    public void update(int percentage) {
+                        listener.refreshGui();
+                    }
+                });
                 LXCJob job = new LXCJob(leech, file.getInstance());
                 jobs.put(leech, job);
                 file.addJob(job);

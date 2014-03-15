@@ -18,20 +18,33 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.net.io;
+package de.tobifleig.lxc.plaf.impl.android;
+
+import de.tobifleig.lxc.plaf.ProgressIndicator;
 
 /**
- * Used to Listen for Transceiver-Events.
+ * A ProgressIndicator, that keeps the GUI-Updates to a minimum.
  *
- * @author Tobias Fleig <tobifleig googlemail com>
+ * @author Tobias Fleig <tobifleig@googlemail.com>
  */
-public interface TransceiverListener {
+public abstract class FilterProgressIndicator implements ProgressIndicator {
 
     /**
-     * Called by Transceiver upon completion of the download/upload.
-     *
-     * @param success true, if succuessful, false if aborted/interrupted
-     * @param removeFile if true, the error was severe and the file should no longer be offered (only used by seeders)
+     * Holds the last progress value received via update().
      */
-    public void finished(boolean success, boolean removeFile);
+    protected int lastProgress = -1;
+
+
+    @Override
+    public void update(int percentage) {
+        if (lastProgress != percentage) {
+            lastProgress = percentage;
+            updateGui();
+        }
+    }
+
+    /**
+     * Must be implemented by subclasses, submits the new value to the GUI.
+     */
+    protected abstract void updateGui();
 }

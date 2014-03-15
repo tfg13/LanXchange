@@ -81,7 +81,7 @@ public class Seeder extends Transceiver {
                             int gotbytes;
                             while ((gotbytes = filein.read(buffer)) > 0) {
                                 transferedBytes += gotbytes;
-                                listener.progress();
+                                updateProgress();
                                 out.write(buffer, 0, gotbytes);
                                 out.flush();
                             }

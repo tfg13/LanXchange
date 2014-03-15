@@ -87,7 +87,7 @@ public class Leecher extends Transceiver {
                             fileout.write(buffer, 0, read);
                             size -= read;
                             transferedBytes += read;
-                            listener.progress();
+                            updateProgress();
                         }
                         fileout.flush();
                         fileout.close();

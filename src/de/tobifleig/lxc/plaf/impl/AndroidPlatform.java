@@ -51,9 +51,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.data.LXCJob;
 import de.tobifleig.lxc.plaf.GuiListener;
+import de.tobifleig.lxc.plaf.ProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
 import de.tobifleig.lxc.plaf.impl.android.FileListWrapper;
+import de.tobifleig.lxc.plaf.impl.android.FilterProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
 
 /**
@@ -71,6 +74,13 @@ public class AndroidPlatform extends ListActivity {
     private GuiListener guiListener;
     private FileListWrapper files;
     private DataSetObserver observer;
+    private final ProgressIndicator noopIndicator = new ProgressIndicator() {
+
+        @Override
+        public void update(int percentage) {
+            // do nothing
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -239,6 +249,10 @@ public class AndroidPlatform extends ListActivity {
         // Status text is different for own files
         TextView statusText = (TextView) item.findViewById(R.id.TextView01);
         statusText.setText(R.string.ui_holdtoremove);
+        // Override all default ProgressIndicators
+        for (LXCJob job : file.getJobs()) {
+            job.getTrans().setProgressIndicator(noopIndicator);
+        }
         return item;
     }
 
@@ -257,10 +271,10 @@ public class AndroidPlatform extends ListActivity {
             ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.done));
         }
         // Show status
-        ProgressBar progressBar = (ProgressBar) item.findViewById(R.id.progressBar1);
-        TextView statusText = (TextView) item.findViewById(R.id.TextView01);
+        final ProgressBar progressBar = (ProgressBar) item.findViewById(R.id.progressBar1);
+        final TextView statusText = (TextView) item.findViewById(R.id.TextView01);
         // download starting?
-        if (file.isLocked()) {
+        if (file.isLocked() && file.getJobs().size() == 0) {
             progressBar.setVisibility(View.VISIBLE);
             statusText.setText(R.string.ui_connecting);
         } else if (!file.isAvailable() && file.getJobs().size() == 1) {
@@ -269,7 +283,20 @@ public class AndroidPlatform extends ListActivity {
             progressBar.setIndeterminate(false);
             int progress = (int) (file.getJobs().get(0).getTrans().getProgress() * 100f);
             progressBar.setProgress(progress);
-            statusText.setText(getResources().getString(R.string.ui_downloading) + progress + "%");
+            statusText.setText(getResources().getString(R.string.ui_downloading)  + " " + progress + "%");
+            // override default ProgressIndicator
+            file.getJobs().get(0).getTrans().setProgressIndicator(new FilterProgressIndicator() {
+                @Override
+                protected void updateGui() {
+                    getListView().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressBar.setProgress(lastProgress);
+                            statusText.setText(getResources().getString(R.string.ui_downloading)  + " " + lastProgress + "%");
+                        }
+                    });
+                }
+            });
         } else if (file.isAvailable()) {
             // done
             statusText.setText(R.string.ui_available);

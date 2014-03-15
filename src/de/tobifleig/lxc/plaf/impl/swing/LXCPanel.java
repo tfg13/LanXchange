@@ -236,13 +236,13 @@ public class LXCPanel extends JPanel {
                         // progress bar
                         g2.drawRect((int) (this.getWidth() * 0.65), y + 30 + o * 20 + 5, (int) (this.getWidth() * 0.35) - 25, 10);
                         // progress in percent
-                        float progress = job.getTrans().getProgress();
-                        String sProg = ((int) (progress * 100)) + "%";
-                        if (progress < 0 || progress > 1) {
+                        int progress = job.getTrans().getProgress();
+                        String sProg = progress + "%";
+                        if (progress < 0 || progress > 100) {
                             sProg = "N/A";
                         } else {
                             // core of progress bar
-                            g2.fillRect((int) (this.getWidth() * 0.65) + 2, y + 30 + o * 20 + 7, (int) (((int) (this.getWidth() * 0.3) - 9) * progress), 7);
+                            g2.fillRect((int) (this.getWidth() * 0.65) + 2, y + 30 + o * 20 + 7, (int) (((int) (this.getWidth() * 0.3) - 9) * (progress / 100f)), 7);
                         }
                         renderCutString(sProg, (int) (this.getWidth() * 0.1), g2, (int) (this.getWidth() * 0.55), y + 30 + o * 20 + 14, mer2);
                         // speed:
@@ -611,10 +611,9 @@ public class LXCPanel extends JPanel {
     }
 
     /**
-     * Sets the file manager.
-     * Must be called before start().
+     * Sets the file list.
      *
-     * @param fileManager
+     * @param fileList fileList
      */
     public void setFileList(List<LXCFile> fileList) {
         this.allFiles = fileList;

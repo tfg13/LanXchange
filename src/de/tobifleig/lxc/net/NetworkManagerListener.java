@@ -41,7 +41,7 @@ public interface NetworkManagerListener {
     /**
      * Files in the Lists were changed, gui-update required.
      */
-    public void triggerGui();
+    public void refreshGui();
 
     /**
      * Gets called when the networksystem removes an LXCInstance.
