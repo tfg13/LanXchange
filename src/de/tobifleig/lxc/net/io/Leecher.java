@@ -38,7 +38,7 @@ public class Leecher extends Transceiver {
     /**
      * The folder to save the loaded files into.
      */
-    private File targetFolder;
+    private final File targetFolder;
 
     @Override
     public void run() {
@@ -47,9 +47,6 @@ public class Leecher extends Transceiver {
         long startTime = System.currentTimeMillis();
 
         try {
-
-            // Create list for base-files (will likely go away in future releases)
-            file.createFiles();
 
             while (true) {
                 byte cmd = in.readByte();
@@ -68,10 +65,6 @@ public class Leecher extends Transceiver {
                     // create file / parent folders
                     File target = new File(targetFolder, path);
                     target.getParentFile().mkdirs();
-                    // remember base-files (deprecated)
-                    if (cmd == 'F') {
-                        file.getFiles().add(target);
-                    }
                     // transfer file content (real data)
                     BufferedOutputStream fileout;
                     byte[] buffer = new byte[4096];
@@ -104,10 +97,6 @@ public class Leecher extends Transceiver {
                     // create folder
                     File target = new File(targetFolder, path);
                     target.mkdirs();
-                    // add to base list, deprecated
-                    if (cmd == 'D') {
-                        file.getFiles().add(target);
-                    }
                 } else if (cmd == 'e') {
                     // done
                     System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");

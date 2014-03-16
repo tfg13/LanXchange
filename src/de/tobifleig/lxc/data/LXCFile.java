@@ -20,18 +20,21 @@
  */
 package de.tobifleig.lxc.data;
 
+import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.net.LXCInstance;
 import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Represents a "file" offered by a certain LXCInstance.
  * A LXCFile can represent a single file, a single folder or multiple files and folders mixed.
+ *
+ * The name "LXCFile" does not describe the purpose of this class very well, it is kepts to avoid breaking compatibility with older clients.
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
@@ -51,10 +54,6 @@ public class LXCFile implements Serializable {
      */
     public static final int TYPE_MULTI = 3;
     /**
-     * Path to the parent-folder of all selected files.
-     */
-    private transient String sourceFile;
-    /**
      * If true, the file has been downloaded successfully.
      * Only valid for remote files.
      */
@@ -72,16 +71,17 @@ public class LXCFile implements Serializable {
     /**
      * The list of files that the user want to share.
      * Including directorys, but not the files within them.
+     * Can be shared with other classes, because it is unmodifiable.
      */
-    private transient List<File> files;
+    private final transient List<VirtualFile> files;
     /**
      * The jobs currently assigned to this file.
      */
-    private transient List<LXCJob> jobs;
+    private final transient List<LXCJob> jobs = new ArrayList<LXCJob>();
     /**
      * The textual representation that is displayed.
      */
-    private String shownName;
+    private final String shownName;
     /**
      * The total size in bytes.
      * Is calculated by the constructor.
@@ -93,12 +93,7 @@ public class LXCFile implements Serializable {
      * The type of this file.
      * One of TYPE_FILE, TYPE_FOLDER or TYPE_MULTI
      */
-    private int type;
-    /**
-     * A list containing ALL files that will be transfered on downloads.
-     * This list includes files in sub-directorys.
-     */
-    private LinkedList<String> content;
+    private final int type;
     /**
      * Transport protocol version number.
      */
@@ -109,19 +104,20 @@ public class LXCFile implements Serializable {
     private final transient int lxcTransVersionMax = 1;
 
     /**
-     * Creates a new LXCFile with the given parameters.
-     * Recursively scans all directorys in "files" and calculates the total size.
-     * May take a long time.
+     * The new constructor, creates a LXCFile with the given parameters.
+     * May take a long time to calculate the size if many files are involved.
      *
-     * @param files a List containing all files and folders the user selected to share
+     * @param fileList a list of VirtualFiles
      * @param shownN the name that is shown
      */
-    public LXCFile(List<File> files, String shownN) {
-        this.files = files;
+    public LXCFile(List<VirtualFile> fileList, String shownN) {
+        // create an unmodifiable non-backed copy:
+        this.files = Collections.unmodifiableList(new ArrayList<VirtualFile>(fileList));
         // Create name
-        shownName = shownN;
-        if (files.size() > 1) {
-            shownName = shownName.concat(" + " + (files.size() - 1));
+        if (fileList.size() > 1) {
+            shownName = shownN.concat(" + " + (fileList.size() - 1));
+        } else {
+            shownName = shownN;
         }
 
         // set type
@@ -133,28 +129,13 @@ public class LXCFile implements Serializable {
             type = LXCFile.TYPE_FILE;
         }
 
-        // misc
-        sourceFile = files.get(0).getParent();
-        content = new LinkedList<String>();
-
         // this constructor only creates local files
         instance = LXCInstance.local;
 
         // calculate size
-        for (File file : files) {
-            fileSize += getSize(file);
+        for (VirtualFile file : fileList) {
+            fileSize += calcSize(file);
         }
-
-    }
-
-    /**
-     * Creates the internal file-list.
-     * Will very likely go away in the future.
-     *
-     * @deprecated Allows external access to internal variables
-     */
-    public void createFiles() {
-        files = new ArrayList<File>();
     }
 
     /**
@@ -163,9 +144,6 @@ public class LXCFile implements Serializable {
      * @param job the new job
      */
     public void addJob(LXCJob job) {
-        if (jobs == null) {
-            jobs = new ArrayList<LXCJob>();
-        }
         jobs.add(job);
     }
 
@@ -184,28 +162,14 @@ public class LXCFile implements Serializable {
      * @return a List with all LXCJobs
      */
     public List<LXCJob> getJobs() {
-        if (jobs == null) {
-            jobs = new ArrayList<LXCJob>();
-        }
         return jobs;
-    }
-
-    /**
-     * Cuts the given absolute path down to a relative one that can be sent to the other side.
-     *
-     * @param absolute the absolute path
-     * @return a relative path
-     */
-    private String cutRelativePath(String absolute) {
-        String res = absolute.substring(sourceFile.length() + 1);
-        return res;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof LXCFile) {
             LXCFile test = (LXCFile) obj;
-            return (shownName.equals(test.shownName) && fileSize == test.fileSize && content.equals(test.content));
+            return (shownName.equals(test.shownName) && fileSize == test.fileSize);
         } else {
             return false;
         }
@@ -216,7 +180,6 @@ public class LXCFile implements Serializable {
         int hash = 5;
         hash = 71 * hash + (this.shownName != null ? this.shownName.hashCode() : 0);
         hash = 71 * hash + (int) (this.fileSize ^ (this.fileSize >>> 32));
-        hash = 71 * hash + (this.content != null ? this.content.hashCode() : 0);
         return hash;
     }
 
@@ -230,39 +193,26 @@ public class LXCFile implements Serializable {
     }
 
     /**
-     * Computes the size of a given File or directory.
+     * Computes the size of a given VirtualFile.
      * Recursively scans directorys.
      * Only counts files. Directorys count as zero bytes.
      *
-     * @param realFile a file to scan
-     * @return the size of the file/dir in bytes.
+     * @param startFile a file to scan
+     * @return the size of the file/dir+subs in bytes
      */
-    private long getSize(File realFile) {
-
+    private long calcSize(VirtualFile startFile) {
         long size = 0;
-        File[] filelist = realFile.listFiles();
-        ArrayList<File> filealist = new ArrayList<File>();
-        if (filelist != null) {
-            filealist.addAll(Arrays.asList(filelist));
-        } else {
-            filealist.add(realFile);
-        }
-        for (int i = 0; i < filealist.size(); i++) {
-            File file = filealist.get(i);
+        LinkedList<VirtualFile> queue = new LinkedList<VirtualFile>();
+        // init queue
+        queue.addLast(startFile);
+        // add everything up
+        while (!queue.isEmpty()) {
+            VirtualFile file = queue.pollFirst();
             if (file.isDirectory()) {
-                content.add(cutRelativePath(file.getAbsolutePath()) + "/");
-                File[] contents = file.listFiles();
-                if (contents == null) {
-                    // content of directory must not be read
-                    System.out.println("cannot read " + file.getAbsolutePath() + ", ignoring");
-                    continue;
-                }
-                filealist.addAll(Arrays.asList(contents));
-                continue;
+                queue.addAll(file.children());
             } else {
-                content.add(cutRelativePath(file.getAbsolutePath()));
+                size += file.size();
             }
-            size += file.length();
         }
         return size;
     }
@@ -274,15 +224,6 @@ public class LXCFile implements Serializable {
      */
     public boolean isAvailable() {
         return isAvailable;
-    }
-
-    /**
-     * Returns the source file.
-     *
-     * @return the source file
-     */
-    public String getSourceFile() {
-        return sourceFile;
     }
 
     /**
@@ -310,33 +251,6 @@ public class LXCFile implements Serializable {
      */
     public long getFileSize() {
         return fileSize;
-    }
-
-    /**
-     * Computes a human-readable String which approximates the value passed to this method.
-     *
-     * @param fSize the fileSize in bytes
-     * @return a human-readable String containing the size (like 12,3 MiB)
-     */
-    public static String getFormattedSize(long fSize) {
-        DecimalFormat form = new DecimalFormat("0.0");
-        if (fSize < 1024) {
-            return fSize + " B";
-        } else if (fSize < 1048576) {
-            String size = form.format(fSize / 1024d);
-            return size + " KiB";
-        } else if (fSize < 1073741824) {
-            String size = form.format(fSize / 1048576d);
-            return size + " MiB";
-        } else if (fSize < 1099511627776l) {
-            String size = form.format(fSize / 1073741824d);
-            return size + " GiB";
-        } else if (fSize < 1125899906842625l) {
-            String size = form.format(fSize / 1099511627776d);
-            return size + " TiB";
-        } else {
-            return "unknown";
-        }
     }
 
     /**
@@ -377,10 +291,11 @@ public class LXCFile implements Serializable {
 
     /**
      * Returns the list of files the user wants to share.
+     * This list is unmodifiable.
      *
      * @return the file-list
      */
-    public List<File> getFiles() {
+    public List<VirtualFile> getFiles() {
         return files;
     }
 
@@ -410,5 +325,87 @@ public class LXCFile implements Serializable {
      */
     public boolean isLocal() {
         return instance.id == LXCInstance.local.id;
+    }
+
+    /**
+     * Converts a list of real files to a List of VirtualFiles.
+     * Determines the common toplevel node, if any, and creates file accordingly.
+     *
+     * @param files a list of real (java.io.File) files
+     * @return a list of VirtualFiles
+     */
+    public static List<VirtualFile> convertToVirtual(List<File> files) {
+        // Search toplevel node(s):
+        LinkedList<File> topLevelNodes = new LinkedList<File>();
+        outer:
+        for (File file : files) {
+            // Check if this file is below any toplevel node
+            for (File topLevelNode : topLevelNodes) {
+                if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
+                    // below - this means file is not a toplevel node
+                    continue outer;
+                }
+            }
+            // This file is a toplevel node - check if this makes other toplevel nodes obsolete
+            for (int i = 0; i < topLevelNodes.size(); i++) {
+                File topLevelNode = topLevelNodes.get(i);
+                if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
+                    // the new file is a parent of this toplevel node
+                    topLevelNodes.remove(i);
+                }
+            }
+            // Insert the new toplevel node
+            topLevelNodes.add(file);
+        }
+
+        ArrayList<VirtualFile> result = new ArrayList<VirtualFile>();
+        // Each of these files now either has a parent in topLevelNodes or is a toplevel node itself.
+        for (File file : files) {
+            if (topLevelNodes.contains(file)) {
+                // toplevel
+                result.add(new RealFile(file));
+            } else {
+                // search topLevelNode
+                for (File topLevelNode : topLevelNodes) {
+                    if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
+                        // found toplevel node
+                        result.add(new RealFile(file, topLevelNode));
+                        break;
+                    }
+                }
+                // this should never be reached
+                System.out.println("WARNING: Cannot find TopLevel node for " + file.getAbsolutePath());
+                // just assume this is toplevel as well
+                result.add(new RealFile(file));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Computes a human-readable String which approximates the value passed to this method.
+     *
+     * @param fSize the fileSize in bytes
+     * @return a human-readable String containing the size (like 12,3 MiB)
+     */
+    public static String getFormattedSize(long fSize) {
+        DecimalFormat form = new DecimalFormat("0.0");
+        if (fSize < 1024) {
+            return fSize + " B";
+        } else if (fSize < 1048576) {
+            String size = form.format(fSize / 1024d);
+            return size + " KiB";
+        } else if (fSize < 1073741824) {
+            String size = form.format(fSize / 1048576d);
+            return size + " MiB";
+        } else if (fSize < 1099511627776l) {
+            String size = form.format(fSize / 1073741824d);
+            return size + " GiB";
+        } else if (fSize < 1125899906842625l) {
+            String size = form.format(fSize / 1099511627776d);
+            return size + " TiB";
+        } else {
+            return "unknown";
+        }
     }
 }

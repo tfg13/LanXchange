@@ -197,7 +197,7 @@ public class DropTransferHandler extends TransferHandler {
                     @Override
                     public void run() {
                         listener.displayCalcing();
-                        LXCFile tempFile = new LXCFile(fileList, first.getName());
+                        LXCFile tempFile = new LXCFile(LXCFile.convertToVirtual(fileList), first.getName());
                         listener.newCalcedFile(tempFile);
                     }
                 }, "lxc_helper_sizecalcer");

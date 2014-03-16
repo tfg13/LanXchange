@@ -21,15 +21,14 @@
 package de.tobifleig.lxc.net.io;
 
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.data.VirtualFile;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -46,22 +45,22 @@ public class Seeder extends Transceiver {
         boolean transferOk = true;
         boolean fileBroken = false;
         try {
-            List<File> files = file.getFiles();
-            String parentFile = files.get(0).getParent();
-            ArrayList<File> allList = new ArrayList<File>();
+            List<VirtualFile> files = file.getFiles();
+            ArrayList<VirtualFile> allList = new ArrayList<VirtualFile>();
             allList.addAll(files);
 
             for (int i = 0; i < allList.size(); i++) {
-                File currentFile = allList.get(i);
+                VirtualFile currentFile = allList.get(i);
                 if (currentFile.isDirectory()) {
                     // add files recursively
-                    allList.addAll(Arrays.asList(currentFile.listFiles()));
+                    allList.addAll(currentFile.children());
                     // send directory itself
                     out.writeByte(files.contains(currentFile) ? 'D' : 'd');
-                    out.writeUTF(absToRelPath(currentFile.getAbsolutePath(), parentFile));
+                    out.writeUTF(currentFile.getTransferPath());
                 } else {
                     // transfer a file
-                    if (currentFile.canRead()) {
+                    try {
+                        InputStream rawInput = currentFile.getInputStream();
                         // inform client
                         out.writeByte(files.contains(currentFile) ? 'F' : 'f');
                         // send date, if version >= 1
@@ -69,14 +68,14 @@ public class Seeder extends Transceiver {
                             out.writeLong(currentFile.lastModified());
                         }
                         // send size
-                        out.writeLong(currentFile.length());
+                        out.writeLong(currentFile.size());
                         // send path
-                        out.writeUTF(absToRelPath(currentFile.getAbsolutePath(), parentFile));
+                        out.writeUTF(currentFile.getTransferPath());
                         out.flush();
                         // send content (real data)
                         BufferedInputStream filein = null;
                         try {
-                            filein = new BufferedInputStream(new FileInputStream(currentFile), 8388608);
+                            filein = new BufferedInputStream(rawInput, 8388608);
                             byte[] buffer = new byte[4096];
                             int gotbytes;
                             while ((gotbytes = filein.read(buffer)) > 0) {
@@ -91,12 +90,14 @@ public class Seeder extends Transceiver {
                             System.out.println("Seeder: Unexpected Error! This should not happen...");
                         } finally {
                             try {
-                                filein.close();
-                            } catch (Exception ex) {
+                                if (filein != null) {
+                                    filein.close();
+                                }
+                            } catch (IOException ex) {
                             }
                         }
-                    } else {
-                        System.out.println("Error: Cannot upload \"" + currentFile.getAbsolutePath() + "\", file no longer exists - aborting transfer.");
+                    } catch (FileNotFoundException ex) {
+                        System.out.println("Error: Cannot upload file with transferpath \"" + currentFile.getTransferPath() + "\", file no longer exists - aborting transfer.");
                         // Cannot read file, send sorry (newer clients (>=149) display a message; older clients silently discard this.
                         out.writeByte('s');
                         out.flush();
@@ -169,19 +170,6 @@ public class Seeder extends Transceiver {
         Thread thread = new Thread(this);
         thread.setName("seeder_" + file.getShownName());
         thread.start();
-    }
-
-    /**
-     * Turns the given absolute path to be relative to parentPath.
-     * This this step is essential, Leecher require paths to be relative.
-     *
-     * @param absolute the local, absolute path of the current file
-     * @param parentPath the local, absolte path to the parent directory of the particular LXCFile
-     * @return a path relative to parentPath
-     */
-    private String absToRelPath(String absolute, String parentPath) {
-        String res = absolute.substring(parentPath.length() + 1);
-        return res;
     }
 
     @Override
