@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
@@ -44,6 +45,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -520,8 +522,10 @@ public class AndroidPlatform extends ListActivity {
                 // open file
                 Intent openIntent = new Intent();
                 openIntent.setAction(Intent.ACTION_VIEW);
-                Uri fileUri = Uri.fromFile(file.getFiles().get(0));
-                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(file.getFiles().get(0).getAbsolutePath()));
+                // Hack: Local files are RealFiles
+                RealFile realFile = (RealFile) file.getFiles().get(0);
+                Uri fileUri = Uri.fromFile(realFile.getBackingFile());
+                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(realFile.getBackingFile().getAbsolutePath()));
                 openIntent.setDataAndType(fileUri, mimeType);
                 System.out.println("Starting intent for uri " + fileUri + " mimeType is " + mimeType);
                 // check if intent can be processed

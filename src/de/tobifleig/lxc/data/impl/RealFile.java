@@ -20,13 +20,14 @@
  */
 package de.tobifleig.lxc.data.impl;
 
-import de.tobifleig.lxc.data.VirtualFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.tobifleig.lxc.data.VirtualFile;
 
 /**
  * Default implementation for VirtualFile.
@@ -73,6 +74,14 @@ public class RealFile extends VirtualFile {
     private RealFile(File file, String parentTransferPath) {
         super(file.getName(), parentTransferPath + File.separatorChar + file.getName());
         this.file = file;
+    }
+
+    /**
+     * Returns the real file backing this virtual file.
+     * @return the real file
+     */
+    public File getBackingFile() {
+        return file;
     }
 
     @Override
