@@ -21,20 +21,22 @@
 package de.tobifleig.lxc.plaf.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -42,7 +44,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -52,6 +53,8 @@ import android.widget.TextView;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
+import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
@@ -426,48 +429,56 @@ public class AndroidPlatform extends ListActivity {
     private void offerFile(Uri uri) {
         String uriString = uri.toString();
         System.out.println("Uri string is " + uriString);
-        // Files selected with KitKats new document selector no longer
-        // allow access as file. One can find out size + get a inputStream, which should be enough.
-        // Todo: Add in future version of LXC.
-        // For now, LXC cannot handle this file.
+
+        VirtualFile file = null;
+        // Handle kitkat files
         if (uriString.contains("content://com.android.providers.media.documents")) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.error_cantofferkitkat_title);
-            builder.setMessage(R.string.error_cantofferkitkat_text);
-            builder.setPositiveButton(R.string.error_cantofferkitkat_ok, new OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // do noting
-                }
-            });
-            builder.show();
+            ContentResolver resolver = getBaseContext().getContentResolver();
+            // get file name
+            String[] proj = { MediaStore.Files.FileColumns.DISPLAY_NAME };
+            Cursor cursor = resolver.query(uri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME);
+            cursor.moveToFirst();
+            String name = cursor.getString(column_index);
+            try {
+                ParcelFileDescriptor desc = resolver.openFileDescriptor(uri, "r");
+                file = new Content(name, desc, uri, resolver);
+
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
-
-        File file = null;
         if (uriString.startsWith("file://")) {
             // seems to be useable right away
-            file = new File(uriString.substring(8)); // just strip "file://"
+            file = new RealFile(new File(uriString.substring(8))); // just strip "file://"
         } else if (uriString.startsWith("content:")) {
             // let android resolve this
             String resolvedPath = getRealPathFromURI(getBaseContext(), uri);
             if (resolvedPath != null) {
-                file = new File(resolvedPath);
+                File resolvedFile = new File(resolvedPath);
+                if (resolvedFile.exists()) {
+                    file = new RealFile(new File(resolvedPath));
+                }
             }
         }
         // one last trick
-        if (file == null || !file.exists()) {
-            file = new File(uri.getPath());
+        if (file == null) {
+            File resolvedFile = new File(uri.getPath());
+            if (resolvedFile.exists()) {
+                file = new RealFile(resolvedFile);
+            }
             // filePath.substring(filePath.indexOf('/'))
         }
         // we tried everything
-        if (file == null || !file.exists()) {
+        if (file == null) {
             System.err.println("invalid input:" + uriString);
             return;
         }
-        List<File> list = new ArrayList<File>();
+        List<VirtualFile> list = new ArrayList<VirtualFile>();
         list.add(file);
-        LXCFile lxcfile = new LXCFile(LXCFile.convertToVirtual(list), file.getName());
+        LXCFile lxcfile = new LXCFile(list, file.getName());
         guiListener.offerFile(lxcfile);
     }
 
