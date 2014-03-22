@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.plaf;
 
+import java.io.File;
+
 import de.tobifleig.lxc.data.LXCFile;
 
 /**
@@ -90,5 +92,5 @@ public interface Platform {
      * Informs about finished downloads.
      * Some platforms (like android) need to be informed about this so they can index the new files.
      */
-    public void downloadComplete(LXCFile file);
+    public void downloadComplete(LXCFile file, File targetFolder);
 }

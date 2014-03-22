@@ -20,15 +20,15 @@
  */
 package de.tobifleig.lxc.data;
 
-import de.tobifleig.lxc.data.impl.RealFile;
-import de.tobifleig.lxc.net.LXCInstance;
 import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.net.LXCInstance;
 
 /**
  * Represents a "file" offered by a certain LXCInstance.
@@ -69,15 +69,15 @@ public class LXCFile implements Serializable {
      */
     private transient boolean locked = false;
     /**
-     * The list of files that the user want to share.
+     * The list of files that the user wants to share.
      * Including directorys, but not the files within them.
      * Can be shared with other classes, because it is unmodifiable.
      */
-    private final transient List<VirtualFile> files;
+    private transient List<VirtualFile> files;
     /**
      * The jobs currently assigned to this file.
      */
-    private final transient List<LXCJob> jobs = new ArrayList<LXCJob>();
+    private transient List<LXCJob> jobs = new ArrayList<LXCJob>();
     /**
      * The textual representation that is displayed.
      */
@@ -111,8 +111,8 @@ public class LXCFile implements Serializable {
      * @param shownN the name that is shown
      */
     public LXCFile(List<VirtualFile> fileList, String shownN) {
-        // create an unmodifiable non-backed copy:
-        this.files = Collections.unmodifiableList(new ArrayList<VirtualFile>(fileList));
+        // create a copy:
+        this.files = new ArrayList<VirtualFile>(fileList);
         // Create name
         if (fileList.size() > 1) {
             shownName = shownN.concat(" + " + (fileList.size() - 1));
@@ -144,6 +144,9 @@ public class LXCFile implements Serializable {
      * @param job the new job
      */
     public void addJob(LXCJob job) {
+        if (jobs == null) {
+            jobs = new ArrayList<LXCJob>();
+        }
         jobs.add(job);
     }
 
@@ -162,6 +165,9 @@ public class LXCFile implements Serializable {
      * @return a List with all LXCJobs
      */
     public List<LXCJob> getJobs() {
+        if (jobs == null) {
+            jobs = new ArrayList<LXCJob>();
+        }
         return jobs;
     }
 
@@ -291,12 +297,20 @@ public class LXCFile implements Serializable {
 
     /**
      * Returns the list of files the user wants to share.
-     * This list is unmodifiable.
      *
      * @return the file-list
      */
     public List<VirtualFile> getFiles() {
         return files;
+    }
+
+    /**
+     * Sets the list of base files.
+     * This is required after downloads.
+     * @param baseFiles
+     */
+    public void setBaseFiles(List<VirtualFile> baseFiles) {
+        this.files = baseFiles;
     }
 
     /**
@@ -338,25 +352,25 @@ public class LXCFile implements Serializable {
         // Search toplevel node(s):
         LinkedList<File> topLevelNodes = new LinkedList<File>();
         outer:
-        for (File file : files) {
-            // Check if this file is below any toplevel node
-            for (File topLevelNode : topLevelNodes) {
-                if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
-                    // below - this means file is not a toplevel node
-                    continue outer;
+            for (File file : files) {
+                // Check if this file is below any toplevel node
+                for (File topLevelNode : topLevelNodes) {
+                    if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
+                        // below - this means file is not a toplevel node
+                        continue outer;
+                    }
                 }
-            }
-            // This file is a toplevel node - check if this makes other toplevel nodes obsolete
-            for (int i = 0; i < topLevelNodes.size(); i++) {
-                File topLevelNode = topLevelNodes.get(i);
-                if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
-                    // the new file is a parent of this toplevel node
-                    topLevelNodes.remove(i);
+                // This file is a toplevel node - check if this makes other toplevel nodes obsolete
+                for (int i = 0; i < topLevelNodes.size(); i++) {
+                    File topLevelNode = topLevelNodes.get(i);
+                    if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
+                        // the new file is a parent of this toplevel node
+                        topLevelNodes.remove(i);
+                    }
                 }
+                // Insert the new toplevel node
+                topLevelNodes.add(file);
             }
-            // Insert the new toplevel node
-            topLevelNodes.add(file);
-        }
 
         ArrayList<VirtualFile> result = new ArrayList<VirtualFile>();
         // Each of these files now either has a parent in topLevelNodes or is a toplevel node itself.

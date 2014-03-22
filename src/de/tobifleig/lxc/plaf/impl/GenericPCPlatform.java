@@ -237,7 +237,7 @@ public class GenericPCPlatform implements Platform {
     }
 
     @Override
-    public void downloadComplete(LXCFile file) {
+    public void downloadComplete(LXCFile file, File targetFolder) {
         // not required for generic pcs
     }
 }

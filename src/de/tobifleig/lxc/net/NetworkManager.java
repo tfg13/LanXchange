@@ -20,6 +20,19 @@
  */
 package de.tobifleig.lxc.net;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.BindException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
+import java.net.Socket;
+import java.util.HashMap;
+
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
@@ -34,18 +47,6 @@ import de.tobifleig.lxc.net.serv.ListServerListener;
 import de.tobifleig.lxc.net.serv.PingServer;
 import de.tobifleig.lxc.net.serv.PingServerListener;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.BindException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NoRouteToHostException;
-import java.net.Socket;
-import java.util.HashMap;
 
 /**
  * Manages networking.
@@ -210,7 +211,7 @@ public class NetworkManager {
      * @param targetFolder the folder to download the file(s) to
      * @return true, if connection could be established
      */
-    public boolean connectAndDownload(final LXCFile file, File targetFolder) {
+    public boolean connectAndDownload(final LXCFile file, final File targetFolder) {
         try {
             Socket server = new Socket();
             server.setPerformancePreferences(0, 0, 1);
@@ -241,7 +242,7 @@ public class NetworkManager {
                         file.setLocked(false);
                         if (success) {
                             file.setAvailable(true);
-                            listener.downloadComplete(file);
+                            listener.downloadComplete(file, targetFolder);
                         }
                         file.removeJob(jobs.get(leech));
                         if (removeFile) {

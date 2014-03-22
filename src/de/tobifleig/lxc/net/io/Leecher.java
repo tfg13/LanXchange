@@ -20,13 +20,18 @@
  */
 package de.tobifleig.lxc.net.io;
 
-import de.tobifleig.lxc.data.LXCFile;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.RealFile;
 
 /**
  * The actual file-receiver
@@ -45,6 +50,7 @@ public class Leecher extends Transceiver {
         System.out.println("Leecher: Starting transmission... (version " + transVersion + ")");
 
         long startTime = System.currentTimeMillis();
+        List<VirtualFile> baseFiles = new ArrayList<VirtualFile>();
 
         try {
 
@@ -65,6 +71,10 @@ public class Leecher extends Transceiver {
                     // create file / parent folders
                     File target = new File(targetFolder, path);
                     target.getParentFile().mkdirs();
+                    // track base files
+                    if (cmd == 'F') {
+                        baseFiles.add(new RealFile(target));
+                    }
                     // transfer file content (real data)
                     BufferedOutputStream fileout;
                     byte[] buffer = new byte[4096];
@@ -97,10 +107,16 @@ public class Leecher extends Transceiver {
                     // create folder
                     File target = new File(targetFolder, path);
                     target.mkdirs();
+                    // track base dirs
+                    if (cmd == 'D') {
+                        baseFiles.add(new RealFile(target));
+                    }
                 } else if (cmd == 'e') {
                     // done
                     System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
                     System.out.println("Leecher: Done receiving.");
+                    // set base files
+                    file.setBaseFiles(baseFiles);
                     listener.finished(true, false);
                     break;
                 } else if (cmd == 's') {

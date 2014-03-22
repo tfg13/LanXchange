@@ -20,6 +20,11 @@
  */
 package de.tobifleig.lxc;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.List;
+
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.net.LXCInstance;
@@ -29,10 +34,6 @@ import de.tobifleig.lxc.net.TransFileList;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.List;
 
 /**
  * The main class of LanXchange.
@@ -127,8 +128,8 @@ public class LXC {
             }
 
             @Override
-            public void downloadComplete(LXCFile file) {
-                LXC.this.platform.downloadComplete(file);
+            public void downloadComplete(LXCFile file, File targetFolder) {
+                LXC.this.platform.downloadComplete(file, targetFolder);
             }
 
             @Override

@@ -461,7 +461,7 @@ public class AndroidPlatform extends ListActivity {
         }
         List<File> list = new ArrayList<File>();
         list.add(file);
-        LXCFile lxcfile = new LXCFile(list, file.getName());
+        LXCFile lxcfile = new LXCFile(LXCFile.convertToVirtual(list), file.getName());
         guiListener.offerFile(lxcfile);
     }
 

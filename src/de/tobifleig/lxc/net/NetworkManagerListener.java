@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.net;
 
+import java.io.File;
+
 import de.tobifleig.lxc.data.LXCFile;
 
 /**
@@ -55,7 +57,7 @@ public interface NetworkManagerListener {
      *
      * @param file the file
      */
-    public void downloadComplete(LXCFile file);
+    public void downloadComplete(LXCFile file, File targetFolder);
 
     /**
      * Called when a upload was aborted because a file no longer exists.
