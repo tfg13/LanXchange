@@ -337,39 +337,45 @@ public class AndroidPlatform extends ListActivity {
                 items = new CharSequence[] { "Video", "Music", "Image", "Other files" };
             }
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Pick what to share:");
-            builder.setItems(items, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int item) {
-                    Intent pickIntent = new Intent();
-                    pickIntent.setAction(Intent.ACTION_GET_CONTENT);
-                    switch (item) {
-                    case 0: // Video
-                        pickIntent.setType("video/*");
-                        //pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
-                        break;
-                    case 1: // Audio
-                        //pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                        pickIntent.setType("audio/*");
-                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
-                        break;
-                    case 2: // Images
-                        pickIntent.setType("image/*");
-                        //pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
-                        break;
-                    case 3: // Other files
-                        pickIntent.setType("file/*");
-                        startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
-                        break;
-                    }
+            //            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            //            builder.setTitle("Pick what to share:");
+            //            builder.setItems(items,  new DialogInterface.OnClickListener() {
+            //                @Override
+            //                public void onClick(DialogInterface dialog, int item) {
+            //                    Intent pickIntent = new Intent();
+            //                    pickIntent.setAction(Intent.ACTION_GET_CONTENT);
+            //                    switch (item) {
+            //                    case 0: // Video
+            //                        pickIntent.setType("video/*");
+            //                        //pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+            //                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+            //                        break;
+            //                    case 1: // Audio
+            //                        //pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            //                        pickIntent.setType("audio/*");
+            //                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+            //                        break;
+            //                    case 2: // Images
+            //                        pickIntent.setType("image/*");
+            //                        //pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            //                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+            //                        break;
+            //                    case 3: // Other files
+            //                        pickIntent.setType("file/*");
+            //                        startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
+            //                        break;
+            //                    }
+            //
+            //                }
+            //            });
+            //            AlertDialog alert = builder.create();
+            //            alert.show();
 
-                }
-            });
-            AlertDialog alert = builder.create();
-            alert.show();
+            Intent testIntent = new Intent();
+            testIntent.setAction(Intent.ACTION_GET_CONTENT);
+            testIntent.addCategory(Intent.CATEGORY_OPENABLE);
+            testIntent.setType("*/*");
+            startActivityForResult(testIntent, RETURNCODE_FILEINTENT);
             return true;
         default:
             return super.onOptionsItemSelected(item);
