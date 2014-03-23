@@ -20,11 +20,6 @@
  */
 package de.tobifleig.lxc;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.List;
-
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.net.LXCInstance;
@@ -34,6 +29,10 @@ import de.tobifleig.lxc.net.TransFileList;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.List;
 
 /**
  * The main class of LanXchange.
@@ -47,7 +46,7 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 153;
+    public static final int versionId = 154;
     /**
      * The Platform we are running on.
      */
@@ -85,7 +84,7 @@ public class LXC {
 
         initLogging(args);
 
-        System.out.println("This is LanXchange v1.05 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig - License GPLv3 or later");
+        System.out.println("This is LanXchange v1.1 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig - License GPLv3 or later");
 
         platform.readConfiguration(args);
 
