@@ -60,10 +60,10 @@ import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
-import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
 import de.tobifleig.lxc.plaf.impl.android.FileListWrapper;
 import de.tobifleig.lxc.plaf.impl.android.FilterProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
+import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
 
 /**
  * Platform for Android / Default Activity
@@ -435,7 +435,7 @@ public class AndroidPlatform extends ListActivity {
 
         VirtualFile file = null;
         // Handle kitkat files
-        if (uriString.contains("content://com.android.providers.media.documents")) {
+        if (uriString.startsWith("content://")) {
             ContentResolver resolver = getBaseContext().getContentResolver();
             // get file name
             String[] proj = { MediaStore.Files.FileColumns.DISPLAY_NAME };
@@ -451,21 +451,11 @@ public class AndroidPlatform extends ListActivity {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
-
-        if (uriString.startsWith("file://")) {
+        } else if (uriString.startsWith("file://")) {
             // seems to be useable right away
             file = new RealFile(new File(uriString.substring(8))); // just strip "file://"
-        } else if (uriString.startsWith("content:")) {
-            // let android resolve this
-            String resolvedPath = getRealPathFromURI(getBaseContext(), uri);
-            if (resolvedPath != null) {
-                File resolvedFile = new File(resolvedPath);
-                if (resolvedFile.exists()) {
-                    file = new RealFile(new File(resolvedPath));
-                }
-            }
         }
+
         // one last trick
         if (file == null) {
             File resolvedFile = new File(uri.getPath());
