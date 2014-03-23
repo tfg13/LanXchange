@@ -402,9 +402,7 @@ public class LXCPanel extends JPanel {
                     // display settings
                     options.showAndWait();
                     guiListener.reloadConfiguration();
-                }
-                // delete?
-                if (e.getButton() == 1 && detailSelected && selectedIndex != -1) {
+                } else if (e.getButton() == 1 && detailSelected && selectedIndex != -1) { // delete?
                     try {
                         LXCFile file = allFiles.get(selectedIndex);
                         if (file.isLocal()) {
@@ -412,10 +410,7 @@ public class LXCPanel extends JPanel {
                         }
                     } catch (Exception ex) {
                     }
-                }
-
-                // Cancel download
-                if (e.getButton() == 1 && subJobDeleteSelected != -1 && selectedIndex != -1) {
+                } else if (e.getButton() == 1 && subJobDeleteSelected != -1 && selectedIndex != -1) { // cancel download
                     // Search job and cancel it
                     allFiles.get(selectedIndex).getJobs().get(subJobDeleteSelected).abortTransfer();
                 } else if (selectedIndex > -1 && selectedIndex < allFiles.size()) {
