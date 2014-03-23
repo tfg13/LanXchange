@@ -25,8 +25,10 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,6 +38,7 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
@@ -75,7 +78,6 @@ import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
 public class AndroidPlatform extends ListActivity {
 
     private static final int RETURNCODE_FILEINTENT = 12345;
-    private static final int RETURNCODE_MEDIAINTENT = 12346;
     private LayoutInflater infl;
     private GuiListener guiListener;
     private FileListWrapper files;
@@ -93,30 +95,10 @@ public class AndroidPlatform extends ListActivity {
         super.onCreate(savedInstanceState);
 
         // Check intent first
-        Uri quickShare = null;
+        List<Uri> quickShare = null;
         Intent launchIntent = getIntent();
         if (launchIntent.getAction() != null) {
-            if  (launchIntent.getAction().equals(Intent.ACTION_SEND) || launchIntent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
-                Object data = launchIntent.getExtras().get(Intent.EXTRA_STREAM);
-                if (data != null && (data.toString().startsWith("file://") || data.toString().startsWith("content:"))) {
-                    // Make file available asap:
-                    quickShare = Uri.parse(launchIntent.getExtras().get(Intent.EXTRA_STREAM).toString());
-                    System.out.println("Quicksharepath:" + quickShare);
-                } else {
-                    // cannot compute input, display error
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(R.string.error_cantoffer_title);
-                    builder.setMessage(R.string.error_cantoffer_text);
-                    builder.setPositiveButton(R.string.error_cantoffer_ok, new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // do noting
-                        }
-                    });
-                    builder.show();
-                    // todo: quit if not already running
-                }
-            }
+            quickShare = computeInputIntent(launchIntent);
         }
 
         TextView emptyText = new TextView(this);
@@ -289,7 +271,7 @@ public class AndroidPlatform extends ListActivity {
             progressBar.setIndeterminate(false);
             int progress = (int) (file.getJobs().get(0).getTrans().getProgress() * 100f);
             progressBar.setProgress(progress);
-            statusText.setText(getResources().getString(R.string.ui_downloading)  + " " + progress + "%");
+            statusText.setText(getResources().getString(R.string.ui_downloading) + " " + progress + "%");
             // override default ProgressIndicator
             file.getJobs().get(0).getTrans().setProgressIndicator(new FilterProgressIndicator() {
                 @Override
@@ -298,7 +280,7 @@ public class AndroidPlatform extends ListActivity {
                         @Override
                         public void run() {
                             progressBar.setProgress(lastProgress);
-                            statusText.setText(getResources().getString(R.string.ui_downloading)  + " " + lastProgress + "%");
+                            statusText.setText(getResources().getString(R.string.ui_downloading) + " " + lastProgress + "%");
                         }
                     });
                 }
@@ -343,43 +325,46 @@ public class AndroidPlatform extends ListActivity {
                 items = new CharSequence[] { "Video", "Music", "Image", "Other files" };
             }
 
-            //            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            //            builder.setTitle("Pick what to share:");
-            //            builder.setItems(items,  new DialogInterface.OnClickListener() {
-            //                @Override
-            //                public void onClick(DialogInterface dialog, int item) {
-            //                    Intent pickIntent = new Intent();
-            //                    pickIntent.setAction(Intent.ACTION_GET_CONTENT);
-            //                    switch (item) {
-            //                    case 0: // Video
-            //                        pickIntent.setType("video/*");
-            //                        //pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-            //                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
-            //                        break;
-            //                    case 1: // Audio
-            //                        //pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-            //                        pickIntent.setType("audio/*");
-            //                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
-            //                        break;
-            //                    case 2: // Images
-            //                        pickIntent.setType("image/*");
-            //                        //pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            //                        startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
-            //                        break;
-            //                    case 3: // Other files
-            //                        pickIntent.setType("file/*");
-            //                        startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
-            //                        break;
-            //                    }
+            // AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            // builder.setTitle("Pick what to share:");
+            // builder.setItems(items, new DialogInterface.OnClickListener() {
+            // @Override
+            // public void onClick(DialogInterface dialog, int item) {
+            // Intent pickIntent = new Intent();
+            // pickIntent.setAction(Intent.ACTION_GET_CONTENT);
+            // switch (item) {
+            // case 0: // Video
+            // pickIntent.setType("video/*");
+            // //pickIntent.setData(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+            // startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+            // break;
+            // case 1: // Audio
+            // //pickIntent.setData(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            // pickIntent.setType("audio/*");
+            // startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+            // break;
+            // case 2: // Images
+            // pickIntent.setType("image/*");
+            // //pickIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            // startActivityForResult(pickIntent, RETURNCODE_MEDIAINTENT);
+            // break;
+            // case 3: // Other files
+            // pickIntent.setType("file/*");
+            // startActivityForResult(fileIntent, RETURNCODE_FILEINTENT);
+            // break;
+            // }
             //
-            //                }
-            //            });
-            //            AlertDialog alert = builder.create();
-            //            alert.show();
+            // }
+            // });
+            // AlertDialog alert = builder.create();
+            // alert.show();
 
             Intent testIntent = new Intent();
             testIntent.setAction(Intent.ACTION_GET_CONTENT);
             testIntent.addCategory(Intent.CATEGORY_OPENABLE);
+            if (android.os.Build.VERSION.SDK_INT >= 18) {
+                testIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            }
             testIntent.setType("*/*");
             startActivityForResult(testIntent, RETURNCODE_FILEINTENT);
             return true;
@@ -388,39 +373,84 @@ public class AndroidPlatform extends ListActivity {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (data == null) {
             // User pressed "back"/"cancel" etc
             return;
         }
-        offerFile(data.getData());
+
+        ArrayList<Uri> uris = new ArrayList<Uri>();
+        // multiple files
+        if (android.os.Build.VERSION.SDK_INT >= 18 && data.getData() == null && data.getClipData() != null) {
+            if (data.getData() == null && data.getClipData() != null) {
+                uris.addAll(urisFromClipdata(data.getClipData()));
+            }
+        } else if (data.getData() != null) {
+            uris.add(data.getData());
+        }
+
+        offerFiles(uris);
     }
 
     @Override
-    protected void onNewIntent (Intent intent) {
+    protected void onNewIntent(Intent intent) {
         if (intent.getAction() != null) {
-            if  (intent.getAction().equals(Intent.ACTION_SEND) || intent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
-                Object data = intent.getExtras().get(Intent.EXTRA_STREAM);
-                if (data != null && (data.toString().startsWith("file://") || data.toString().startsWith("content:"))) {
-                    // Make file available asap:
-                    offerFile(Uri.parse(intent.getExtras().get(Intent.EXTRA_STREAM).toString()));
-                } else {
-                    // cannot compute input, display error
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(R.string.error_cantoffer_title);
-                    builder.setMessage(R.string.error_cantoffer_text);
-                    builder.setPositiveButton(R.string.error_cantoffer_ok, new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // do noting
-                        }
-                    });
-                    builder.show();
-                    // todo: quit if not already running
-                }
+            List<Uri> uris = computeInputIntent(intent);
+            if (uris != null && !uris.isEmpty()) {
+                offerFiles(uris);
+            } else {
+                // cannot compute input, display error
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.error_cantoffer_title);
+                builder.setMessage(R.string.error_cantoffer_text);
+                builder.setPositiveButton(R.string.error_cantoffer_ok, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do noting
+                    }
+                });
+                builder.show();
             }
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private List<Uri> urisFromClipdata(ClipData clipdata) {
+        ArrayList<Uri> result = new ArrayList<Uri>();
+        for (int i = 0; i < clipdata.getItemCount(); i++) {
+            ClipData.Item item = clipdata.getItemAt(i);
+            result.add(item.getUri());
+        }
+        return result;
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private List<Uri> computeInputIntent(Intent intent) {
+        if (intent.getAction().equals(Intent.ACTION_SEND)) {
+            Object data = intent.getExtras().get(Intent.EXTRA_STREAM);
+            if (data != null && (data.toString().startsWith("file://") || data.toString().startsWith("content:"))) {
+                // Make file available asap:
+                ArrayList<Uri> uris = new ArrayList<Uri>();
+                uris.add(Uri.parse(intent.getExtras().get(Intent.EXTRA_STREAM).toString()));
+                return uris;
+            }
+        } else if (intent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
+            // there is a legacy and a new way to receive multiple files
+            // try the new first
+            if (android.os.Build.VERSION.SDK_INT >= 16 && intent.getClipData() != null) {
+                return urisFromClipdata(intent.getClipData());
+            } else if (intent.getStringArrayListExtra(Intent.EXTRA_STREAM) != null) {
+                ArrayList<Uri> uris = new ArrayList<Uri>();
+                ArrayList<String> uriStrings = intent.getStringArrayListExtra(Intent.EXTRA_STREAM);
+                for (String uriString : uriStrings) {
+                    uris.add(Uri.parse(uriString));
+                }
+                return uris;
+            }
+        }
+        return null;
     }
 
     /**
@@ -429,17 +459,36 @@ public class AndroidPlatform extends ListActivity {
      * @param path
      *            the absolute path
      */
-    private void offerFile(Uri uri) {
-        String uriString = uri.toString();
-        System.out.println("Uri string is " + uriString);
+    private void offerFiles(List<Uri> uris) {
+        System.out.println("First uri string is " + uris.get(0).toString());
 
+        List<VirtualFile> list = new ArrayList<VirtualFile>();
+        for (Uri uri : uris) {
+            VirtualFile virtualFile = uriToVirtualFile(uri);
+            if (virtualFile != null) {
+                list.add(virtualFile);
+            }
+        }
+
+        // we tried everything
+        if (list.isEmpty()) {
+            System.err.println("invalid input!");
+            return;
+        }
+
+        LXCFile lxcfile = new LXCFile(list, list.get(0).getName());
+        guiListener.offerFile(lxcfile);
+    }
+
+    private VirtualFile uriToVirtualFile(Uri uri) {
+        String uriString = uri.toString();
         VirtualFile file = null;
         // Handle kitkat files
         if (uriString.startsWith("content://")) {
             ContentResolver resolver = getBaseContext().getContentResolver();
             // get file name
             String[] proj = { MediaStore.Files.FileColumns.DISPLAY_NAME };
-            Cursor cursor = resolver.query(uri,  proj, null, null, null);
+            Cursor cursor = resolver.query(uri, proj, null, null, null);
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME);
             cursor.moveToFirst();
             String name = cursor.getString(column_index);
@@ -453,7 +502,8 @@ public class AndroidPlatform extends ListActivity {
             }
         } else if (uriString.startsWith("file://")) {
             // seems to be useable right away
-            file = new RealFile(new File(uriString.substring(8))); // just strip "file://"
+            file = new RealFile(new File(uriString.substring(8))); // just strip
+            // "file://"
         }
 
         // one last trick
@@ -464,15 +514,7 @@ public class AndroidPlatform extends ListActivity {
             }
             // filePath.substring(filePath.indexOf('/'))
         }
-        // we tried everything
-        if (file == null) {
-            System.err.println("invalid input:" + uriString);
-            return;
-        }
-        List<VirtualFile> list = new ArrayList<VirtualFile>();
-        list.add(file);
-        LXCFile lxcfile = new LXCFile(list, file.getName());
-        guiListener.offerFile(lxcfile);
+        return file;
     }
 
     private String getRealPathFromURI(Context context, Uri contentUri) {
@@ -480,7 +522,7 @@ public class AndroidPlatform extends ListActivity {
         String result = null;
         try {
             String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             result = cursor.getString(column_index);
@@ -516,7 +558,8 @@ public class AndroidPlatform extends ListActivity {
                 // Hack: Local files are RealFiles
                 RealFile realFile = (RealFile) file.getFiles().get(0);
                 Uri fileUri = Uri.fromFile(realFile.getBackingFile());
-                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(realFile.getBackingFile().getAbsolutePath()));
+                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        MimeTypeMap.getFileExtensionFromUrl(realFile.getBackingFile().getAbsolutePath()));
                 openIntent.setDataAndType(fileUri, mimeType);
                 System.out.println("Starting intent for uri " + fileUri + " mimeType is " + mimeType);
                 // check if intent can be processed
@@ -590,9 +633,9 @@ public class AndroidPlatform extends ListActivity {
      * When this activity is started with an ACTION_SEND Intent, the path of the
      * file to share will end up here.
      * 
-     * @param path
+     * @param uris a list of Uris to share
      */
-    public void quickShare(Uri uri) {
-        offerFile(uri);
+    public void quickShare(List<Uri> uris) {
+        offerFiles(uris);
     }
 }
