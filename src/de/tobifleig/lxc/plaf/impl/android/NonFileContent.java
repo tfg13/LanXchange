@@ -1,4 +1,4 @@
-package de.tobifleig.lxc.plaf.impl;
+package de.tobifleig.lxc.plaf.impl.android;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import de.tobifleig.lxc.data.VirtualFile;
 
-public class Content extends VirtualFile {
+public class NonFileContent extends VirtualFile {
 
     /**
      * Links to the real file.
@@ -34,7 +34,7 @@ public class Content extends VirtualFile {
      * @param uri uri of the file
      * @param resolver to open an InputStream
      */
-    public Content(String name, ParcelFileDescriptor descriptor, Uri uri, ContentResolver resolver) {
+    public NonFileContent(String name, ParcelFileDescriptor descriptor, Uri uri, ContentResolver resolver) {
         super(name);
         this.descriptor = descriptor;
         this.fileUri = uri;

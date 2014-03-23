@@ -60,6 +60,7 @@ import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
+import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
 import de.tobifleig.lxc.plaf.impl.android.FileListWrapper;
 import de.tobifleig.lxc.plaf.impl.android.FilterProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
@@ -444,7 +445,7 @@ public class AndroidPlatform extends ListActivity {
             String name = cursor.getString(column_index);
             try {
                 ParcelFileDescriptor desc = resolver.openFileDescriptor(uri, "r");
-                file = new Content(name, desc, uri, resolver);
+                file = new NonFileContent(name, desc, uri, resolver);
 
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
