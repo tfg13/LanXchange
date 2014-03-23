@@ -443,9 +443,10 @@ public class AndroidPlatform extends ListActivity {
                 return urisFromClipdata(intent.getClipData());
             } else if (intent.getStringArrayListExtra(Intent.EXTRA_STREAM) != null) {
                 ArrayList<Uri> uris = new ArrayList<Uri>();
-                ArrayList<String> uriStrings = intent.getStringArrayListExtra(Intent.EXTRA_STREAM);
-                for (String uriString : uriStrings) {
-                    uris.add(Uri.parse(uriString));
+                @SuppressWarnings("rawtypes")
+                ArrayList uriStrings = intent.getStringArrayListExtra(Intent.EXTRA_STREAM);
+                for (Object uriString : uriStrings) {
+                    uris.add(Uri.parse(uriString.toString()));
                 }
                 return uris;
             }
