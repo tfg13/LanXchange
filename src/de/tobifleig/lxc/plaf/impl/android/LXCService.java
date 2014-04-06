@@ -27,7 +27,6 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -45,8 +44,14 @@ import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
 
 public class LXCService extends Service implements Platform {
 
+    /**
+     * Flat to prevent multiple service instances running at a time.
+     */
     private boolean running = false;
-    private LXC lxc;
+    //private LXC lxc;
+    /**
+     * The listener, used by the user interface to send events to the core implementation.
+     */
     private GuiListener listener;
 
     public LXCService() {
@@ -57,33 +62,36 @@ public class LXCService extends Service implements Platform {
         return null;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!running) {
             running = true;
-            System.out.println("LXC_SERVICE START");
 
-            int icon = R.drawable.ic_lxc_running;
-            CharSequence tickerText = "LanXchange running";
-            long when = System.currentTimeMillis();
+            /*
+             * Create permanent notifiaction that stays active until this Service is stopped.
+             * Tapping the notification brings the user to the main activity.
+             */
 
-            Notification notification = new Notification(icon, tickerText, when);
+            Notification.Builder builder = new Notification.Builder(this);
+            builder.setSmallIcon(R.drawable.ic_lxc_running);
+            builder.setContentTitle(getResources().getString(R.string.notification_running_title));
+            builder.setContentText(getResources().getString(R.string.notification_running_text));
 
-            Context context = getApplicationContext();
-            CharSequence contentTitle = "LanXchange running";
-            CharSequence contentText = "Tap to return to LanXchange";
+            // configure intent
             Intent notificationIntent = new Intent(this, AndroidPlatform.class);
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+            builder.setContentIntent(contentIntent);
 
-            notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+            // launch notification
+            startForeground(1, builder.getNotification());
 
-            startForeground(1, notification);
-
+            // launch LXC
             startLXC();
         }
+
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
-
         return START_STICKY;
     }
 
@@ -94,7 +102,7 @@ public class LXCService extends Service implements Platform {
     }
 
     private void startLXC() {
-        lxc = new LXC(this, new String[]{"-nolog"});
+        new LXC(this, new String[]{"-nolog"});
     }
 
     @Override

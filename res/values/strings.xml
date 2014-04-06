@@ -24,5 +24,7 @@
     <string name="error_cantofferkitkat_text">You used a new method to select this file which LanXchange can\'t handle (yet). Try selecting the content within another app and use \"Send\" and then select LanXchange).</string>
     <string name="error_cantofferkitkat_ok">OK</string>
     <string name="ui_nowifi">Please enable Wi-Fi!</string>
+    <string name="notification_running_title">LanXchange running</string>
+    <string name="notification_running_text">Tap to return to LanXchange</string>
 
 </resources>
