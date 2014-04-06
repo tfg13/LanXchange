@@ -20,13 +20,14 @@
  */
 package de.tobifleig.lxc.net;
 
-import de.tobifleig.lxc.net.serv.PingServer;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import de.tobifleig.lxc.net.serv.PingServer;
 
 /**
  * Manages all NetworkInterfaces.

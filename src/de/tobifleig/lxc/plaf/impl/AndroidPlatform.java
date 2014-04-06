@@ -26,45 +26,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.data.LXCJob;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
-import de.tobifleig.lxc.plaf.ProgressIndicator;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
-import de.tobifleig.lxc.plaf.impl.android.FileListWrapper;
-import de.tobifleig.lxc.plaf.impl.android.FilterProgressIndicator;
+import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeListener;
+import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeReceiver;
+import de.tobifleig.lxc.plaf.impl.android.FileListView;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
 import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
 
@@ -75,20 +64,15 @@ import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
  * 
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class AndroidPlatform extends ListActivity {
+public class AndroidPlatform extends Activity {
 
     private static final int RETURNCODE_FILEINTENT = 12345;
-    private LayoutInflater infl;
     private GuiListener guiListener;
-    private FileListWrapper files;
-    private DataSetObserver observer;
-    private final ProgressIndicator noopIndicator = new ProgressIndicator() {
 
-        @Override
-        public void update(int percentage) {
-            // do nothing
-        }
-    };
+    /**
+     * The view that displays all shared and available files
+     */
+    private FileListView fileListView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,115 +85,22 @@ public class AndroidPlatform extends ListActivity {
             quickShare = computeInputIntent(launchIntent);
         }
 
-        TextView emptyText = new TextView(this);
-        emptyText.setText(R.string.nofiles);
-        emptyText.setGravity(Gravity.CENTER);
-
-        getListView().setEmptyView(emptyText);
-        getListView().setLongClickable(true);
-        // getListView().setPadding(20, 0, 20, 0);
-
+        // load layout
+        setContentView(R.layout.main);
+        // layout is loaded, setup main view
+        fileListView = (FileListView) findViewById(R.id.fileListView1);
+        // set up the text displayed when there are no files
+        TextView emptyText = (TextView) ((LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.empty_list, null);
+        fileListView.setEmptyView(emptyText);
         ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
         root.addView(emptyText);
 
-        infl = (LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        getListView().setAdapter(new ListAdapter() {
-
-            @Override
-            public void unregisterDataSetObserver(DataSetObserver arg0) {
-                System.out.println("Observer deregistered");
-                observer = null;
-            }
+        ConnectivityChangeReceiver.setConnectivityListener(new ConnectivityChangeListener() {
 
             @Override
-            public void registerDataSetObserver(DataSetObserver arg0) {
-                System.out.println("Observer registered!");
-                observer = arg0;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return guiListener == null || (files.getLocalList().isEmpty() && files.getRemoteList().isEmpty());
-            }
-
-            @Override
-            public boolean hasStableIds() {
-                // TODO Auto-generated method stub
-                return false;
-            }
-
-            @Override
-            public int getViewTypeCount() {
-                // TODO Auto-generated method stub
-                return 1;
-            }
-
-            @Override
-            public View getView(int n, View view, ViewGroup group) {
-                // insert header
-                if (n == 0) {
-                    TextView yourfiles = (TextView) infl.inflate(R.layout.listheader, group, false);
-                    yourfiles.setText(R.string.ui_yourfiles);
-                    return yourfiles;
-                }
-                // element own files?
-                if (n <= files.getLocalList().size()) {
-                    return createLocalListItem(files.getLocalList().get(n - 1), group);
-                }
-                // second header
-                if (n == files.getLocalList().size() + 1) {
-                    TextView sharedwithyou = (TextView) infl.inflate(R.layout.listheader, group, false);
-                    sharedwithyou.setText(R.string.ui_sharedwithyou);
-                    return sharedwithyou;
-                }
-                // network files
-                return createRemoteListItem(files.getRemoteList().get(n - (2 + files.getLocalList().size())), group);
-            }
-
-            @Override
-            public int getItemViewType(int arg0) {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-
-            @Override
-            public long getItemId(int arg0) {
-                // TODO Auto-generated method stub
-                return arg0;
-            }
-
-            @Override
-            public Object getItem(int arg0) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public int getCount() {
-                return guiListener == null ? 0 : (files.getLocalList().size() + files.getRemoteList().size()) + 2;
-            }
-
-            @Override
-            public boolean isEnabled(int position) {
-                // cannot click on category headers
-                if (position == 0 || position == files.getLocalList().size() + 1) {
-                    return false;
-                }
-                return true;
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-        });
-
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                return AndroidPlatform.this.onLongListItemClick(null, arg1, arg2, arg3);
+            public void setWifiState(boolean isWifi) {
+                setWifiWarning(!isWifi);
             }
         });
 
@@ -217,84 +108,9 @@ public class AndroidPlatform extends ListActivity {
 
             @Override
             public void update() {
-                updateGui();
+                fileListView.updateGui();
             }
         }, quickShare);
-    }
-
-    private View createLocalListItem(LXCFile file, ViewGroup group) {
-        View item = infl.inflate(R.layout.file_item, group, false);
-        ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
-        ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
-        // set image
-        if (file.getType() == LXCFile.TYPE_FILE) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
-        } else if (file.getType() == LXCFile.TYPE_FOLDER) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.folder);
-        } else { // multi
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.multifile);
-        }
-        // Status text is different for own files
-        TextView statusText = (TextView) item.findViewById(R.id.TextView01);
-        statusText.setText(R.string.ui_holdtoremove);
-        // Override all default ProgressIndicators
-        for (LXCJob job : file.getJobs()) {
-            job.getTrans().setProgressIndicator(noopIndicator);
-        }
-        return item;
-    }
-
-    private View createRemoteListItem(LXCFile file, ViewGroup group) {
-        View item = infl.inflate(R.layout.file_item, group, false);
-        ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
-        ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
-        // set image
-        if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FILE) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
-        } else if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FOLDER) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.folder);
-        } else if (!file.isAvailable()) { // multi
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.multifile);
-        } else {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.done));
-        }
-        // Show status
-        final ProgressBar progressBar = (ProgressBar) item.findViewById(R.id.progressBar1);
-        final TextView statusText = (TextView) item.findViewById(R.id.TextView01);
-        // download starting?
-        if (file.isLocked() && file.getJobs().size() == 0) {
-            progressBar.setVisibility(View.VISIBLE);
-            statusText.setText(R.string.ui_connecting);
-        } else if (!file.isAvailable() && file.getJobs().size() == 1) {
-            // downloading
-            progressBar.setVisibility(View.VISIBLE);
-            progressBar.setIndeterminate(false);
-            int progress = (int) (file.getJobs().get(0).getTrans().getProgress() * 100f);
-            progressBar.setProgress(progress);
-            statusText.setText(getResources().getString(R.string.ui_downloading) + " " + progress + "%");
-            // override default ProgressIndicator
-            file.getJobs().get(0).getTrans().setProgressIndicator(new FilterProgressIndicator() {
-                @Override
-                protected void updateGui() {
-                    getListView().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressBar.setProgress(lastProgress);
-                            statusText.setText(getResources().getString(R.string.ui_downloading) + " " + lastProgress + "%");
-                        }
-                    });
-                }
-            });
-        } else if (file.isAvailable()) {
-            // done
-            statusText.setText(R.string.ui_available);
-        }
-        return item;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
@@ -350,6 +166,7 @@ public class AndroidPlatform extends ListActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         if (intent.getAction() != null) {
+            System.out.println(intent.getAction());
             List<Uri> uris = computeInputIntent(intent);
             if (uris != null && !uris.isEmpty()) {
                 offerFiles(uris);
@@ -405,6 +222,17 @@ public class AndroidPlatform extends ListActivity {
             }
         }
         return null;
+    }
+
+    private void setWifiWarning(boolean displayWarning) {
+        // CONTINUE HERE!!!
+
+        // Change ListActivity to regular activity with list in layout.
+        // Then, implement a warning header when wifi is disable.
+        // Such a header could also be used on firstStart
+
+        System.out.println("Wifiwarning " + displayWarning);
+
     }
 
     /**
@@ -471,90 +299,22 @@ public class AndroidPlatform extends ListActivity {
         return file;
     }
 
-    private String getRealPathFromURI(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        String result = null;
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            result = cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        // only clicks to second list for now
-        if (position >= files.getLocalList().size() + 2) {
-            final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
-            if (!file.isLocal() && !file.isAvailable()) {
-                file.setLocked(true);
-                updateGui();
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        guiListener.downloadFile(file, false);
-                    }
-                });
-                t.setName("lxc_helper_initdl_" + file.getShownName());
-                t.setDaemon(true);
-                t.start();
-            } else if (!file.isLocal() && file.isAvailable()) {
-                // open file
-                Intent openIntent = new Intent();
-                openIntent.setAction(Intent.ACTION_VIEW);
-                // Hack: Local files are RealFiles
-                RealFile realFile = (RealFile) file.getFiles().get(0);
-                Uri fileUri = Uri.fromFile(realFile.getBackingFile());
-                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                        MimeTypeMap.getFileExtensionFromUrl(realFile.getBackingFile().getAbsolutePath()));
-                openIntent.setDataAndType(fileUri, mimeType);
-                System.out.println("Starting intent for uri " + fileUri + " mimeType is " + mimeType);
-                // check if intent can be processed
-                List<ResolveInfo> list = getPackageManager().queryIntentActivities(openIntent, 0);
-                if (list.isEmpty()) {
-                    // cannot be opened
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(R.string.error_cantopen_title);
-                    builder.setMessage(R.string.error_cantopen_text);
-                    builder.setPositiveButton(R.string.error_cantopen_ok, new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // do noting
-                        }
-                    });
-                    builder.show();
-                } else {
-                    startActivity(openIntent);
-                }
-            }
-        }
-    }
-
-    public boolean onLongListItemClick(ListView l, View v, int position, long id) {
-        // clicks for first list
-        if (position != 0 && position <= files.getLocalList().size()) {
-            final LXCFile file = files.getLocalList().get(position - 1);
-            guiListener.removeFile(file);
-            updateGui();
-            return true;
-        } else if (position >= files.getLocalList().size() + 2) {
-            // clicks for second list, only valid for downloaded files
-            final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
-            if (file.isAvailable()) {
-                guiListener.resetFile(file);
-                updateGui();
-                return true;
-            }
-        }
-        return false;
-    }
+    //    private String getRealPathFromURI(Context context, Uri contentUri) {
+    //        Cursor cursor = null;
+    //        String result = null;
+    //        try {
+    //            String[] proj = { MediaStore.Images.Media.DATA };
+    //            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+    //            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+    //            cursor.moveToFirst();
+    //            result = cursor.getString(column_index);
+    //        } finally {
+    //            if (cursor != null) {
+    //                cursor.close();
+    //            }
+    //        }
+    //        return result;
+    //    }
 
     /**
      * Sets the GuiListener. Will be called by AndroidSingleton when LXC is
@@ -565,22 +325,9 @@ public class AndroidPlatform extends ListActivity {
      *            out future GuiListener
      */
     public void setGuiListener(GuiListener guiListener) {
-        files = new FileListWrapper(guiListener.getFileList());
+        fileListView.setGuiListener(guiListener);
         this.guiListener = guiListener;
-        updateGui();
-    }
-
-    private void updateGui() {
-        getListView().post(new Runnable() {
-
-            @Override
-            public void run() {
-                if (observer != null) {
-                    files.listChanged();
-                    observer.onChanged();
-                }
-            }
-        });
+        fileListView.updateGui();
     }
 
     /**
