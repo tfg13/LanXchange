@@ -246,15 +246,7 @@ public class AndroidPlatform extends Activity {
     }
 
     private void setWifiWarning(boolean displayWarning) {
-        // CONTINUE HERE!!!
-
-        // Change ListActivity to regular activity with list in layout.
-        // Then, implement a warning header when wifi is disable.
-        // Such a header could also be used on firstStart
-
-        System.out.println("Wifiwarning " + displayWarning);
         findViewById(R.id.noWifiWarning).setVisibility(displayWarning ? View.VISIBLE : View.INVISIBLE);
-
     }
 
     /**
@@ -316,27 +308,9 @@ public class AndroidPlatform extends Activity {
             if (resolvedFile.exists()) {
                 file = new RealFile(resolvedFile);
             }
-            // filePath.substring(filePath.indexOf('/'))
         }
         return file;
     }
-
-    //    private String getRealPathFromURI(Context context, Uri contentUri) {
-    //        Cursor cursor = null;
-    //        String result = null;
-    //        try {
-    //            String[] proj = { MediaStore.Images.Media.DATA };
-    //            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-    //            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-    //            cursor.moveToFirst();
-    //            result = cursor.getString(column_index);
-    //        } finally {
-    //            if (cursor != null) {
-    //                cursor.close();
-    //            }
-    //        }
-    //        return result;
-    //    }
 
     /**
      * Sets the GuiListener. Will be called by AndroidSingleton when LXC is
