@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/noWifiWarning"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#FF4444"
+        android:gravity="center"
+        android:text="@string/ui_nowifi"
+        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textSize="18sp" />
+
+    <de.tobifleig.lxc.plaf.impl.android.FileListView
+        android:id="@+id/fileListView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:longClickable="true" >
+    </de.tobifleig.lxc.plaf.impl.android.FileListView>
+
+</LinearLayout>

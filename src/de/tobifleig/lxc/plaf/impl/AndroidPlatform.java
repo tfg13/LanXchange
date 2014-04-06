@@ -43,6 +43,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import de.tobifleig.lxc.R;
@@ -103,6 +104,8 @@ public class AndroidPlatform extends Activity {
                 setWifiWarning(!isWifi);
             }
         });
+        // trigger connectivity listener once to get the current status
+        new ConnectivityChangeReceiver().onReceive(getBaseContext(), null);
 
         AndroidSingleton.onCreateMainActivity(this, new GuiInterfaceBridge() {
 
@@ -232,6 +235,7 @@ public class AndroidPlatform extends Activity {
         // Such a header could also be used on firstStart
 
         System.out.println("Wifiwarning " + displayWarning);
+        findViewById(R.id.noWifiWarning).setVisibility(displayWarning ? View.VISIBLE : View.INVISIBLE);
 
     }
 
