@@ -22,6 +22,8 @@ package de.tobifleig.lxc.plaf.impl.android;
 
 import java.io.File;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -45,6 +47,10 @@ import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
 public class LXCService extends Service implements Platform {
 
     /**
+     * After how many ms without activity the service should stop itself.
+     */
+    private final long STOP_SERVICE_MS = 1000 * 60 * 15;// 15 mins
+    /**
      * Flat to prevent multiple service instances running at a time.
      */
     private boolean running = false;
@@ -52,9 +58,11 @@ public class LXCService extends Service implements Platform {
     /**
      * The listener, used by the user interface to send events to the core implementation.
      */
-    private GuiListener listener;
+    private AndroidGuiListener listener;
+    private Timer timer;
 
     public LXCService() {
+        timer = new Timer("SERVICE_SHUTDOWN_TIMER", false);
     }
 
     @Override
@@ -132,8 +140,19 @@ public class LXCService extends Service implements Platform {
             }
 
             @Override
-            public void setGuiListener(GuiListener guiListener) {
-                listener = guiListener;
+            public void setGuiListener(final GuiListener guiListener) {
+                // delegate everything to the original listener except the new Android Funct
+                listener = new AndroidGuiListener(guiListener) {
+                    @Override
+                    public void guiHidden() {
+                        reScheduleTimer();
+                    }
+
+                    @Override
+                    public void guiVisible() {
+                        stopTimer();
+                    }
+                };
             }
 
             @Override
@@ -153,11 +172,25 @@ public class LXCService extends Service implements Platform {
 
             @Override
             public boolean confirmCloseWithTransfersRunning() { // TODO
-                System.out
-                .println("FIXME: Check for running downloads before exiting");
+                System.out.println("FIXME: Check for running downloads before exiting");
                 return true;
             }
         };
+    }
+
+    private void stopTimer() {
+        timer.purge();
+    }
+    private void reScheduleTimer() {
+        stopTimer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                System.out.println("FIXME: Check for running downloads before exiting");
+                stopSelf();
+            }
+        }, STOP_SERVICE_MS);
     }
 
     @Override

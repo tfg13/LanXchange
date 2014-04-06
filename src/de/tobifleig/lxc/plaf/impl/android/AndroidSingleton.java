@@ -25,7 +25,6 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
 
 public class AndroidSingleton {
@@ -33,7 +32,7 @@ public class AndroidSingleton {
     private static boolean running = false;
     private static AndroidPlatform activity;
     private static AndroidSingleton singleton;
-    private static GuiListener guiListener;
+    private static AndroidGuiListener guiListener;
     private static GuiInterfaceBridge genericBridge = new GuiInterfaceBridge() {
 
         @Override
@@ -65,9 +64,18 @@ public class AndroidSingleton {
         if (!running) {
             running = true;
             activity.startService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.LXCService.class));
-        } else {
+        } else if (guiListener != null) {
             activity.setGuiListener(guiListener);
             sendQuickShare();
+        }
+    }
+
+    /**
+     * Call this when the main activity becomes visible (again).
+     */
+    public static void onMainActivityVisible() {
+        if (guiListener != null) {
+            guiListener.guiVisible();
         }
     }
 
@@ -75,14 +83,13 @@ public class AndroidSingleton {
      * Call this when the main activity is being destroyed. If the main activity
      * is not re-created soon, the service will be stopped, if there are no
      * running jobs left.
-     * 
-     * @param activity
-     *            the main activity
      */
-    public static void onDestroy(AndroidPlatform activity) {
+    public static void onMainActivityHidden() {
         AndroidSingleton.activity = null;
         currentBridge = genericBridge;
-        // TODO: Add some clever code here...
+        if (guiListener != null) {
+            guiListener.guiHidden();
+        }
     }
 
     /**
@@ -104,7 +111,7 @@ public class AndroidSingleton {
      * @param fileManagern
      *            the filemanager, required for the gui
      */
-    public static void serviceReady(GuiListener guiListener) {
+    public static void serviceReady(AndroidGuiListener guiListener) {
         AndroidSingleton.guiListener = guiListener;
         activity.setGuiListener(guiListener);
         sendQuickShare();

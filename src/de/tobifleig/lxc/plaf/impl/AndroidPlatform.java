@@ -50,7 +50,7 @@ import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
-import de.tobifleig.lxc.plaf.GuiListener;
+import de.tobifleig.lxc.plaf.impl.android.AndroidGuiListener;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
 import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeListener;
 import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeReceiver;
@@ -68,7 +68,8 @@ import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
 public class AndroidPlatform extends Activity {
 
     private static final int RETURNCODE_FILEINTENT = 12345;
-    private GuiListener guiListener;
+    private AndroidGuiListener guiListener;
+    private GuiInterfaceBridge guiBridge;
 
     /**
      * The view that displays all shared and available files
@@ -107,13 +108,30 @@ public class AndroidPlatform extends Activity {
         // trigger connectivity listener once to get the current status
         new ConnectivityChangeReceiver().onReceive(getBaseContext(), null);
 
-        AndroidSingleton.onCreateMainActivity(this, new GuiInterfaceBridge() {
+        guiBridge = new GuiInterfaceBridge() {
 
             @Override
             public void update() {
                 fileListView.updateGui();
             }
-        }, quickShare);
+        };
+        AndroidSingleton.onCreateMainActivity(this, guiBridge, quickShare);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Re-Check that Service is running. In some rare cases, this may not be the case.
+        AndroidSingleton.onCreateMainActivity(this, guiBridge, null);
+        AndroidSingleton.onMainActivityVisible();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        // notify service about the gui becoming invisible.
+        // service will stop itself after a while to preserve resources
+        AndroidSingleton.onMainActivityHidden();
     }
 
     @Override
@@ -328,7 +346,7 @@ public class AndroidPlatform extends Activity {
      * @param guiListener
      *            out future GuiListener
      */
-    public void setGuiListener(GuiListener guiListener) {
+    public void setGuiListener(AndroidGuiListener guiListener) {
         fileListView.setGuiListener(guiListener);
         this.guiListener = guiListener;
         fileListView.updateGui();
