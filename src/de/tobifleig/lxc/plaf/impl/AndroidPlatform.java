@@ -246,7 +246,7 @@ public class AndroidPlatform extends Activity {
     }
 
     private void setWifiWarning(boolean displayWarning) {
-        findViewById(R.id.noWifiWarning).setVisibility(displayWarning ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.noWifiWarning).setVisibility(displayWarning ? View.VISIBLE : View.GONE);
     }
 
     /**
