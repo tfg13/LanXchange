@@ -8,6 +8,7 @@
     <string name="nofiles">No files found in your home network. \nTap + to start sharing</string>
     <string name="menu_stop">Stop LXC</string>
     <string name="menu_add">Share file(s)</string>
+    <string name="menu_help">Help</string>
     <string name="ui_yourfiles">Your files</string>
     <string name="ui_sharedwithyou">Shared with you</string>
     <string name="ui_taptoload">Tap to download</string>
@@ -27,5 +28,31 @@
     <string name="ui_nowifi">Please enable Wi-Fi!</string>
     <string name="notification_running_title">LanXchange running</string>
     <string name="notification_running_text">Tap to return to LanXchange</string>
+    <string name="title_activity_help">Help</string>
 
+    <string name="help_send">How do I send files with LanXchange?</string>
+    <string name="help_send_text">Just tap the + Button. Then select the file you want to share. Thats it! All other devices in your local network can now use LanXchange to download the shared file.</string>
+    <string name="help_receive">How do I receive files with LanXchange?</string>
+    <string name="help_receive_text">Just start the app! LanXchange will automatically discover other devices in your local network running LanXchange and display all files that are shared by them. Just tap the file you want to download.</string>
+    <string name="help_nofiles">Files from other devices don\'t show up!</string>
+    <string name="help_nofiles_text">Be patient! Files take up to 20 seconds on some devices to appear. Also make sure that all devices have Wifi enabled and are connected to the same network. Additionally, check that no firewall prevents LanXchange from accessing the network.</string>
+	<string name="help_download_location">Where do downloaded files go?</string>
+	<string name="help_download_location_text">All files are saved to the internal memory of your device (also known as internal SD-Card). Look out for the \"download\" folder. LanXchange also notifiys Android about received files, so they should apper in all your apps.</string>
+	<string name="help_multiple">Can I share multiple files at once?</string>
+	<string name="help_multiple_text">Yes. If you have Android 4.3 (Jelly Bean M2) or higher, you can use the normal + button for this. Tap and hold a file to enable multi-selection. On older devices, you need to install a file manager/explorer app. Then select multiple files there and choose "Share" and then "LanXchange"</string>
+	<string name="help_filetypes">What kind of files can I share with LanXchange?</string>
+	<string name="help_filetypes_text">Basically everything that is a file and that is stored locally on your phone. Files in cloud storage may or may not work, but even if they do keep in mind that they have to be downloaded in the background to be read by LanXchange and that may be slow.</string>
+	<string name="help_android_selector_dumb">I cannot select other files than images, videos and audio!</string>
+	<string name="help_android_selector_dumb_text">Lets say you want to share a .PDF file but the android file selector (the thing that pops up when you tap the + button) only offers images, videos and images. In this case, you can install a file manager/explorer from the store. Having such an app installed should allow you to use it for file selection - without type limitations. Another trick is to try sharing the file directly from another app. Most apps offer a "Share with" functionality - LanXchange should be one of the options.</string>
+	<string name="help_download_select_target">How can I choose where downloaded files go?</string>
+	<string name="help_download_select_target_text">For now, you cannot. I may add this feature in the future, so write me a mail if you need it!</string>
+	<string name="help_share_crossplatform">Can transfer files between different platforms? (e.g. PC to Android, Mac to Windows)</string>
+	<string name="help_share_crossplatform_text">Yes.</string>
+	<string name="help_pcversion">Where can I get the PC version?</string>
+	<string name="help_pcversion_text">Select "PC-Version" in the main menu (right where you selected "Help" to get here)</string>
+	<string name="help_nofiles2">I tried everything, but I still cannot see files from other devices!</string>
+	<string name="help_nofiles2_text">Sometimes restarting the app on both sides helps. If the problem persits, send me a mail!</string>
+	<string name="help_bugfeature">I want feature XY, I found a bug.</string>
+	<string name="help_bugfeature_text">Email me! Select "About" in the main menu.</string>
+	<string name="help_category_general">F.A.Q.</string>
 </resources>

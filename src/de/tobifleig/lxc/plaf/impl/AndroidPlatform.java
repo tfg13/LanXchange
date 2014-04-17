@@ -56,6 +56,7 @@ import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeListener;
 import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeReceiver;
 import de.tobifleig.lxc.plaf.impl.android.FileListView;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
+import de.tobifleig.lxc.plaf.impl.android.HelpActivity;
 import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
 
 /**
@@ -158,6 +159,12 @@ public class AndroidPlatform extends Activity {
             testIntent.setType("*/*");
             startActivityForResult(testIntent, RETURNCODE_FILEINTENT);
             return true;
+        case R.id.help:
+            // display help
+            Intent showHelp = new Intent();
+            showHelp.setClass(getBaseContext(), HelpActivity.class);
+            startActivity(showHelp);
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -186,7 +193,8 @@ public class AndroidPlatform extends Activity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if (intent.getAction() != null) {
+        // only act if there is an action and it is not MAIN
+        if (intent.getAction() != null && !intent.getAction().equals(Intent.ACTION_MAIN)) {
             System.out.println(intent.getAction());
             List<Uri> uris = computeInputIntent(intent);
             if (uris != null && !uris.isEmpty()) {

@@ -47,6 +47,15 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name="de.tobifleig.lxc.plaf.impl.android.HelpActivity"
+            android:label="@string/title_activity_help" android:parentActivityName="de.tobifleig.lxc.plaf.impl.AndroidPlatform"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="AndroidPlatform" />
+        </activity>
     </application>
 
 </manifest>
