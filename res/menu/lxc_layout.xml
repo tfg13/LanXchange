@@ -1,7 +1,13 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/addFile" android:showAsAction="ifRoom" android:title="@string/menu_add" android:icon="@drawable/ic_action_add"></item><item android:id="@+id/quit"
-          android:title="@string/menu_stop"
-          android:showAsAction="ifRoom"
-          android:icon="@drawable/ic_action_stop"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/addFile"
+        android:icon="@drawable/ic_action_add"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_add"/>
     
-</menu>
+    <item
+        android:id="@+id/quit"
+        android:icon="@drawable/ic_action_stop"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_stop"/>

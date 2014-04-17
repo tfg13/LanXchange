@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">LanXchange</string>
@@ -6,7 +7,7 @@
     <string name="title_activity_lxc">LanXchange</string>
     <string name="nofiles">No files found in your home network. \nTap + to start sharing</string>
     <string name="menu_stop">Stop LXC</string>
-    <string name="menu_add">Offer file(s)</string>
+    <string name="menu_add">Share file(s)</string>
     <string name="ui_yourfiles">Your files</string>
     <string name="ui_sharedwithyou">Shared with you</string>
     <string name="ui_taptoload">Tap to download</string>
