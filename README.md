@@ -1,18 +1,12 @@
 LanXchange
 ==========
 
-Ever tried to copy files from one computer to another? What if your flash drive is full or vanished again?
-
-LanXchange uses your local (wifi-)network to transfer files and folder directly, without DVDs or flash drives.
-
-LanXchange is very simple to use, just drag files into the window on one computer to make them available in your home network.
-When started on other computers, LanXchange automatically detects those files.
-Your transfer starts after a simple click.
+A simple tool to copy files over local (wifi-)networks. Supports Windows, Mac and Linux PCs and Android phones.
 
 Features
 --------
 
-* Does not require any setup
+* No setup required
 * Automatically detects files offered by other computers and displays them
 * Can transfer single files, folders or a combination of both
 * Allows transfers between different platforms/operating systems
@@ -21,21 +15,18 @@ Features
 Requirements
 ------------
 
-* Runs on Windows, OS X and Linux (Android version in the works!)
-* Java 6 installed
+* Runs on Windows, OS X and Linux PCs with Java 7 installed.
+* Runs on Android >= 4.0 (Ice Cream Sandwich)
 
 Getting started
 ---------------
+
+(Google Play download Link coming soon!)
 
 1. [Download LanXchange](https://github.com/tfg13/LanXchange/raw/master/releases/stable/lxc.zip)
 2. Unzip the downloaded archive to some place in your home folder (like "My Documents")
 3. Run it by double-clicking "LXC.exe" (Windows) or "lxc" (OS X, Linux)
 4. Repeat these steps for all computers and start sharing!
-
-Upcoming Features
------------------
-
-* LanXchange for Android
 
 License
 -------
@@ -54,4 +45,4 @@ You should have received a copy of the GNU General Public License
 along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
 
 
-Copyright (c) 2009, 2010, 2011, 2012 Tobias Fleig - All rights reserved
+Copyright (c) 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig - All rights reserved
