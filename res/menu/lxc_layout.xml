@@ -2,8 +2,8 @@
 
     <item
         android:id="@+id/addFile"
-        android:icon="@drawable/ic_action_add"
-        android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_new"
+        android:showAsAction="always"
         android:title="@string/menu_add"/>
 
     <item
