@@ -9,6 +9,7 @@
     <string name="menu_stop">Stop LXC</string>
     <string name="menu_add">Share file(s)</string>
     <string name="menu_help">Help</string>
+    <string name="menu_about">About</string>
     <string name="ui_yourfiles">Your files</string>
     <string name="ui_sharedwithyou">Shared with you</string>
     <string name="ui_taptoload">Tap to download</string>
@@ -29,6 +30,7 @@
     <string name="notification_running_title">LanXchange running</string>
     <string name="notification_running_text">Tap to return to LanXchange</string>
     <string name="title_activity_help">Help</string>
+    <string name="title_activity_about">About</string>
 
     <string name="help_send">How do I send files with LanXchange?</string>
     <string name="help_send_text">Just tap the + Button. Then select the file you want to share. Thats it! All other devices in your local network can now use LanXchange to download the shared file.</string>
@@ -55,4 +57,15 @@
 	<string name="help_bugfeature">I want feature XY, I found a bug.</string>
 	<string name="help_bugfeature_text">Email me! Select "About" in the main menu.</string>
 	<string name="help_category_general">F.A.Q.</string>
+	<string name="about_category_general">About</string>
+	<string name="about_version">Version</string>
+	<string name="about_copyright">Copyright</string>
+	<string name="about_copyright_text">© 2009–2014 Tobias Fleig\nAll rights reserved.</string>
+	<string name="about_license">License</string>
+	<string name="about_license_text">http://www.gnu.org/licenses/gpl-3.0.txt</string>
+	<string name="about_source">Source Code</string>
+	<string name="about_source_text">https://github.com/tfg13/LanXchange</string>
+	<string name="about_twitter">Author on Twitter</string>
+	<string name="about_twitter_text">https://twitter.com/tfg13</string>
+	<string name="about_version_internal">Internal Version</string>
 </resources>

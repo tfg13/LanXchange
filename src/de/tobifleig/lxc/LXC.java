@@ -48,6 +48,10 @@ public class LXC {
      */
     public static final int versionId = 154;
     /**
+     * The external version id.
+     */
+    public static final String versionString = "v1.1";
+    /**
      * The Platform we are running on.
      */
     private final Platform platform;
@@ -84,7 +88,7 @@ public class LXC {
 
         initLogging(args);
 
-        System.out.println("This is LanXchange v1.1 (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig - License GPLv3 or later");
+        System.out.println("This is LanXchange " + versionString + " (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig - License GPLv3 or later");
 
         platform.readConfiguration(args);
 

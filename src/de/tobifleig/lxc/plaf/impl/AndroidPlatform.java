@@ -50,6 +50,7 @@ import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.plaf.impl.android.AboutActivity;
 import de.tobifleig.lxc.plaf.impl.android.AndroidGuiListener;
 import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
 import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeListener;
@@ -164,6 +165,12 @@ public class AndroidPlatform extends Activity {
             Intent showHelp = new Intent();
             showHelp.setClass(getBaseContext(), HelpActivity.class);
             startActivity(showHelp);
+            return true;
+        case R.id.about:
+            // display about
+            Intent showAbout = new Intent();
+            showAbout.setClass(getBaseContext(), AboutActivity.class);
+            startActivity(showAbout);
             return true;
         default:
             return super.onOptionsItemSelected(item);
