@@ -10,6 +10,7 @@
     <string name="menu_add">Share file(s)</string>
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
+    <string name="menu_pcversion">PC version</string>
     <string name="ui_yourfiles">Your files</string>
     <string name="ui_sharedwithyou">Shared with you</string>
     <string name="ui_taptoload">Tap to download</string>
@@ -31,7 +32,7 @@
     <string name="notification_running_text">Tap to return to LanXchange</string>
     <string name="title_activity_help">Help</string>
     <string name="title_activity_about">About</string>
-
+    <string name="title_activity_pcversion">PC version</string>
     <string name="help_send">How do I send files with LanXchange?</string>
     <string name="help_send_text">Just tap the + Button. Then select the file you want to share. Thats it! All other devices in your local network can now use LanXchange to download the shared file.</string>
     <string name="help_receive">How do I receive files with LanXchange?</string>
@@ -68,4 +69,7 @@
 	<string name="about_twitter">Author on Twitter</string>
 	<string name="about_twitter_text">https://twitter.com/tfg13</string>
 	<string name="about_version_internal">Internal Version</string>
+	<string name="pcversion_header">Get the PC version at</string>
+	<string name="pcversion_text">lanxchange.com</string>
+	<string name="pcversion_url">http://lanxchange.com/</string>
 </resources>

@@ -59,6 +59,7 @@ import de.tobifleig.lxc.plaf.impl.android.FileListView;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
 import de.tobifleig.lxc.plaf.impl.android.HelpActivity;
 import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
+import de.tobifleig.lxc.plaf.impl.android.PCVersionActivity;
 
 /**
  * Platform for Android / Default Activity
@@ -171,6 +172,12 @@ public class AndroidPlatform extends Activity {
             Intent showAbout = new Intent();
             showAbout.setClass(getBaseContext(), AboutActivity.class);
             startActivity(showAbout);
+            return true;
+        case R.id.pcversion:
+            // display info about pc version
+            Intent showPCVersion = new Intent();
+            showPCVersion.setClass(getBaseContext(), PCVersionActivity.class);
+            startActivity(showPCVersion);
             return true;
         default:
             return super.onOptionsItemSelected(item);

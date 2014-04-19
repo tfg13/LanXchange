@@ -65,6 +65,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="AndroidPlatform" />
         </activity>
+
+        <activity
+            android:name="de.tobifleig.lxc.plaf.impl.android.PCVersionActivity"
+            android:label="@string/title_activity_pcversion" android:parentActivityName="de.tobifleig.lxc.plaf.impl.AndroidPlatform"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="AndroidPlatform" />
+        </activity>
     </application>
 
 </manifest>
