@@ -262,14 +262,14 @@ public class FileListView extends ListView {
         ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
         // set image
         if (file.getType() == LXCFile.TYPE_FILE) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
+            ((ImageView) item.findViewById(R.id.typeView)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
         } else if (file.getType() == LXCFile.TYPE_FOLDER) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.folder);
+            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.folder);
         } else { // multi
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.multifile);
+            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.multifile);
         }
         // Status text is different for own files
-        TextView statusText = (TextView) item.findViewById(R.id.TextView01);
+        TextView statusText = (TextView) item.findViewById(R.id.instruction);
         statusText.setText(R.string.ui_holdtoremove);
         // Override all default ProgressIndicators
         for (LXCJob job : file.getJobs()) {
@@ -284,17 +284,17 @@ public class FileListView extends ListView {
         ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
         // set image
         if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FILE) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
+            ((ImageView) item.findViewById(R.id.typeView)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
         } else if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FOLDER) {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.folder);
+            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.folder);
         } else if (!file.isAvailable()) { // multi
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageResource(R.drawable.multifile);
+            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.multifile);
         } else {
-            ((ImageView) item.findViewById(R.id.imageView1)).setImageDrawable(getResources().getDrawable(R.drawable.done));
+            ((ImageView) item.findViewById(R.id.typeView)).setImageDrawable(getResources().getDrawable(R.drawable.done));
         }
         // Show status
         final ProgressBar progressBar = (ProgressBar) item.findViewById(R.id.progressBar1);
-        final TextView statusText = (TextView) item.findViewById(R.id.TextView01);
+        final TextView statusText = (TextView) item.findViewById(R.id.instruction);
         // download starting?
         if (file.isLocked() && file.getJobs().size() == 0) {
             progressBar.setVisibility(View.VISIBLE);

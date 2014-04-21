@@ -15,7 +15,7 @@
         android:textSize="18sp" />
 
     <de.tobifleig.lxc.plaf.impl.android.ui.FileListView
-        android:id="@+id/fileListView1"
+        android:id="@+id/fileList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:longClickable="true" >

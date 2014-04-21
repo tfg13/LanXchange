@@ -93,7 +93,7 @@ public class AndroidPlatform extends Activity {
         // load layout
         setContentView(R.layout.main);
         // layout is loaded, setup main view
-        fileListView = (FileListView) findViewById(R.id.fileListView1);
+        fileListView = (FileListView) findViewById(R.id.fileList);
         // set up the text displayed when there are no files
         TextView emptyText = (TextView) ((LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.empty_list, null);
         fileListView.setEmptyView(emptyText);
