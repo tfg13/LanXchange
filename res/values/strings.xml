@@ -47,9 +47,9 @@
 	<string name="help_filetypes_text">Basically everything that is a file and that is stored locally on your phone. Files in cloud storage may or may not work, but even if they do keep in mind that they have to be downloaded in the background to be read by LanXchange and that may be slow.</string>
 	<string name="help_android_selector_dumb">I cannot select other files than images, videos and audio!</string>
 	<string name="help_android_selector_dumb_text">Lets say you want to share a .PDF file but the android file selector (the thing that pops up when you tap the + button) only offers images, videos and images. In this case, you can install a file manager/explorer from the store. Having such an app installed should allow you to use it for file selection - without type limitations. Another trick is to try sharing the file directly from another app. Most apps offer a "Share with" functionality - LanXchange should be one of the options.</string>
-	<string name="help_download_select_target">How can I choose where downloaded files go?</string>
-	<string name="help_download_select_target_text">For now, you cannot. I may add this feature in the future, so write me a mail if you need it!</string>
-	<string name="help_share_crossplatform">Can transfer files between different platforms? (e.g. PC to Android, Mac to Windows)</string>
+	<string name="help_download_select_target">Is it possible to save received files somewhere else?</string>
+	<string name="help_download_select_target_text">Not yet. I may add this feature in the future, so write me a mail if you need it!</string>
+	<string name="help_share_crossplatform">Can I use LanXchange to transfer files between different platforms? (e.g. PC to Android, Mac to Windows)</string>
 	<string name="help_share_crossplatform_text">Yes.</string>
 	<string name="help_pcversion">Where can I get the PC version?</string>
 	<string name="help_pcversion_text">Select "PC-Version" in the main menu (right where you selected "Help" to get here)</string>
