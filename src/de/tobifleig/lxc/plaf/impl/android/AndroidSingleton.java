@@ -73,9 +73,9 @@ public class AndroidSingleton {
     /**
      * Call this when the main activity becomes visible (again).
      */
-    public static void onMainActivityVisible() {
+    public static void onMainActivityVisible(int depth) {
         if (guiListener != null) {
-            guiListener.guiVisible();
+            guiListener.guiVisible(depth);
         }
     }
 
@@ -84,12 +84,12 @@ public class AndroidSingleton {
      * is not re-created soon, the service will be stopped, if there are no
      * running jobs left.
      */
-    public static void onMainActivityHidden() {
-        AndroidSingleton.activity = null;
+    public static void onMainActivityHidden(int depth) {
         currentBridge = genericBridge;
         if (guiListener != null) {
-            guiListener.guiHidden();
+            guiListener.guiHidden(depth);
         }
+        AndroidSingleton.activity = null;
     }
 
     /**
@@ -103,6 +103,13 @@ public class AndroidSingleton {
             running = false;
             activity.stopService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.LXCService.class));
         }
+    }
+
+    /**
+     * Called by the Service on self-stop.
+     */
+    public static void serviceStopping() {
+        running = false;
     }
 
     /**

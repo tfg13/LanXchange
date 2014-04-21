@@ -126,7 +126,7 @@ public class AndroidPlatform extends Activity {
         super.onStart();
         // Re-Check that Service is running. In some rare cases, this may not be the case.
         AndroidSingleton.onCreateMainActivity(this, guiBridge, null);
-        AndroidSingleton.onMainActivityVisible();
+        AndroidSingleton.onMainActivityVisible(0);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class AndroidPlatform extends Activity {
         super.onStop();
         // notify service about the gui becoming invisible.
         // service will stop itself after a while to preserve resources
-        AndroidSingleton.onMainActivityHidden();
+        AndroidSingleton.onMainActivityHidden(0);
     }
 
     @Override

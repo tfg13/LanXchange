@@ -1,6 +1,5 @@
 package de.tobifleig.lxc.plaf.impl.android;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import de.tobifleig.lxc.R;
 
-public class HelpActivity extends Activity {
+public class HelpActivity extends KeepServiceRunningActivity {
 
     private final int[] faqEntries = new int[]{
             R.string.help_send, R.string.help_send_text,

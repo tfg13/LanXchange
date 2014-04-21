@@ -19,13 +19,15 @@ public abstract class AndroidGuiListener implements GuiListener {
 
     /**
      * Called everytime the gui is sent to the background.
+     *
+     * @param depth 0 for parent, >0 for child activities
      */
-    public abstract void guiHidden();
+    public abstract void guiHidden(int depth);
 
     /**
      * Called everytime the gui becomes visible (again).
      */
-    public abstract void guiVisible();
+    public abstract void guiVisible(int depth);
 
 
     @Override

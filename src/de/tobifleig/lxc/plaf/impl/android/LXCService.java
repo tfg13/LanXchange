@@ -60,6 +60,8 @@ public class LXCService extends Service implements Platform {
      */
     private AndroidGuiListener listener;
     private Timer timer;
+    private TimerTask killTask;
+    private boolean[] componentsVisible = new boolean[2];
 
     public LXCService() {
         timer = new Timer("SERVICE_SHUTDOWN_TIMER", false);
@@ -144,13 +146,15 @@ public class LXCService extends Service implements Platform {
                 // delegate everything to the original listener except the new Android Funct
                 listener = new AndroidGuiListener(guiListener) {
                     @Override
-                    public void guiHidden() {
-                        reScheduleTimer();
+                    public void guiHidden(int depth) {
+                        componentsVisible[depth] = false;
+                        triggerTimer();
                     }
 
                     @Override
-                    public void guiVisible() {
-                        stopTimer();
+                    public void guiVisible(int depth) {
+                        componentsVisible[depth] = true;
+                        triggerTimer();
                     }
                 };
             }
@@ -178,19 +182,37 @@ public class LXCService extends Service implements Platform {
         };
     }
 
+    /**
+     * Call this after componentsVisible has changed
+     */
+    private void triggerTimer() {
+        if (componentsVisible[0] == false && componentsVisible[1] == false) {
+            reScheduleTimer();
+        } else {
+            stopTimer();
+        }
+    }
+
     private void stopTimer() {
-        timer.purge();
+        if (killTask != null) {
+            killTask.cancel();
+            killTask = null;
+        }
     }
     private void reScheduleTimer() {
         stopTimer();
-        timer.schedule(new TimerTask() {
+        killTask = new TimerTask() {
 
             @Override
             public void run() {
-                System.out.println("FIXME: Check for running downloads before exiting");
-                stopSelf();
+                if (listener.shutdown(false, false)) {
+                    AndroidSingleton.serviceStopping();
+                    stopSelf();
+                }
             }
-        }, STOP_SERVICE_MS);
+        };
+
+        timer.schedule(killTask, STOP_SERVICE_MS);
     }
 
     @Override

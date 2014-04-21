@@ -1,6 +1,5 @@
 package de.tobifleig.lxc.plaf.impl.android;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import de.tobifleig.lxc.R;
 
-public class PCVersionActivity extends Activity {
+public class PCVersionActivity extends KeepServiceRunningActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

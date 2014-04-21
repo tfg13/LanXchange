@@ -1,6 +1,5 @@
 package de.tobifleig.lxc.plaf.impl.android;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.net.Uri;
@@ -17,7 +16,7 @@ import android.widget.TextView;
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
 
-public class AboutActivity extends Activity {
+public class AboutActivity extends KeepServiceRunningActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
