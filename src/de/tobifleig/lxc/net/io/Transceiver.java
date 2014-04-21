@@ -124,6 +124,10 @@ public abstract class Transceiver implements Runnable {
         this.progressIndicator = progressIndicator;
     }
 
+    public ProgressIndicator getProgressIndicator() {
+        return progressIndicator;
+    }
+
     /**
      * Called by the transfer routine to signal a progressing transfer.
      */

@@ -34,6 +34,14 @@ public abstract class FilterProgressIndicator implements ProgressIndicator {
      */
     protected int lastProgress = -1;
 
+    /**
+     * Creates a new FilterProgressIndicator with the given initial value.
+     * @param lastProgress
+     */
+    public FilterProgressIndicator(int lastProgress) {
+        this.lastProgress = lastProgress;
+    }
+
 
     @Override
     public void update(int percentage) {

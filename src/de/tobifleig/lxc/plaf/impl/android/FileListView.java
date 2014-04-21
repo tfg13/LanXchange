@@ -302,18 +302,17 @@ public class FileListView extends ListView {
             // downloading
             progressBar.setVisibility(View.VISIBLE);
             progressBar.setIndeterminate(false);
-            int progress = (int) (file.getJobs().get(0).getTrans().getProgress() * 100f);
+            int progress = (file.getJobs().get(0).getTrans().getProgress());
             progressBar.setProgress(progress);
             statusText.setText(getResources().getString(R.string.ui_downloading) + " " + progress + "%");
             // override default ProgressIndicator
-            file.getJobs().get(0).getTrans().setProgressIndicator(new FilterProgressIndicator() {
+            file.getJobs().get(0).getTrans().setProgressIndicator(new FilterProgressIndicator(progress) {
                 @Override
                 protected void updateGui() {
                     post(new Runnable() {
                         @Override
                         public void run() {
-                            progressBar.setProgress(lastProgress);
-                            statusText.setText(getResources().getString(R.string.ui_downloading) + " " + lastProgress + "%");
+                            observer.onChanged();
                         }
                     });
                 }
