@@ -27,10 +27,15 @@ package de.tobifleig.lxc.plaf.impl.android;
  *
  */
 public interface GuiInterfaceBridge {
-	
-	/**
-	 * Forwards some update()-calls to the gui.
-	 */
-	public void update();
+
+    /**
+     * Forwards some update()-calls to the gui.
+     */
+    public void update();
+
+    /**
+     * Forwards confirmCloseWithTransfersRunning()-calls to the gui.
+     */
+    public boolean confirmCloseWithTransfersRunning();
 
 }

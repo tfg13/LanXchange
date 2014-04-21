@@ -117,6 +117,34 @@ public class AndroidPlatform extends Activity {
             public void update() {
                 fileListView.updateGui();
             }
+
+            @Override
+            public boolean confirmCloseWithTransfersRunning() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(AndroidPlatform.this);
+                builder.setMessage(R.string.dialog_closewithrunning_text);
+                builder.setTitle(R.string.dialog_closewithrunning_title);
+                builder.setPositiveButton(R.string.dialog_closewithrunning_yes, new OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        guiListener.shutdown(true, true);
+                        AndroidSingleton.onRealDestroy(AndroidPlatform.this);
+                        finish();
+                    }
+                });
+                builder.setNegativeButton(R.string.dialog_closewithrunning_no, new OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                // always return false
+                // if the user decides to kill lanxchange anyway, shutdown is called again
+                return false;
+            }
         };
         AndroidSingleton.onCreateMainActivity(this, guiBridge, quickShare);
     }
@@ -148,8 +176,10 @@ public class AndroidPlatform extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.quit:
-            AndroidSingleton.onRealDestroy(this);
-            finish();
+            if (guiListener.shutdown(false, true)) {
+                AndroidSingleton.onRealDestroy(this);
+                finish();
+            }
             return true;
         case R.id.addFile:
             Intent testIntent = new Intent();

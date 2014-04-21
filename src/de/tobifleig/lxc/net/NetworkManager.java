@@ -194,6 +194,7 @@ public class NetworkManager {
      * Stops the networking-subsystem.
      * Triggers sending of a special offline-signal and stops sending heartbeats.
      * Afterwards, closes all sockets and threads created by the networking subsystem.
+     * Kills all running transfers without further notice.
      */
     public void stop() {
         multicaster.stop();
@@ -201,6 +202,9 @@ public class NetworkManager {
         fileServer.stop();
         listServer.stop();
         instances.stop();
+        for (LXCJob job : jobs.values()) {
+            job.abortTransfer();
+        }
     }
 
     /**

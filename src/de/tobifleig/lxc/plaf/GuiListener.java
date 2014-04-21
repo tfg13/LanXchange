@@ -20,8 +20,9 @@
  */
 package de.tobifleig.lxc.plaf;
 
-import de.tobifleig.lxc.data.LXCFile;
 import java.util.List;
+
+import de.tobifleig.lxc.data.LXCFile;
 
 /**
  * The Listener for LXC GUIs.
@@ -76,8 +77,16 @@ public interface GuiListener {
 
     /**
      * The user wants to quit LXC.
+     * Returns true, if and only if the shutdown was successful.
+     * To be successful, the shutdown must not be aborted by running transfers.
+     *
+     * If force is true, the shutdown is always successful and the user is never asked.
+     *
+     * Otherwise, the parameter askUserOnTransfer configures the behaviour when there are still transfers running.
+     * If true, the gui is called to display a dialog with abort and quit anyway.
+     * If false the user will not be asked and LXC will never shut down with transfers running.
      */
-    public void shutdown();
+    public boolean shutdown(boolean force, boolean askUserOnTransfer);
 
     /**
      * The user changed important settings.

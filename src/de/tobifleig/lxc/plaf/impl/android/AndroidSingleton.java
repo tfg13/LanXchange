@@ -39,6 +39,12 @@ public class AndroidSingleton {
         public void update() {
             // do nothing
         }
+
+        @Override
+        public boolean confirmCloseWithTransfersRunning() {
+            // no gui = no one to ask = no not close
+            return false;
+        }
     };
     private static GuiInterfaceBridge currentBridge = genericBridge;
     private static List<Uri> quickShare;

@@ -105,12 +105,6 @@ public class LXCService extends Service implements Platform {
         return START_STICKY;
     }
 
-    @Override
-    public void onDestroy() {
-        System.out.println("LXC_SERVICE_STOP");
-        listener.shutdown();
-    }
-
     private void startLXC() {
         new LXC(this, new String[]{"-nolog"});
     }
@@ -156,6 +150,17 @@ public class LXCService extends Service implements Platform {
                         componentsVisible[depth] = true;
                         triggerTimer();
                     }
+
+                    @Override
+                    public boolean shutdown(boolean force, boolean askUserOnTransfer) {
+                        boolean superResult = super.shutdown(force, askUserOnTransfer);
+                        // need to catch this and stop our threads
+                        if (superResult) {
+                            stopTimer();
+                            timer.cancel();
+                        }
+                        return superResult;
+                    }
                 };
             }
 
@@ -176,8 +181,7 @@ public class LXCService extends Service implements Platform {
 
             @Override
             public boolean confirmCloseWithTransfersRunning() { // TODO
-                System.out.println("FIXME: Check for running downloads before exiting");
-                return true;
+                return AndroidSingleton.getInterfaceBridge().confirmCloseWithTransfersRunning();
             }
         };
     }
@@ -207,12 +211,17 @@ public class LXCService extends Service implements Platform {
             public void run() {
                 if (listener.shutdown(false, false)) {
                     AndroidSingleton.serviceStopping();
+                    timer.cancel();
                     stopSelf();
                 }
             }
         };
 
-        timer.schedule(killTask, STOP_SERVICE_MS);
+        try {
+            timer.schedule(killTask, STOP_SERVICE_MS);
+        } catch (IllegalStateException ex) {
+            // ignore, app is shutting down
+        }
     }
 
     @Override

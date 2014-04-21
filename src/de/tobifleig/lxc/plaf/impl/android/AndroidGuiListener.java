@@ -56,8 +56,8 @@ public abstract class AndroidGuiListener implements GuiListener {
     }
 
     @Override
-    public void shutdown() {
-        basicGuiListener.shutdown();
+    public boolean shutdown(boolean force, boolean askUserOnTransfer) {
+        return basicGuiListener.shutdown(force, askUserOnTransfer);
     }
 
     @Override
