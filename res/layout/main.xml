@@ -14,11 +14,11 @@
         android:textColor="?android:attr/textColorPrimaryInverse"
         android:textSize="18sp" />
 
-    <de.tobifleig.lxc.plaf.impl.android.FileListView
+    <de.tobifleig.lxc.plaf.impl.android.ui.FileListView
         android:id="@+id/fileListView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:longClickable="true" >
-    </de.tobifleig.lxc.plaf.impl.android.FileListView>
+    </de.tobifleig.lxc.plaf.impl.android.ui.FileListView>
 
 </LinearLayout>

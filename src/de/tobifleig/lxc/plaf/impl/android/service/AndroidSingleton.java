@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.impl.android;
+package de.tobifleig.lxc.plaf.impl.android.service;
 
 import java.util.List;
 
@@ -26,6 +26,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
+import de.tobifleig.lxc.plaf.impl.android.AndroidGuiListener;
+import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
 
 public class AndroidSingleton {
 
@@ -69,7 +71,7 @@ public class AndroidSingleton {
         AndroidSingleton.currentBridge = bridge;
         if (!running) {
             running = true;
-            activity.startService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.LXCService.class));
+            activity.startService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.service.LXCService.class));
         } else if (guiListener != null) {
             activity.setGuiListener(guiListener);
             sendQuickShare();
@@ -107,7 +109,7 @@ public class AndroidSingleton {
     public static void onRealDestroy(Activity activity) {
         if (running) {
             running = false;
-            activity.stopService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.LXCService.class));
+            activity.stopService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.service.LXCService.class));
         }
     }
 

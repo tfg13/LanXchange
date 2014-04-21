@@ -50,16 +50,16 @@ import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
-import de.tobifleig.lxc.plaf.impl.android.AboutActivity;
 import de.tobifleig.lxc.plaf.impl.android.AndroidGuiListener;
-import de.tobifleig.lxc.plaf.impl.android.AndroidSingleton;
 import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeListener;
 import de.tobifleig.lxc.plaf.impl.android.ConnectivityChangeReceiver;
-import de.tobifleig.lxc.plaf.impl.android.FileListView;
 import de.tobifleig.lxc.plaf.impl.android.GuiInterfaceBridge;
-import de.tobifleig.lxc.plaf.impl.android.HelpActivity;
 import de.tobifleig.lxc.plaf.impl.android.NonFileContent;
-import de.tobifleig.lxc.plaf.impl.android.PCVersionActivity;
+import de.tobifleig.lxc.plaf.impl.android.activity.AboutActivity;
+import de.tobifleig.lxc.plaf.impl.android.activity.HelpActivity;
+import de.tobifleig.lxc.plaf.impl.android.activity.PCVersionActivity;
+import de.tobifleig.lxc.plaf.impl.android.service.AndroidSingleton;
+import de.tobifleig.lxc.plaf.impl.android.ui.FileListView;
 
 /**
  * Platform for Android / Default Activity

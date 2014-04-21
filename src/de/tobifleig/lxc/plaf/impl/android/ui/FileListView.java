@@ -1,4 +1,4 @@
-package de.tobifleig.lxc.plaf.impl.android;
+package de.tobifleig.lxc.plaf.impl.android.ui;
 
 import java.util.List;
 
@@ -26,6 +26,7 @@ import de.tobifleig.lxc.data.LXCJob;
 import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
+import de.tobifleig.lxc.plaf.impl.android.FileListWrapper;
 
 
 /**

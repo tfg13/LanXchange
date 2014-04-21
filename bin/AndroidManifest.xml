@@ -37,7 +37,7 @@
         </activity>
 
         <service
-            android:name="de.tobifleig.lxc.plaf.impl.android.LXCService"
+            android:name="de.tobifleig.lxc.plaf.impl.android.service.LXCService"
             android:enabled="true"
             android:exported="false" >
         </service>
@@ -49,7 +49,7 @@
         </receiver>
 
         <activity
-            android:name="de.tobifleig.lxc.plaf.impl.android.HelpActivity"
+            android:name="de.tobifleig.lxc.plaf.impl.android.activity.HelpActivity"
             android:label="@string/title_activity_help" android:parentActivityName="de.tobifleig.lxc.plaf.impl.AndroidPlatform"
             android:exported="false">
             <meta-data
@@ -58,7 +58,7 @@
         </activity>
 
         <activity
-            android:name="de.tobifleig.lxc.plaf.impl.android.AboutActivity"
+            android:name="de.tobifleig.lxc.plaf.impl.android.activity.AboutActivity"
             android:label="@string/title_activity_about" android:parentActivityName="de.tobifleig.lxc.plaf.impl.AndroidPlatform"
             android:exported="false">
             <meta-data
@@ -67,7 +67,7 @@
         </activity>
 
         <activity
-            android:name="de.tobifleig.lxc.plaf.impl.android.PCVersionActivity"
+            android:name="de.tobifleig.lxc.plaf.impl.android.activity.PCVersionActivity"
             android:label="@string/title_activity_pcversion" android:parentActivityName="de.tobifleig.lxc.plaf.impl.AndroidPlatform"
             android:exported="false">
             <meta-data

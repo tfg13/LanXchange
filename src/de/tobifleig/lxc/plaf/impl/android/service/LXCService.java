@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.impl.android;
+package de.tobifleig.lxc.plaf.impl.android.service;
 
 import java.io.File;
 import java.util.List;
@@ -43,6 +43,7 @@ import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
+import de.tobifleig.lxc.plaf.impl.android.AndroidGuiListener;
 
 public class LXCService extends Service implements Platform {
 

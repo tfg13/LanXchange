@@ -1,5 +1,6 @@
-package de.tobifleig.lxc.plaf.impl.android;
+package de.tobifleig.lxc.plaf.impl.android.activity;
 
+import de.tobifleig.lxc.plaf.impl.android.service.AndroidSingleton;
 import android.app.Activity;
 
 public class KeepServiceRunningActivity extends Activity {

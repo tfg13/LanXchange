@@ -1,4 +1,4 @@
-package de.tobifleig.lxc.plaf.impl.android;
+package de.tobifleig.lxc.plaf.impl.android.activity;
 
 import android.content.Intent;
 import android.net.Uri;
