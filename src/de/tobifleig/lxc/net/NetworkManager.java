@@ -118,8 +118,8 @@ public class NetworkManager {
         });
         fileServer = new FileServer(new FileServerListener() {
             @Override
-            public void downloadRequest(final LXCFile file, ObjectOutputStream outStream, ObjectInputStream inStream, InetAddress address, int transVersion) {
-                final Seeder seed = new Seeder(outStream, inStream, file, transVersion);
+            public void downloadRequest(Socket socket, final LXCFile file, ObjectOutputStream outStream, ObjectInputStream inStream, InetAddress address, int transVersion) {
+                final Seeder seed = new Seeder(socket, outStream, inStream, file, transVersion);
                 TransceiverListener seedListener = new TransceiverListener() {
                     @Override
                     public void finished(boolean success, boolean removeFile) {
@@ -240,7 +240,7 @@ public class NetworkManager {
                 file.setLocked(false);
             } else if (result == 'y') {
                 // accepted
-                final Leecher leech = new Leecher(input, output, file, targetFolder, file.getLxcTransVersion());
+                final Leecher leech = new Leecher(server, input, output, file, targetFolder, file.getLxcTransVersion());
                 TransceiverListener leechListener = new TransceiverListener() {
                     @Override
                     public void finished(boolean success, boolean removeFile) {

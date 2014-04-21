@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,6 +119,7 @@ public class Seeder extends Transceiver {
             try {
                 out.close();
                 in.close();
+                socket.close();
                 System.gc(); // Closes filehandles etc
             } catch (Exception ex) {
                 // Who cares..
@@ -147,13 +149,15 @@ public class Seeder extends Transceiver {
      * Removing the second stream would break compatibilty with previous versions, therefore it is kept.
      * However, it should not be used and may be removed in the future.
      *
+     * @param socket the socket
      * @param output the OutputStream, connected and ready
      * @param input the InputStream, connected and ready
      * @param transFile the {@link LXCFile} that is to be transferred
      * @param transVersion version of the transfer protocol {@link LXCTransceiver}
      * @see LXCTransceiver
      */
-    public Seeder(ObjectOutputStream output, ObjectInputStream input, LXCFile transFile, int transVersion) {
+    public Seeder(Socket socket, ObjectOutputStream output, ObjectInputStream input, LXCFile transFile, int transVersion) {
+        this.socket = socket;
         this.file = transFile;
         this.out = output;
         this.in = input;

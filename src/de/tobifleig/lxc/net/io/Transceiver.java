@@ -24,6 +24,7 @@ import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 
 /**
  * Superclass for Leecher and Seeder
@@ -76,6 +77,11 @@ public abstract class Transceiver implements Runnable {
      */
     protected ObjectInputStream in;
     /**
+     * The socket for the transfer.
+     * Since the streams are created externally, this socket is not required for the transfer itself, but it has to be closed somewhere.
+     */
+    protected Socket socket;
+    /**
      * Used to trigger gui-updates on progress.
      */
     protected TransceiverListener listener;
@@ -118,6 +124,7 @@ public abstract class Transceiver implements Runnable {
     /**
      * Sets the ProgressIndicator used to display progress of running transfers.
      * Overwrites the old ProgressIndicator, if any.
+     *
      * @param progressIndicator the new ProgressIndicator
      */
     public void setProgressIndicator(ProgressIndicator progressIndicator) {

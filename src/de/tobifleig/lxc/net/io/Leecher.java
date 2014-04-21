@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -141,6 +142,10 @@ public class Leecher extends Transceiver {
                 out.close();
             } catch (Exception ex) {
             }
+            try {
+                socket.close();
+            } catch (Exception ex) {
+            }
         }
     }
 
@@ -156,13 +161,15 @@ public class Leecher extends Transceiver {
      * Removing the second stream would break compatibilty with previous versions, therefore it is kept.
      * However, it should not be used and may be removed in the future.
      *
+     * @param socket the socket
      * @param output the OutputStream, connected and ready
      * @param input the InputStream, connected and ready
      * @param transFile the {@link LXCFile} that is to be transferred
      * @param targetFolder the folder to save the files into
      * @param transVersion version of the transfer protocol {@link LXCTransceiver}
      */
-    public Leecher(ObjectInputStream input, ObjectOutputStream output, LXCFile transFile, File targetFolder, int transVersion) {
+    public Leecher(Socket socket, ObjectInputStream input, ObjectOutputStream output, LXCFile transFile, File targetFolder, int transVersion) {
+        this.socket = socket;
         this.file = transFile;
         this.out = output;
         this.in = input;

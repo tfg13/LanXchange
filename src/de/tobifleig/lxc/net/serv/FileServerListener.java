@@ -24,6 +24,7 @@ import de.tobifleig.lxc.data.LXCFile;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.Socket;
 
 /**
  * Used to listen for FileServer-events
@@ -36,11 +37,12 @@ public interface FileServerListener {
      * Called upon download-requests.
      * Connection is already established, Seeder should be startet.
      *
+     * @param socket the socket
      * @param file the requested LXCFile
      * @param outStream the outputStream
      * @param inStream the inputStream
      * @param address the remote address
      * @param transVersion protocol version to use
      */
-    public void downloadRequest(LXCFile file, ObjectOutputStream outStream, ObjectInputStream inStream, InetAddress address, int transVersion);
+    public void downloadRequest(Socket socket, LXCFile file, ObjectOutputStream outStream, ObjectInputStream inStream, InetAddress address, int transVersion);
 }

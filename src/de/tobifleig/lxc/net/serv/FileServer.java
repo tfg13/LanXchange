@@ -98,7 +98,7 @@ public class FileServer implements Runnable {
                                 // send ACK, start transfer
                                 output.writeByte('y');
                                 output.flush();
-                                listener.downloadRequest(file, output, input, client.getInetAddress(), version);
+                                listener.downloadRequest(client, file, output, input, client.getInetAddress(), version);
                             } else {
                                 // refuse request
                                 output.writeByte('n');
