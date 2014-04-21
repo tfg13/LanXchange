@@ -72,18 +72,22 @@ public class AboutActivity extends Activity {
                     text.setText(R.string.about_copyright_text);
                     break;
                 case 2:
+                    header.setText(R.string.about_mailme);
+                    text.setText(R.string.about_mailme_text);
+                    break;
+                case 3:
                     header.setText(R.string.about_license);
                     text.setText(R.string.about_license_text);
                     break;
-                case 3:
+                case 4:
                     header.setText(R.string.about_source);
                     text.setText(R.string.about_source_text);
                     break;
-                case 4:
+                case 5:
                     header.setText(R.string.about_twitter);
                     text.setText(R.string.about_twitter_text);
                     break;
-                case 5:
+                case 6:
                     header.setText(R.string.about_version_internal);
                     text.setText(Integer.toString(LXC.versionId));
                     break;
@@ -108,7 +112,7 @@ public class AboutActivity extends Activity {
 
             @Override
             public int getCount() {
-                return 6;
+                return 7;
             }
 
             @Override
@@ -133,15 +137,18 @@ public class AboutActivity extends Activity {
                     // do nothing
                     break;
                 case 2:
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_license_text))));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_mailme_text))));
                     break;
                 case 3:
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_source_text))));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_license_text))));
                     break;
                 case 4:
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_twitter_text))));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_source_text))));
                     break;
                 case 5:
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_twitter_text))));
+                    break;
+                case 6:
                     // do nothing
                     break;
                 }

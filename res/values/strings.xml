@@ -66,6 +66,8 @@
 	<string name="about_license_text">http://www.gnu.org/licenses/gpl-3.0.txt</string>
 	<string name="about_source">Source Code</string>
 	<string name="about_source_text">https://github.com/tfg13/LanXchange</string>
+	<string name="about_mailme">Email me!</string>
+	<string name="about_mailme_text">mail@lanxchange.com</string>
 	<string name="about_twitter">Author on Twitter</string>
 	<string name="about_twitter_text">https://twitter.com/tfg13</string>
 	<string name="about_version_internal">Internal Version</string>
