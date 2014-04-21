@@ -180,7 +180,7 @@ public class LXCService extends Service implements Platform {
             }
 
             @Override
-            public boolean confirmCloseWithTransfersRunning() { // TODO
+            public boolean confirmCloseWithTransfersRunning() {
                 return AndroidSingleton.getInterfaceBridge().confirmCloseWithTransfersRunning();
             }
         };
@@ -275,7 +275,6 @@ public class LXCService extends Service implements Platform {
 
     @Override
     public void downloadComplete(LXCFile file, File targetFolder) {
-        // TODO Auto-generated method stub
         // Tell the media scanner about the new file so that it is
         // immediately available to the user.
         List<VirtualFile> baseFiles = file.getFiles();

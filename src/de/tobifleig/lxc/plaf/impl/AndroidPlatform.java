@@ -345,7 +345,6 @@ public class AndroidPlatform extends Activity {
                 file = new NonFileContent(name, desc, uri, resolver);
 
             } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else if (uriString.startsWith("file://")) {
