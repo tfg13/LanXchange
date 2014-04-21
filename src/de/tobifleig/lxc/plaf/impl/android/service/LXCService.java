@@ -133,7 +133,6 @@ public class LXCService extends Service implements Platform {
             @Override
             public void showError(String error) {
                 System.err.println(error);
-                System.out.println("FIXME: Error printed to stderr");
             }
 
             @Override
@@ -233,7 +232,6 @@ public class LXCService extends Service implements Platform {
 			Object value = stored.get(key);
 			Configuration.putStringSetting(key, value.toString());
 		}*/
-        System.out.println("FixMe: Implement readConfiguration");
     }
 
     @Override
@@ -246,7 +244,6 @@ public class LXCService extends Service implements Platform {
 			prefs.putString(key, Configuration.getStringSetting(key));
 		}
 		prefs.commit();*/
-        System.out.println("FixMe: Implement writeConfiguration");
     }
 
     @Override
