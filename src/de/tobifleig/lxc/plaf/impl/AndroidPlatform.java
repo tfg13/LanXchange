@@ -320,8 +320,7 @@ public class AndroidPlatform extends Activity {
             }
         } else if (uriString.startsWith("file://")) {
             // seems to be useable right away
-            file = new RealFile(new File(uriString.substring(8))); // just strip
-            // "file://"
+            file = new RealFile(new File(uri.getPath()));
         }
 
         // one last trick
