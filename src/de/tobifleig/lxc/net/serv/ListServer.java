@@ -26,6 +26,7 @@ import java.io.ObjectInputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * The ListServer listens to port 27717 and receives file lists of remote instances.
@@ -47,7 +48,15 @@ public class ListServer implements Runnable {
     public void run() {
         try {
             while (true) {
-                Socket client = servSock.accept(); // Wait for next list, blocks
+                Socket client;
+                try {
+                    client = servSock.accept();
+                } catch (SocketException ex) {
+                    // servSock was closed, ignore
+                    break;
+                }
+
+                // Wait for next list, blocks
                 try {
                     ObjectInputStream input = new ObjectInputStream(client.getInputStream());
                     try {
@@ -109,5 +118,13 @@ public class ListServer implements Runnable {
         thread.setName("listserver");
         this.bindSocket();
         thread.start();
+    }
+
+    public void stop() {
+        try {
+            servSock.close();
+        } catch (IOException ex) {
+            // ignore
+        }
     }
 }

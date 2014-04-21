@@ -49,10 +49,6 @@ class HeartbeatSender {
      */
     private Timer timer;
     /**
-     * The mutlicast-task.
-     */
-    private TimerTask multicastTask;
-    /**
      * The heartbeat-packet. Always the same and therefore cached.
      */
     private byte[] packet;
@@ -97,17 +93,25 @@ class HeartbeatSender {
     void stop() {
         // Set packet content to "offline-signal"
         packet[4] = 'o';
-        // cancel repeated task:
-        multicastTask.cancel();
-        // Send one last signal ASAP
-        timer.schedule(new TimerTask() {
+        // cancel heartbeats:
+        timer.cancel();
+        // Send one last signal in a new thread (required for android)
+        Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 multicast(packet);
                 // shutdown timer thread
                 timer.cancel();
             }
-        }, 0);
+        });
+        t.start();
+        // wait for thread to finish
+        try {
+            t.join(1000);// should not take too long
+        } catch (InterruptedException ex) {
+            // ignore, offline-signals are best-effort anyway
+        }
+        // done, sockets will be closed by the interface manager
     }
 
     /**
@@ -123,7 +127,7 @@ class HeartbeatSender {
             multicast(packet);
         } else {
             // asynchronous (multiple times)
-            multicastTask = new TimerTask() {
+            TimerTask multicastTask = new TimerTask() {
                 int counter = asyncRepetitions;
 
                 @Override

@@ -27,8 +27,8 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Ping-Server, listens for Pings/Heartbeats
@@ -40,7 +40,7 @@ public class PingServer {
     /**
      * The sockets currently in use.
      */
-    private HashMap<NetworkInterface, MulticastSocket> listenSockets;
+    private ConcurrentHashMap<NetworkInterface, MulticastSocket> listenSockets;
     /**
      * The Listener to call when pings are received.
      */
@@ -54,7 +54,7 @@ public class PingServer {
      */
     public PingServer(PingServerListener listener) {
         this.listener = listener;
-        listenSockets = new HashMap<NetworkInterface, MulticastSocket>();
+        listenSockets = new ConcurrentHashMap<NetworkInterface, MulticastSocket>();
     }
 
     /**
@@ -94,6 +94,7 @@ public class PingServer {
             public void run() {
                 try {
                     MulticastSocket socket = new MulticastSocket(27716);
+                    listenSockets.put(inter, socket);
                     socket.setNetworkInterface(inter);
                     socket.joinGroup(InetAddress.getByName("225.4.5.6"));
                     byte[] buffer = new byte[5];

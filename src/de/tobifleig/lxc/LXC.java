@@ -273,6 +273,5 @@ public class LXC {
 
         // done, exit
         System.out.println("LXC done. Thank you.");
-        System.exit(0);
     }
 }

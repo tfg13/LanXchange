@@ -20,19 +20,6 @@
  */
 package de.tobifleig.lxc.net;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.BindException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NoRouteToHostException;
-import java.net.Socket;
-import java.util.HashMap;
-
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
@@ -47,6 +34,18 @@ import de.tobifleig.lxc.net.serv.ListServerListener;
 import de.tobifleig.lxc.net.serv.PingServer;
 import de.tobifleig.lxc.net.serv.PingServerListener;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.BindException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
+import java.net.Socket;
+import java.util.HashMap;
 
 /**
  * Manages networking.
@@ -194,12 +193,14 @@ public class NetworkManager {
     /**
      * Stops the networking-subsystem.
      * Triggers sending of a special offline-signal and stops sending heartbeats.
-     * Please note that most ServerSockets are not closed, which means that the ports are not freed.
-     * NetworkManager expectes the JVM to shut down shortly after calling this method.
-     * It is known that this is considered bad practice and therefore it will likely be changed in future releases.
+     * Afterwards, closes all sockets and threads created by the networking subsystem.
      */
     public void stop() {
         multicaster.stop();
+        interfacesurveillance.stop();
+        fileServer.stop();
+        listServer.stop();
+        instances.stop();
     }
 
     /**

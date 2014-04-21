@@ -137,6 +137,14 @@ class InstanceManager {
     }
 
     /**
+     * Stops the InstanceManager.
+     * Disables periodic checks for timeouts.
+     */
+    void stop() {
+        timer.cancel();
+    }
+
+    /**
      * Compute incoming ping-packets.
      * Computing may result in creation of new LXCInstanes.
      *

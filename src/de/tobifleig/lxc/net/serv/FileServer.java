@@ -30,6 +30,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * This server listens for incoming download requests.
@@ -46,6 +47,10 @@ public class FileServer implements Runnable {
      * The FileManager to get filelists etc from.
      */
     private FileManager fileManager;
+    /**
+     * The socket this server uses to listen to illegal commands.
+     */
+    private ServerSocket servSock;
 
     /**
      * Creates a new FileServer with the given parameters.
@@ -61,13 +66,20 @@ public class FileServer implements Runnable {
     @Override
     public void run() {
         try {
-            ServerSocket servSock = new ServerSocket();
+            servSock = new ServerSocket();
             servSock.setReceiveBufferSize(212992);
             servSock.setPerformancePreferences(0, 0, 1);
             servSock.bind(new InetSocketAddress(27719));
 
             while (true) {
-                Socket client = servSock.accept();
+                Socket client;
+                try {
+                    client = servSock.accept();
+                } catch (SocketException ex) {
+                    // servSock was closed, ignore
+                    break;
+                }
+
                 client.setSendBufferSize(212992);
                 ObjectInputStream input;
                 ObjectOutputStream output;
@@ -116,5 +128,16 @@ public class FileServer implements Runnable {
         thread.setDaemon(true);
         thread.setName("fileserver");
         thread.start();
+    }
+
+    /**
+     * Stop this server.
+     */
+    public void stop() {
+        try {
+            servSock.close();
+        } catch (IOException ex) {
+            // ignore
+        }
     }
 }

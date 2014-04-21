@@ -20,14 +20,14 @@
  */
 package de.tobifleig.lxc.net;
 
+import de.tobifleig.lxc.net.serv.PingServer;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import de.tobifleig.lxc.net.serv.PingServer;
 
 /**
  * Manages all NetworkInterfaces.
@@ -52,6 +52,10 @@ public class InterfaceManager {
      * Interfaces that are actively used.
      */
     private ArrayList<NetworkInterface> usedInterfaces;
+    /**
+     * Timer to poll for interface changes.
+     */
+    private Timer timer;
 
     /**
      * Creates a new LXCInterfaceManager with the given parameters.
@@ -67,10 +71,9 @@ public class InterfaceManager {
     /**
      * Iterates over all known interfaces and decides, which should be used.
      */
-    private void updateInterfaces() {
+    private void updateInterfaces(Enumeration<NetworkInterface> interf) {
         try {
             ArrayList<NetworkInterface> nextList = new ArrayList<NetworkInterface>();
-            Enumeration<NetworkInterface> interf = NetworkInterface.getNetworkInterfaces();
             while (interf.hasMoreElements()) {
                 NetworkInterface inter = interf.nextElement();
                 if (inter.isUp() && !inter.isLoopback() && !inter.isPointToPoint()) {
@@ -95,15 +98,33 @@ public class InterfaceManager {
      */
     void start() {
         // first execution is synchronous
-        updateInterfaces();
+        try {
+            updateInterfaces(NetworkInterface.getNetworkInterfaces());
+        } catch (SocketException ex) {
+            // ignore
+        }
         // repeat async
-        Timer t = new Timer(true);
-        t.schedule(new TimerTask() {
+        timer = new Timer(true);
+        timer.schedule(new TimerTask() {
 
             @Override
             public void run() {
-                updateInterfaces();
+                try {
+                    updateInterfaces(NetworkInterface.getNetworkInterfaces());
+                } catch (SocketException ex) {
+                    // ignore
+                }
             }
         }, 5000, 5000);
+    }
+
+    /**
+     * Stops the IntefaceManager.
+     * Stops polling for network changes immediately.
+     * Also simulates removal of all active NetworkInterfaces.
+     */
+    void stop() {
+        timer.cancel();
+        updateInterfaces(Collections.<NetworkInterface>emptyEnumeration());
     }
 }

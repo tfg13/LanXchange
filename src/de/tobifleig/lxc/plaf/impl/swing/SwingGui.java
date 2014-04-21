@@ -201,6 +201,8 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
             @Override
             public void windowClosing(WindowEvent e) {
                 listener.shutdown();
+                // swing sometimes refuses to shutdown correctly
+                System.exit(0);
             }
         });
     }
