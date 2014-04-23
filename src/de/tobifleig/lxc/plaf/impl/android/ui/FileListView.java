@@ -235,7 +235,6 @@ public class FileListView extends ListView {
                 String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                         MimeTypeMap.getFileExtensionFromUrl(realFile.getBackingFile().getAbsolutePath()));
                 openIntent.setDataAndType(fileUri, mimeType);
-                System.out.println("Starting intent for uri " + fileUri + " mimeType is " + mimeType);
                 // check if intent can be processed
                 List<ResolveInfo> list = getContext().getPackageManager().queryIntentActivities(openIntent, 0);
                 if (list.isEmpty()) {
