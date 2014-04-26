@@ -22,12 +22,15 @@ package de.tobifleig.lxc.net;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -82,15 +85,16 @@ class HeartbeatSender {
                 sendHeartbeat(-1);
             }
         };
-        timer.schedule(task, 20000, 20000);
+        timer.schedule(task, 0, 20000);
         // inital heartbeat
-        sendHeartbeat(5);
+        sendHeartbeat(4);
     }
 
     /**
      * Stops sending heartbeats and sends a special, last offline-beat.
+     * Needs all known remote instances to send offline-signals to them.
      */
-    void stop() {
+    void stop(final Iterable<LXCInstance> remoteInstances) {
         // Set packet content to "offline-signal"
         packet[4] = 'o';
         // cancel heartbeats:
@@ -100,6 +104,10 @@ class HeartbeatSender {
             @Override
             public void run() {
                 multicast(packet);
+                // offline signals to all known instances
+                for (LXCInstance instance : remoteInstances) {
+                    direct(packet, instance.getDownloadAddress());
+                }
                 // shutdown timer thread
                 timer.cancel();
             }
@@ -119,12 +127,15 @@ class HeartbeatSender {
      * If asyncRepetitions equals -1, sending is synchronous.
      * Otherwise the internal timer is used. In this case there is a delay of one second after each packet.
      *
+     * Only synchronous hearthbeats contain
+     *
      * @param asyncRepetitions # of async packets, -1 for 1 sync packet
      */
     void sendHeartbeat(final int asyncRepetitions) {
         if (asyncRepetitions == -1) {
             // synchronous
             multicast(packet);
+            manualBroadcast();
         } else {
             // asynchronous (multiple times)
             TimerTask multicastTask = new TimerTask() {
@@ -206,5 +217,66 @@ class HeartbeatSender {
             ex.printStackTrace();
         }
 
+    }
+
+    /**
+     * Send the given packet via UDP to all local network devices.
+     * This is intended for environments where multicast is not supported (Android).
+     * Simulates a broadcast by sending UDP packets to all possible network devices.
+     * This obviously only works for small (home) IPv4 networks,
+     * where the addresses only differ by the last byte.
+     *
+     * This is a (hopefully) temporary workaround, suggestions for better, more robust,
+     * more elegant solutions are welcome.
+     */
+    private synchronized void manualBroadcast() {
+        for (NetworkInterface inter : sockets.keySet()) {
+            // get local ipv4 address of this interface
+            InetAddress localAddress = null;
+            Enumeration<InetAddress> inetAddresses = inter.getInetAddresses();
+            while (inetAddresses.hasMoreElements()) {
+                localAddress = inetAddresses.nextElement();
+                if (!localAddress.isLoopbackAddress() && localAddress instanceof Inet4Address) {
+                    // just pick this one
+                    break;
+                }
+            }
+            // found one?
+            if (localAddress != null) {
+                DatagramSocket sock = sockets.get(inter);
+                byte[] localAddressBytes = localAddress.getAddress();
+                int localSuffix = localAddressBytes[3];
+                try {
+                    for (int i = 1; i < 255; i++) {
+                        if (i == localSuffix) {
+                            // don't ping self
+                            continue;
+                        }
+                        localAddressBytes[3] = (byte) i;
+                        DatagramPacket pack = new DatagramPacket(packet, packet.length, InetAddress.getByAddress(localAddressBytes), 27716);
+                        sock.send(pack);
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+        }
+    }
+
+    /**
+     * Send the given signal as a heartbeat to all known instances.
+     *
+     * @param data the data to send
+     */
+    private void direct(byte[] data, InetAddress address) {
+        DatagramPacket pack = new DatagramPacket(data, data.length, address, 27716);
+        for (MulticastSocket sock : sockets.values()) {
+            try {
+                sock.send(pack);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 }

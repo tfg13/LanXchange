@@ -197,7 +197,7 @@ public class NetworkManager {
      * Kills all running transfers without further notice.
      */
     public void stop() {
-        multicaster.stop();
+        multicaster.stop(instances.getRemotes());
         interfacesurveillance.stop();
         fileServer.stop();
         listServer.stop();
