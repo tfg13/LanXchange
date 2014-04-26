@@ -29,10 +29,13 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Environment;
 import android.os.IBinder;
 import de.tobifleig.lxc.LXC;
@@ -60,6 +63,11 @@ public class LXCService extends Service implements Platform {
      * The listener, used by the user interface to send events to the core implementation.
      */
     private AndroidGuiListener listener;
+    /**
+     * The MulticastLock. Required to allow LanXchange to receive multicasts over wifi.
+     * This drains the battery, so multicasting must be disabled on exit.
+     */
+    private MulticastLock multicastLock;
     private Timer timer;
     private TimerTask killTask;
     private boolean[] componentsVisible = new boolean[2];
@@ -166,7 +174,11 @@ public class LXCService extends Service implements Platform {
 
             @Override
             public void init(String[] args) {
-                // not required for android
+                // acquire multicast lock
+                WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                multicastLock = wifi.createMulticastLock("lanxchange_multicastLock");
+                multicastLock.setReferenceCounted(false);
+                multicastLock.acquire();
             }
 
             @Override
@@ -284,5 +296,13 @@ public class LXCService extends Service implements Platform {
         }
 
         MediaScannerConnection.scanFile(this, paths, null, null);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (multicastLock != null) {
+            multicastLock.release();
+        }
+        super.onDestroy();
     }
 }
