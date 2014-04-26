@@ -212,6 +212,10 @@ class InstanceManager {
      * @param id the id of the remote instance
      */
     synchronized private void gotHeartbeat(InetAddress address, int id) {
+        if (id == LXCInstance.local.id) {
+            // ping from self, ignore
+            return;
+        }
         if (instances.containsKey(address) && id == instances.get(address).id) {
             instances.get(address).heartBeat();
         } else {
