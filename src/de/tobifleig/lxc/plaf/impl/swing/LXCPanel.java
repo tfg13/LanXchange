@@ -290,26 +290,28 @@ public class LXCPanel extends JPanel {
             // display help text?
             if (helpHovered) {
                 g2.setColor(Color.WHITE);
-                g2.fillRect(5, this.getHeight() - 205, 190, 200);
+                g2.fillRect(5, this.getHeight() - 215, 170, 210);
                 g2.setColor(Color.BLACK);
-                g2.drawRect(5, this.getHeight() - 205, 190, 200);
+                g2.drawRect(5, this.getHeight() - 215, 170, 210);
                 g2.setFont(f1);
-                g2.drawString("quick help", 15, this.getHeight() - 180);
+                g2.drawString("quick help", 15, this.getHeight() - 190);
                 g2.setFont(f2);
-                g2.drawString("This window contains all files", 15, this.getHeight() - 150);
-                g2.drawString("currently available in your", 15, this.getHeight() - 140);
-                g2.drawString("home network.", 15, this.getHeight() - 130);
-                g2.drawString("To download files, simply", 15, this.getHeight() - 110);
-                g2.drawString("click on them with your mouse.", 15, this.getHeight() - 100);
+                g2.drawString("Start LanXchange on multiple", 15, this.getHeight() - 160);
+                g2.drawString("devices in the same network", 15, this.getHeight() - 150);
+                g2.drawString("", 15, this.getHeight() - 140);
+                g2.drawString("Files offered by other", 15, this.getHeight() - 120);
+                g2.drawString("devices automatically", 15, this.getHeight() - 110);
+                g2.drawString("appear in this window.", 15, this.getHeight() - 100);
                 g2.drawString("", 15, this.getHeight() - 90);
-                g2.drawString("To offer files yourself,", 15, this.getHeight() - 80);
-                g2.drawString("drag them into this window.", 15, this.getHeight() - 70);
+                g2.drawString("Drag files into this", 15, this.getHeight() - 80);
+                g2.drawString("window to start sharing.", 15, this.getHeight() - 70);
                 g2.drawString("", 15, this.getHeight() - 60);
-                g2.drawString("", 15, this.getHeight() - 50);
-                g2.drawString("Modify the default settings", 15, this.getHeight() - 40);
-                g2.drawString("by clicking the wrench", 15, this.getHeight() - 30);
+                g2.drawString("A simple click downloads", 15, this.getHeight() - 50);
+                g2.drawString("a file.", 15, this.getHeight() - 40);
                 g2.setColor(Color.LIGHT_GRAY);
-                g2.drawString("v" + LXC.versionId, 190 - mer2.stringWidth("v" + LXC.versionId), this.getHeight() - 10);
+                g2.drawString("LanXchange " + LXC.versionString, 10, this.getHeight() - 20);
+                g2.drawString("v" + LXC.versionId, 170 - mer2.stringWidth("v" + LXC.versionId), this.getHeight() - 20);
+                g2.drawString("(c) 2009-2014  Tobias Fleig    GPL3+", 10, this.getHeight() - 10);
 
             }
         } else {
