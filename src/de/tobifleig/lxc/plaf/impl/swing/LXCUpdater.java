@@ -63,7 +63,7 @@ public final class LXCUpdater {
     /**
      * Files, that should no longer be found in the users installation and therefore must be deleted.
      */
-    private static final String[] oldFiles = new String[]{"lxc_debug.exe", "LXC.ico"};
+    private static final String[] oldFiles = new String[]{"lxc_debug.exe", "LXC.ico", "Ubuntu-R.ttf", "lxc_updates.pub"};
 
     /**
      * Checks for updates, promts the user and installs them.
@@ -134,7 +134,11 @@ public final class LXCUpdater {
                 masterZip.close();
                 // the check itself
                 KeyFactory fact = KeyFactory.getInstance("RSA");
-                FileInputStream ins = new FileInputStream(new File("lxc_updates.pub"));
+                InputStream ins = ClassLoader.getSystemClassLoader().getResourceAsStream("lxc_updates.pub");
+                if (ins == null) {
+                    // try file
+                    ins = new FileInputStream(new File("lxc_updates.pub"));
+                }
                 byte[] b = new byte[ins.available()];
                 ins.read(b);
                 ins.close();

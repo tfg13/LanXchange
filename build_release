@@ -22,10 +22,13 @@ echo "Packing jar..."
 cd classes
 echo "Main-Class: de.tobifleig.lxc.plaf.impl.GenericPCPlatform" > manifest.txt
 jar -cmf manifest.txt ../lanxchange.jar de
-
 cd ..
+jar -uf lanxchange.jar lxc_updates.pub
+jar -uf lanxchange.jar Ubuntu-R.ttf
+
+
 echo "Packing files"
-zip -r lxc.zip COPYING font_license.txt img/*.png lanxchange.jar lxc lxc.exe lxc_updates.pub Ubuntu-R.ttf
+zip -r lxc.zip COPYING font_license.txt img/*.png lanxchange.jar lxc lxc.exe
 
 echo "Copying zip to repository..."
 cp lxc.zip $DIR/releases/stable

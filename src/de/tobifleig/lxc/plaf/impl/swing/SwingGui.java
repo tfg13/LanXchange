@@ -30,6 +30,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.imageio.ImageIO;
@@ -88,7 +89,14 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
             ex.printStackTrace();
         }
         try {
-            ubuFont = Font.createFont(Font.TRUETYPE_FONT, new File("Ubuntu-R.ttf"));
+            InputStream ubuFontRes = ClassLoader.getSystemClassLoader().getResourceAsStream("Ubuntu-R.ttf");
+            if (ubuFontRes != null) {
+                ubuFont = Font.createFont(Font.TRUETYPE_FONT, ubuFontRes);
+            } else {
+                // try file
+                ubuFont = Font.createFont(Font.TRUETYPE_FONT, new File("Ubuntu-R.ttf"));
+            }
+
         } catch (FontFormatException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
