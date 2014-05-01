@@ -44,11 +44,11 @@ import java.util.zip.ZipFile;
  * This system never installs anything without comfirmation. For security reasons, only signed updates are accepted.
  *
  * At default settings, this class will check for updates on every start.
- * "Checking for updates" means reading the version file from github and comparing it to LXC.versionId.
+ * "Checking for updates" means reading the version file from updates.lanxchange.com and comparing it to LXC.versionId.
  * If a newer version is available, the user will be asked, if he/she wants to download.
  * If the answer is yes, the update is downloaded and installed and LXC is restarted automatically.
  * This usually happens withing seconds.
- * "Download and install" updates means downloading update_master.zip from github and extracting it.
+ * "Download and install" updates means downloading update_master.zip from updates.lanxchange.com and extracting it.
  * It contains to files: Another zipfile containing a full copy of LXC and a signature file.
  * Before proceeding, the (X509, SHA256withRSA) signature is checked to match the pubkey contained in lxc_updates.pub
  * If correct, the zipfile is extracted into the main folder, overriding all files.
@@ -80,7 +80,7 @@ public final class LXCUpdater {
         }
 
         // Contact update server, download version file
-        Scanner scanner = new Scanner(new URL("https://raw.github.com/tfg13/LanXchange/master/update/v").openStream(), "utf8");
+        Scanner scanner = new Scanner(new URL("http://updates.lanxchange.com/v").openStream(), "utf8");
         int gotver = Integer.parseInt(scanner.nextLine());
         String title = scanner.nextLine();
         scanner.close();
@@ -92,7 +92,7 @@ public final class LXCUpdater {
             if (updateGui.isUpdate()) {
                 updateGui.toProgressView();
                 // download update
-                URL url = new URL("https://raw.github.com/tfg13/LanXchange/master/update/update_master.zip");
+                URL url = new URL("http://updates.lanxchange.com/update_master.zip");
                 FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
