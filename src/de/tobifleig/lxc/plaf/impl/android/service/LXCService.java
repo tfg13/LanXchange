@@ -36,8 +36,10 @@ import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.PowerManager;
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
@@ -68,6 +70,8 @@ public class LXCService extends Service implements Platform {
      * This drains the battery, so multicasting must be disabled on exit.
      */
     private MulticastLock multicastLock;
+    private WifiLock wifiLock;
+    private PowerManager.WakeLock wakeLock;
     private Timer timer;
     private TimerTask killTask;
     private boolean[] componentsVisible = new boolean[2];
@@ -176,9 +180,18 @@ public class LXCService extends Service implements Platform {
             public void init(String[] args) {
                 // acquire multicast lock
                 WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-                multicastLock = wifi.createMulticastLock("lanxchange_multicastLock");
+                multicastLock = wifi.createMulticastLock("Lanxchange multicastLock");
                 multicastLock.setReferenceCounted(false);
                 multicastLock.acquire();
+                // acquire wifi lock
+                wifiLock = wifi.createWifiLock("LanXchange wifilock");
+                wifiLock.setReferenceCounted(false);
+                wifiLock.acquire();
+                // acquire wake lock
+                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LanXchange wakelock");
+                wakeLock.setReferenceCounted(false);
+                wakeLock.acquire();
             }
 
             @Override
@@ -302,6 +315,12 @@ public class LXCService extends Service implements Platform {
     public void onDestroy() {
         if (multicastLock != null) {
             multicastLock.release();
+        }
+        if (wifiLock != null) {
+            wifiLock.release();
+        }
+        if (wakeLock != null) {
+            wakeLock.release();
         }
         super.onDestroy();
     }
