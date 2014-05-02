@@ -23,6 +23,7 @@ package de.tobifleig.lxc.plaf.impl.swing;
 import de.tobifleig.lxc.LXC;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -139,10 +140,14 @@ public final class LXCUpdater {
                     // try file
                     ins = new FileInputStream(new File("lxc_updates.pub"));
                 }
-                byte[] b = new byte[ins.available()];
-                ins.read(b);
+                ByteArrayOutputStream sigRead = new ByteArrayOutputStream();
+                int bytesRead = 0;
+                byte[] sigBuffer = new byte[1024];
+                while ((bytesRead = ins.read(sigBuffer)) != -1) {
+                    sigRead.write(sigBuffer, 0, bytesRead);
+                }
                 ins.close();
-                X509EncodedKeySpec priKeySpec = new X509EncodedKeySpec(b);
+                X509EncodedKeySpec priKeySpec = new X509EncodedKeySpec(sigRead.toByteArray());
                 PublicKey pubKey = fact.generatePublic(priKeySpec);
 
                 Signature sign = Signature.getInstance("SHA256withRSA");
