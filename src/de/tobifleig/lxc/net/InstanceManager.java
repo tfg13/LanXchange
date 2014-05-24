@@ -34,6 +34,14 @@ import java.util.TimerTask;
  */
 class InstanceManager {
 
+	/**
+	 * Instance was detected by the other side, we learned about it when receiving a file list.
+	 */
+	public static final int SOURCE_RECEIVED_LIST = 1;
+	/**
+	 * Instance was detected by heartbeats.
+	 */
+	public static final int SOURCE_HEARTBEAT = 2;
     /**
      * Contains all known instances.
      * Enables access to them by addresses
@@ -201,7 +209,7 @@ class InstanceManager {
             return instances.get(address);
         }
         // create new (list detection)
-        return addInstance(address, id);
+        return addInstance(address, id, SOURCE_RECEIVED_LIST);
     }
 
     /**
@@ -219,11 +227,11 @@ class InstanceManager {
         if (instances.containsKey(address) && id == instances.get(address).id) {
             instances.get(address).heartBeat();
         } else {
-            addInstance(address, id);
+            addInstance(address, id, SOURCE_HEARTBEAT);
         }
     }
 
-    synchronized private LXCInstance addInstance(InetAddress address, int id) {
+    synchronized private LXCInstance addInstance(InetAddress address, int id, int source) {
         // try to merge with existing:
         for (LXCInstance inst : instances.values()) {
             if (inst.id == id) {
@@ -237,11 +245,11 @@ class InstanceManager {
         // check for override:
         if (instances.containsKey(address)) {
             // delete first
-            System.out.println("Overriding old instance at " + address + " " + id);
+            System.out.println("Overriding old instance at " + address + " " + id + " (d:" + source + ")");
             removeAddress(address);
         }
         instances.put(address, newremote);
-        System.out.println("New Instance at " + address + " id: " + id);
+        System.out.println("New Instance at " + address + " id: " + id + " (d:" + source + ")");
         // Send a file list to this new instance
         listener.instanceAdded(newremote);
         return newremote;
