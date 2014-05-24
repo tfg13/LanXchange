@@ -235,9 +235,10 @@ class HeartbeatSender {
             InetAddress localAddress = null;
             Enumeration<InetAddress> inetAddresses = inter.getInetAddresses();
             while (inetAddresses.hasMoreElements()) {
-                localAddress = inetAddresses.nextElement();
-                if (!localAddress.isLoopbackAddress() && localAddress instanceof Inet4Address) {
+                InetAddress testAddress = inetAddresses.nextElement();
+                if (!testAddress.isLoopbackAddress() && testAddress instanceof Inet4Address) {
                     // just pick this one
+                    localAddress = testAddress;
                     break;
                 }
             }
