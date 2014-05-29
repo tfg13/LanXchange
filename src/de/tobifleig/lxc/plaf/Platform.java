@@ -52,7 +52,7 @@ public interface Platform {
      * @param args the start-parameters
      * @return the platform-specific user interface
      */
-    public GuiInterface getGui(String[] args);
+    public UserInterface getGui(String[] args);
 
     /**
      * Reads and returns the configuration.

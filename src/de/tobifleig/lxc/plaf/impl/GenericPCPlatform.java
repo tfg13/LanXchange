@@ -23,7 +23,7 @@ package de.tobifleig.lxc.plaf.impl;
 import de.tobifleig.lxc.Configuration;
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.plaf.GuiInterface;
+import de.tobifleig.lxc.plaf.UserInterface;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.swing.LXCUpdater;
 import de.tobifleig.lxc.plaf.impl.swing.SwingGui;
@@ -123,7 +123,7 @@ public class GenericPCPlatform implements Platform {
     }
 
     @Override
-    public GuiInterface getGui(String[] args) {
+    public UserInterface getGui(String[] args) {
         return gui;
     }
 

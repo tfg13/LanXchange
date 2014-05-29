@@ -24,13 +24,13 @@ import de.tobifleig.lxc.data.LXCFile;
 import java.io.File;
 
 /**
- * Defines a LXC-GUI.
+ * Defines a LXC-UI.
  *
- * Enables the same codebase to use Swing or the Android-UI
+ * Enables the same codebase to use Swing or the Android-UI or a textbased interface
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public interface GuiInterface {
+public interface UserInterface {
 
     /**
      * Initialize the user-inferface.

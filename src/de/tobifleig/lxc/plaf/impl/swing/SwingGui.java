@@ -21,7 +21,7 @@
 package de.tobifleig.lxc.plaf.impl.swing;
 
 import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.plaf.GuiInterface;
+import de.tobifleig.lxc.plaf.UserInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -47,7 +47,7 @@ import javax.swing.UIManager;
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class SwingGui extends javax.swing.JFrame implements GuiInterface {
+public class SwingGui extends javax.swing.JFrame implements UserInterface {
 
     private static final long serialVersionUID = 1L;
     /**

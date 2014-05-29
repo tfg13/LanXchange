@@ -44,7 +44,7 @@ import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
-import de.tobifleig.lxc.plaf.GuiInterface;
+import de.tobifleig.lxc.plaf.UserInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
@@ -134,8 +134,8 @@ public class LXCService extends Service implements Platform {
     }
 
     @Override
-    public GuiInterface getGui(String[] args) {
-        return new GuiInterface() {
+    public UserInterface getGui(String[] args) {
+        return new UserInterface() {
 
             @Override
             public void update() {
