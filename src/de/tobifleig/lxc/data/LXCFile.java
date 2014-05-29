@@ -20,15 +20,14 @@
  */
 package de.tobifleig.lxc.data;
 
+import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.net.LXCInstance;
 import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import de.tobifleig.lxc.data.impl.RealFile;
-import de.tobifleig.lxc.net.LXCInstance;
 
 /**
  * Represents a "file" offered by a certain LXCInstance.
@@ -242,6 +241,25 @@ public class LXCFile implements Serializable {
     }
 
     /**
+     * Return a String with exactly 30 chars containing the name. The name is cut or suffixed with extra spaces to fill the 30 chars.
+     *
+     * @return
+     */
+    public String getFormattedName() {
+        String name = getShownName();
+        if (name.length() > 30) {
+            return name.substring(30);
+        } else if (name.length() < 30) {
+            for (int i = name.length(); i < 30; i++) {
+                name += " ";
+            }
+            return name;
+        } else {
+            return name;
+        }
+    }
+
+    /**
      * Returns the type.
      *
      * @return
@@ -352,25 +370,25 @@ public class LXCFile implements Serializable {
         // Search toplevel node(s):
         LinkedList<File> topLevelNodes = new LinkedList<File>();
         outer:
-            for (File file : files) {
-                // Check if this file is below any toplevel node
-                for (File topLevelNode : topLevelNodes) {
-                    if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
-                        // below - this means file is not a toplevel node
-                        continue outer;
-                    }
+        for (File file : files) {
+            // Check if this file is below any toplevel node
+            for (File topLevelNode : topLevelNodes) {
+                if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
+                    // below - this means file is not a toplevel node
+                    continue outer;
                 }
-                // This file is a toplevel node - check if this makes other toplevel nodes obsolete
-                for (int i = 0; i < topLevelNodes.size(); i++) {
-                    File topLevelNode = topLevelNodes.get(i);
-                    if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
-                        // the new file is a parent of this toplevel node
-                        topLevelNodes.remove(i);
-                    }
-                }
-                // Insert the new toplevel node
-                topLevelNodes.add(file);
             }
+            // This file is a toplevel node - check if this makes other toplevel nodes obsolete
+            for (int i = 0; i < topLevelNodes.size(); i++) {
+                File topLevelNode = topLevelNodes.get(i);
+                if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
+                    // the new file is a parent of this toplevel node
+                    topLevelNodes.remove(i);
+                }
+            }
+            // Insert the new toplevel node
+            topLevelNodes.add(file);
+        }
 
         ArrayList<VirtualFile> result = new ArrayList<VirtualFile>();
         // Each of these files now either has a parent in topLevelNodes or is a toplevel node itself.

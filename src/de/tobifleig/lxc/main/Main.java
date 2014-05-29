@@ -18,13 +18,33 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.impl;
+package de.tobifleig.lxc.main;
+
+import java.util.Arrays;
 
 /**
- * Windows-specific behaviors/settings.
+ * Application entry point. Every project should have a main class.
  *
- * @author Tobias Fleig <tobifleig googlemail com>
+ * @author Michael
  */
-public class WinPlatform extends GenericPCPlatform {
-    // Room for future enhancements
+public class Main {
+
+    /**
+     * Entry point Launch Swing-GUI unless -nogui was given as argument
+     *
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        boolean gui = true;
+        if (Arrays.asList(args).contains("-nogui")) {
+            gui = false;
+        }
+        if (gui) {
+            new SwingGUILauncher(args);
+        } else {
+            new LxcDaemonController(args);
+        }
+
+    }
+
 }
