@@ -52,7 +52,16 @@ public class GenericPCPlatform implements Platform {
     /**
      * the swing-gui.
      */
-    private static UserInterface gui = new SwingGui();
+    private static UserInterface userInterface;
+
+    /**
+     * Create a new GenericPCPlatform and use the given UserInterface to talk to the user.
+     *
+     * @param userInterface
+     */
+    public GenericPCPlatform(UserInterface userInterface) {
+        this.userInterface = userInterface;
+    }
 
     @Override
     public boolean hasAutoUpdates() {
@@ -104,7 +113,7 @@ public class GenericPCPlatform implements Platform {
                 @Override
                 public void run() {
                     try {
-                        LXCUpdater.checkAndPerformUpdate(gui, force, noVerification, managed);
+                        LXCUpdater.checkAndPerformUpdate(userInterface, force, noVerification, managed);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -123,7 +132,7 @@ public class GenericPCPlatform implements Platform {
 
     @Override
     public UserInterface getGui(String[] args) {
-        return gui;
+        return userInterface;
     }
 
     @Override
@@ -216,9 +225,10 @@ public class GenericPCPlatform implements Platform {
     /**
      * Starts LanXchange on PC plaforms.
      *
+     * @param userInterface the interface (graphical or text) to talk to the user
      * @param args any arguments you want to pass to LanXchange
      */
-    public static void main(String[] args) {
+    public static void startLXC(UserInterface userInterface, String[] args) {
         // check permission for own folder
         try {
             File.createTempFile("testacl", null, new File(".")).delete();
@@ -228,10 +238,10 @@ public class GenericPCPlatform implements Platform {
             System.out.println("ERROR: Cannot write to my directory ("
                     + new File(".").getAbsolutePath()
                     + "). Try running LXC in your home directory.");
-            gui.showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
+            userInterface.showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
             System.exit(1);
         }
-        LXC lxc = new LXC(new GenericPCPlatform(), args);
+        LXC lxc = new LXC(new GenericPCPlatform(userInterface), args);
     }
 
     @Override
