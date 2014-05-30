@@ -20,6 +20,7 @@
  */
 package de.tobifleig.lxc.plaf.impl.swing;
 
+import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import java.awt.Color;
 import javax.swing.ImageIcon;
 

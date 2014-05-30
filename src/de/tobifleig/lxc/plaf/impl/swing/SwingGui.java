@@ -20,8 +20,9 @@
  */
 package de.tobifleig.lxc.plaf.impl.swing;
 
+import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.plaf.UserInterface;
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import java.awt.Font;
 import java.awt.FontFormatException;

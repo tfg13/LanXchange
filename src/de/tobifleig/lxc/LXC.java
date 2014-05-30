@@ -26,7 +26,7 @@ import de.tobifleig.lxc.net.LXCInstance;
 import de.tobifleig.lxc.net.NetworkManager;
 import de.tobifleig.lxc.net.NetworkManagerListener;
 import de.tobifleig.lxc.net.TransFileList;
-import de.tobifleig.lxc.plaf.UserInterface;
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 import java.io.File;

@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.tobifleig.lxc.plaf.impl.swing;
+package de.tobifleig.lxc.plaf.impl.textbased;
+
+import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 
 /**
  *

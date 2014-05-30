@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.impl.swing;
+package de.tobifleig.lxc.plaf.impl.ui;
 
 /**
  * Generic Dialog to inform the user of the update progress.

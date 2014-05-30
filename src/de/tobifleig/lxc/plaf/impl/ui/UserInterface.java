@@ -18,10 +18,11 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf;
+package de.tobifleig.lxc.plaf.impl.ui;
 
 import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.plaf.impl.swing.UpdateDialog;
+import de.tobifleig.lxc.plaf.GuiListener;
+import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import java.io.File;
 
 /**
