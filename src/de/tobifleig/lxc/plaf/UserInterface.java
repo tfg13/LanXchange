@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.plaf;
 
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.plaf.impl.swing.UpdateDialog;
 import java.io.File;
 
 /**
@@ -82,4 +83,11 @@ public interface UserInterface {
      * @return true, if user really wants to quit and cancel all running transfers
      */
     public boolean confirmCloseWithTransfersRunning();
+
+    /**
+     * Return a dialog that can be used to inform the user of the update process.
+     *
+     * @return
+     */
+    public UpdateDialog getUpdateDialog();
 }

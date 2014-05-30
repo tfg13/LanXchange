@@ -52,7 +52,7 @@ public class GenericPCPlatform implements Platform {
     /**
      * the swing-gui.
      */
-    private static SwingGui gui = new SwingGui();
+    private static UserInterface gui = new SwingGui();
 
     @Override
     public boolean hasAutoUpdates() {
@@ -104,8 +104,7 @@ public class GenericPCPlatform implements Platform {
                 @Override
                 public void run() {
                     try {
-                        LXCUpdater.checkAndPerformUpdate(gui, force,
-                                noVerification, managed);
+                        LXCUpdater.checkAndPerformUpdate(gui, force, noVerification, managed);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -217,8 +216,7 @@ public class GenericPCPlatform implements Platform {
     /**
      * Starts LanXchange on PC plaforms.
      *
-     * @param args
-     * any arguments you want to pass to LanXchange
+     * @param args any arguments you want to pass to LanXchange
      */
     public static void main(String[] args) {
         // check permission for own folder

@@ -271,4 +271,9 @@ public class SwingGui extends javax.swing.JFrame implements UserInterface {
     public boolean confirmCloseWithTransfersRunning() {
         return (JOptionPane.showConfirmDialog(rootPane, "Exiting now will kill all running transfers. Quit anyway?", "Transfers running", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION);
     }
+
+    @Override
+    public UpdateDialog getUpdateDialog() {
+        return new SwingUpdateDialog(this);
+    }
 }
