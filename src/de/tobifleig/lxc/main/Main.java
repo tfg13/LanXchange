@@ -28,18 +28,24 @@ package de.tobifleig.lxc.main;
 public class Main {
 
     /**
-     * Entry point
-     * Launch Swing-GUI unless -nogui was given as argument
-     * 
+     * Entry point Launch Swing-GUI unless -nogui was given as argument
+     *
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        boolean gui = true;
         for (String arg : args) {
             if (arg.equals("-nogui")) {
-                new LXCDaemonLauncher(args);
+                gui = false;
+
             }
         }
-        new SwingGUILauncher(args);
+        if (gui) {
+            new SwingGUILauncher(args);
+        } else {
+            new LXCDaemonLauncher(args);
+        }
+
     }
 
 }
