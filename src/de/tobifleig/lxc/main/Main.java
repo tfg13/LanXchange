@@ -43,7 +43,7 @@ public class Main {
         if (gui) {
             new SwingGUILauncher(args);
         } else {
-            new LXCDaemonLauncher(args);
+            new LxcDaemonController(args);
         }
 
     }
