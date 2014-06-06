@@ -21,10 +21,13 @@
 package de.tobifleig.lxc.plaf.impl.textbased;
 
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.data.LXCJob;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import java.io.File;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * The UnserInterface that lets the daemon communicate with lxc.
@@ -33,14 +36,51 @@ import java.io.File;
  */
 public class LXCDaemonUserInterface implements UserInterface {
 
+    private GuiListener guiListener;
+    private List<LXCFile> files;
+    FileNumberTranslator translator = new FileNumberTranslator();
+
+    public String getStatus() {
+        String status = "ID NAME                           DESCRIPTION\n";
+        for (LXCFile file : files) {
+            status += translator.getNumberForFile(file) + "  ";
+            status += file.getFormattedName() + " ";
+            if (file.isLocal()) {
+                if (file.getJobs().size() == 0) {
+                    status += " Offered by this machine\n";
+                } else {
+                    Iterator<LXCJob> iter = file.getJobs().iterator();
+                    while (iter.hasNext()) {
+                        LXCJob job = iter.next();
+                        status += "Sending to " + job.getRemote().getName() + " at " + job.getTrans().getCurrentSpeed() + ", " + job.getTrans().getProgress() + "% complete.\n";
+                        if (iter.hasNext()) {
+                            status += "                              ";
+                        }
+                    }
+                }
+
+                // TODO show downloaders and their progress
+            } else {
+                if (file.getJobs().size() == 0) {
+                    status += "Offered from " + file.getInstance().getName();
+                } else {
+                    LXCJob job = file.getJobs().get(0);
+                    status += "Downloading from " + file.getInstance().getName() + " at " + job.getTrans().getCurrentSpeed() + ", " + job.getTrans().getProgress() + "% complete.\n";
+                }
+
+            }
+            status += "\n";
+        }
+        return status;
+    }
+
     @Override
     public void init(String[] args) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void display() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        files = guiListener.getFileList();
     }
 
     @Override
@@ -50,12 +90,12 @@ public class LXCDaemonUserInterface implements UserInterface {
 
     @Override
     public void setGuiListener(GuiListener guiListener) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.guiListener = guiListener;
     }
 
     @Override
     public void update() {
-        throw new UnsupportedOperationException("Not supported yet.");
+//        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

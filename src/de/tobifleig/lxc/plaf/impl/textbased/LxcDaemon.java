@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.plaf.impl.textbased;
 
+import de.tobifleig.lxc.LXC;
+import de.tobifleig.lxc.plaf.impl.GenericPCPlatform;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -37,9 +39,12 @@ public class LxcDaemon implements Runnable {
 
     private ServerSocket serverSocket;
     private Thread serverThread;
+    private LXCDaemonUserInterface lxcInterface;
 
     public LxcDaemon() {
         try {
+            lxcInterface = new LXCDaemonUserInterface();
+            new LXC(new GenericPCPlatform(lxcInterface), new String[0]);
             serverSocket = new ServerSocket(LXC_SERVER_PORT);
             serverThread = new Thread(this);
             serverThread.setName("LxcDaemonThread");
@@ -70,6 +75,10 @@ public class LxcDaemon implements Runnable {
                         socket.getOutputStream().write("stopping...".getBytes());
                         socket.close();
                         System.exit(0);
+                        break;
+                    case "list":
+                        socket.getOutputStream().write((lxcInterface.getStatus() + "\n").getBytes());
+                        socket.close();
                         break;
                     default:
                         socket.getOutputStream().write(("unknown command: " + commands[0]).getBytes());
