@@ -26,7 +26,9 @@ import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -37,12 +39,12 @@ import java.util.List;
 public class LXCDaemonUserInterface implements UserInterface {
 
     private GuiListener guiListener;
-    private List<LXCFile> files;
+    private List<LXCFile> lxcFileList;
     FileNumberTranslator translator = new FileNumberTranslator();
 
     public String getStatus() {
         String status = "ID NAME                           DESCRIPTION\n";
-        for (LXCFile file : files) {
+        for (LXCFile file : lxcFileList) {
             status += translator.getNumberForFile(file) + "  ";
             status += file.getFormattedName() + " ";
             if (file.isLocal()) {
@@ -80,7 +82,7 @@ public class LXCDaemonUserInterface implements UserInterface {
 
     @Override
     public void display() {
-        files = guiListener.getFileList();
+        lxcFileList = guiListener.getFileList();
     }
 
     @Override
@@ -113,4 +115,25 @@ public class LXCDaemonUserInterface implements UserInterface {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public String uploadFile(String filename) {
+        File file = new File(filename);
+        if (file == null) {
+            return "ERROR\nFile not found";
+        }
+        List<File> files = new LinkedList<>();
+        files.add(file);
+        LXCFile lxcFile = new LXCFile(LXCFile.convertToVirtual(files), file.getName());
+        guiListener.offerFile(lxcFile);
+        return "OK\nFile uploaded as " + translator.getNumberForFile(lxcFile) + "\n";
+    }
+
+    public String stopUploadFile(int number) {
+        LXCFile file = translator.getFileForNumber(number);
+        if (file == null || !lxcFileList.contains(file)) {
+            return "ERROR\nNo such file.";
+        } else {
+            guiListener.removeFile(file);
+            return "OK\nStopped uploading " + file.getShownName();
+        }
+    }
 }

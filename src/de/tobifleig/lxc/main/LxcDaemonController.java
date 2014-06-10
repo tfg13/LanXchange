@@ -18,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.tobifleig.lxc.main;
 
 import de.tobifleig.lxc.plaf.impl.textbased.LxcDaemon;
@@ -91,7 +90,46 @@ public class LxcDaemonController {
                 }
                 break;
             case "upload-file":
-                System.out.println("not yet implemented");
+                if (args.length < 3) {
+                    System.out.println("what file should i upload?");
+                    break;
+                }
+                String filename = args[2];
+                try {
+                    socket.getOutputStream().write(("upload-file " + filename + "\n").getBytes());
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    if (!reader.readLine().equals("OK")) {
+                        System.out.println("Error uploading file!");
+                        System.out.println(reader.readLine());
+                    } else {
+                        System.out.println("File uploaded successfully!");
+                    }
+                    socket.close();
+                } catch (IOException ex) {
+                    System.out.println("Error uploading file.");
+                }
+                break;
+            case "stop-uploading-file":
+                if (args.length < 3) {
+                    System.out.println("Stop uploading wich file?");
+                }
+                try {
+                    int number = Integer.parseInt(args[2]);
+                    socket.getOutputStream().write(("stop-uploading-file " + number + "\n").getBytes());
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    if (!reader.readLine().equals("OK")) {
+                        System.out.println("Error stopping file upload!");
+                        System.out.println(reader.readLine());
+                    } else {
+                        System.out.println("Success");
+                        System.out.println(reader.readLine());
+                    }
+                    socket.close();
+                } catch (IOException ex) {
+                    System.out.println("Error uploading file.");
+                }catch(NumberFormatException ex2){
+                    System.out.println("Usage: stop-uploading-file X\nWhere X is the number given to the file. Use -nogui list to see the numbers.");
+                }
                 break;
             case "download-file":
                 System.out.println("not yet implemented");
