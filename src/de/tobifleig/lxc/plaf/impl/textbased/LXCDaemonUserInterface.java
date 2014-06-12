@@ -117,7 +117,7 @@ public class LXCDaemonUserInterface implements UserInterface {
 
     public String uploadFile(String filename) {
         File file = new File(filename);
-        if (file == null) {
+        if (!file.exists()) {
             return "ERROR\nFile not found";
         }
         List<File> files = new LinkedList<>();
@@ -131,6 +131,8 @@ public class LXCDaemonUserInterface implements UserInterface {
         LXCFile file = translator.getFileForNumber(number);
         if (file == null || !lxcFileList.contains(file)) {
             return "ERROR\nNo such file.";
+        } else if (!file.isLocal()) {
+            return "ERROR\nFile is uploaded from another system.";
         } else {
             guiListener.removeFile(file);
             return "OK\nStopped uploading " + file.getShownName();
