@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.plaf.impl.textbased;
 
 import de.tobifleig.lxc.LXC;
+import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.GenericPCPlatform;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,11 +41,14 @@ public class LxcDaemon implements Runnable {
     private ServerSocket serverSocket;
     private Thread serverThread;
     private LXCDaemonUserInterface lxcInterface;
+    private LXC lxc;
 
     public LxcDaemon() {
         try {
             lxcInterface = new LXCDaemonUserInterface();
-            new LXC(new GenericPCPlatform(lxcInterface), new String[0]);
+            Platform plattform = new GenericPCPlatform(lxcInterface);
+            lxcInterface.setDefaultDownloadTarget(plattform.getDefaultDownloadTarget());
+            lxc = new LXC(plattform, new String[0]);
             serverSocket = new ServerSocket(LXC_SERVER_PORT);
             serverThread = new Thread(this);
             serverThread.setName("LxcDaemonThread");
@@ -67,10 +71,6 @@ public class LxcDaemon implements Runnable {
                 String[] commands = reader.readLine().split(" ");
 
                 switch (commands[0]) {
-                    case "status":
-                        socket.getOutputStream().write("lxcd running\n\n".getBytes());
-                        socket.close();
-                        break;
                     case "stop":
                         socket.getOutputStream().write("stopping...\n\n".getBytes());
                         socket.close();
@@ -86,6 +86,14 @@ public class LxcDaemon implements Runnable {
                         break;
                     case "stop-uploading-file":
                         socket.getOutputStream().write((lxcInterface.stopUploadFile(Integer.parseInt(commands[1])) + "\n\n").getBytes());
+                        socket.close();
+                        break;
+                    case "download":
+                        String target = "";
+                        if (commands.length > 2) {
+                            target = commands[2];
+                        }
+                        socket.getOutputStream().write((lxcInterface.downloadFile(Integer.parseInt(commands[1]), target) + "\n\n").getBytes());
                         socket.close();
                         break;
                     default:

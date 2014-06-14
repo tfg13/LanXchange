@@ -40,6 +40,7 @@ public class LXCDaemonUserInterface implements UserInterface {
     private GuiListener guiListener;
     private List<LXCFile> lxcFileList;
     FileNumberTranslator translator = new FileNumberTranslator();
+    private File downloadFolder;
 
     public String getStatus() {
         String status = "ID NAME                           DESCRIPTION\n";
@@ -95,17 +96,17 @@ public class LXCDaemonUserInterface implements UserInterface {
 
     @Override
     public void update() {
-//        throw new UnsupportedOperationException("Not supported yet.");
+        // lxcd is not interactive, so we ignore updates
     }
 
     @Override
     public File getFileTarget(LXCFile file) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return downloadFolder;
     }
 
     @Override
     public boolean confirmCloseWithTransfersRunning() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override
@@ -134,6 +135,33 @@ public class LXCDaemonUserInterface implements UserInterface {
         } else {
             guiListener.removeFile(file);
             return "Stopped uploading " + file.getShownName();
+        }
+    }
+
+    String downloadFile(int number, String target) {
+        LXCFile file = translator.getFileForNumber(number);
+        if (file == null || !lxcFileList.contains(file)) {
+            return "No such file.";
+        } else if (!file.isLocal()) {
+            if (!target.isEmpty()) {
+                downloadFolder = new File(target);
+            }
+            if (downloadFolder == null) {
+                return "Set defaulttarget in lxc.cfg or supply the download target as argument.";
+            } else if (!downloadFolder.canWrite()) {
+                return "Cant write to " + downloadFolder.getAbsolutePath();
+            } else {
+                guiListener.downloadFile(file, true);
+                return "Downloading " + file.getFormattedName();
+            }
+        } else {
+            return "Cant download files offered from this machine." + file.getShownName();
+        }
+    }
+
+    public void setDefaultDownloadTarget(String defaultDownloadTarget) {
+        if (defaultDownloadTarget != null) {
+            downloadFolder = new File(defaultDownloadTarget);
         }
     }
 }
