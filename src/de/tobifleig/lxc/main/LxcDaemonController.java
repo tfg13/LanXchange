@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * Control the Lxc-Daemon. Sends start, stop, file-upload etc. commands to the daemon
@@ -51,65 +52,65 @@ public class LxcDaemonController {
         } catch (IOException ex) {
             // cant connect, lxcd propably isnt running
         }
-        switch (args[1]) {
-            case "status":
-                if (socket.isConnected()) {
-                    System.out.println("LxcDaemon is running.");
-                } else {
-                    System.out.println("LxcDaemon is NOT running.");
-                }
-                break;
-            case "start":
+
+        if (Arrays.asList(args).contains("status")) {
+            if (socket.isConnected()) {
+                System.out.println("LxcDaemon is running.");
+            } else {
+                System.out.println("LxcDaemon is NOT running.");
+            }
+        } else if (Arrays.asList(args).contains("start")) {
+            try {
+                ProcessBuilder builder = new ProcessBuilder();
+                builder.environment().putAll(System.getenv());
+                builder.command("java", "-jar", "LXC.jar", "-nogui", "daemonize");
+                builder.start();
+            } catch (IOException ex) {
+                System.out.println("Error starting lxc daemon");
+                ex.printStackTrace();
+            }
+        } else if (Arrays.asList(args).contains("daemonize")) {
+            LxcDaemon daemon = new LxcDaemon();
+        } else if (Arrays.asList(args).contains("stop")) {
+            if (socket.isConnected()) {
                 try {
-                    ProcessBuilder builder = new ProcessBuilder();
-                    builder.environment().putAll(System.getenv());
-                    builder.command("java", "-jar", "LXC.jar", "-nogui", "daemonize");
-                    builder.start();
-                } catch (IOException ex) {
-                    System.out.println("Error starting lxc daemon");
-                    ex.printStackTrace();
-                }
-                break;
-            case "daemonize":
-                LxcDaemon daemon = new LxcDaemon();
-                break;
-            case "stop":
-                if (socket.isConnected()) {
-                    try {
-                        socket.getOutputStream().write("stop\n".getBytes());
-                        String answer = reader.readLine();
-                        if (answer.equals("stopping...")) {
-                            System.out.println("LXC Daemon shutting down.");
-                        } else {
-                            System.out.println("Error stopping daemon.");
-                        }
-                        socket.close();
-                    } catch (IOException ex) {
+                    socket.getOutputStream().write("stop\n".getBytes());
+                    String answer = reader.readLine();
+                    if (answer.equals("stopping...")) {
+                        System.out.println("LXC Daemon shutting down.");
+                    } else {
                         System.out.println("Error stopping daemon.");
                     }
-                } else {
-                    System.out.println("LXC Daemon is not running.");
-                }
-                break;
-            default:
-                // Its a command to the deamon, send it and print the answer:
-                String command = "";
-                command += args[1];
-                for (int i = 2; i < args.length; i++) {
-                    command += " " + args[i];
-                }
-                try {
-                    socket.getOutputStream().write(command.getBytes());
-                    socket.getOutputStream().write("\n".getBytes());
-                    String answer;
-                    do {
-                        answer = reader.readLine();
-                        System.out.println(answer);
-                    } while (!answer.isEmpty());
                     socket.close();
                 } catch (IOException ex) {
-                    System.out.println("Cant connect to LXCDaemon.");
+                    System.out.println("Error stopping daemon.");
                 }
+            } else {
+                System.out.println("LXC Daemon is not running.");
+            }
+        } else { // Its a command to the deamon, send it and print the answer:
+            String command = "";
+            boolean daemonargs = false;
+            for (int i = 0; i < args.length; i++) {
+                if (daemonargs) {
+                    command += " " + args[i];
+                } else if (args[i].equals("-nogui")) {
+                    daemonargs = true;
+                }
+            }
+            command = command.substring(1);
+            try {
+                socket.getOutputStream().write(command.getBytes());
+                socket.getOutputStream().write("\n".getBytes());
+                String answer;
+                do {
+                    answer = reader.readLine();
+                    System.out.println(answer);
+                } while (!answer.isEmpty());
+                socket.close();
+            } catch (IOException ex) {
+                System.out.println("Cant connect to LXCDaemon.");
+            }
         }
     }
 }

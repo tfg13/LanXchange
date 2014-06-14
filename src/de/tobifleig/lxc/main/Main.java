@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.main;
 
+import java.util.Arrays;
+
 /**
  * Application entry point. Every project should have a main class.
  *
@@ -34,11 +36,8 @@ public class Main {
      */
     public static void main(String args[]) {
         boolean gui = true;
-        for (String arg : args) {
-            if (arg.equals("-nogui")) {
-                gui = false;
-
-            }
+        if (Arrays.asList(args).contains("-nogui")) {
+            gui = false;
         }
         if (gui) {
             new SwingGUILauncher(args);
