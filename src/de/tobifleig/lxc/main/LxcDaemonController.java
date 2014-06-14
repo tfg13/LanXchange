@@ -38,20 +38,23 @@ public class LxcDaemonController {
      * The socket used to communicate to the Lxc-Daemon
      */
     private Socket socket;
+    /**
+     * The reader to read from the sockets inputstream.
+     */
+    private BufferedReader reader;
 
     public LxcDaemonController(String args[]) {
         try {
             socket = new Socket();
             socket.connect(new InetSocketAddress("localhost", LxcDaemon.LXC_SERVER_PORT));
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException ex) {
             // cant connect, lxcd propably isnt running
         }
         switch (args[1]) {
             case "status":
                 if (socket.isConnected()) {
-
                     System.out.println("LxcDaemon is running.");
-
                 } else {
                     System.out.println("LxcDaemon is NOT running.");
                 }
@@ -74,7 +77,6 @@ public class LxcDaemonController {
                 if (socket.isConnected()) {
                     try {
                         socket.getOutputStream().write("stop\n".getBytes());
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         String answer = reader.readLine();
                         if (answer.equals("stopping...")) {
                             System.out.println("LXC Daemon shutting down.");
@@ -89,69 +91,25 @@ public class LxcDaemonController {
                     System.out.println("LXC Daemon is not running.");
                 }
                 break;
-            case "upload-file":
-                if (args.length < 3) {
-                    System.out.println("what file should i upload?");
-                    break;
-                }
-                String filename = args[2];
-                try {
-                    socket.getOutputStream().write(("upload-file " + filename + "\n").getBytes());
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    if (!reader.readLine().equals("OK")) {
-                        System.out.println("Error uploading file!");
-                        System.out.println(reader.readLine());
-                    } else {
-                        System.out.println("File uploaded successfully!");
-                    }
-                    socket.close();
-                } catch (IOException ex) {
-                    System.out.println("Error uploading file.");
-                }
-                break;
-            case "stop-uploading-file":
-                if (args.length < 3) {
-                    System.out.println("Stop uploading wich file?");
+            default:
+                // Its a command to the deamon, send it and print the answer:
+                String command = "";
+                command += args[1];
+                for (int i = 2; i < args.length; i++) {
+                    command += " " + args[i];
                 }
                 try {
-                    int number = Integer.parseInt(args[2]);
-                    socket.getOutputStream().write(("stop-uploading-file " + number + "\n").getBytes());
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    if (!reader.readLine().equals("OK")) {
-                        System.out.println("Error stopping file upload!");
-                        System.out.println(reader.readLine());
-                    } else {
-                        System.out.println("Success");
-                        System.out.println(reader.readLine());
-                    }
-                    socket.close();
-                } catch (IOException ex) {
-                    System.out.println("Error uploading file.");
-                }catch(NumberFormatException ex2){
-                    System.out.println("Usage: stop-uploading-file X\nWhere X is the number given to the file. Use -nogui list to see the numbers.");
-                }
-                break;
-            case "download-file":
-                System.out.println("not yet implemented");
-                break;
-            case "list":
-                try {
-                    socket.getOutputStream().write("list\n".getBytes());
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    socket.getOutputStream().write(command.getBytes());
+                    socket.getOutputStream().write("\n".getBytes());
                     String answer;
                     do {
                         answer = reader.readLine();
                         System.out.println(answer);
-                    } while (!answer.equals(""));
+                    } while (!answer.isEmpty());
                     socket.close();
                 } catch (IOException ex) {
-                    System.out.println("Error requesting list.");
+                    System.out.println("Cant connect to LXCDaemon.");
                 }
-                break;
-            default:
-                System.out.print("unknown command: " + args[1]);
         }
-
-//        GenericPCPlatform.startLXC(new LXCDaemonUserInterface(), args);
     }
 }

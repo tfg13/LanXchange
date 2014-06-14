@@ -68,28 +68,28 @@ public class LxcDaemon implements Runnable {
 
                 switch (commands[0]) {
                     case "status":
-                        socket.getOutputStream().write("lxcd running".getBytes());
+                        socket.getOutputStream().write("lxcd running\n\n".getBytes());
                         socket.close();
                         break;
                     case "stop":
-                        socket.getOutputStream().write("stopping...".getBytes());
+                        socket.getOutputStream().write("stopping...\n\n".getBytes());
                         socket.close();
                         System.exit(0);
                         break;
                     case "list":
-                        socket.getOutputStream().write((lxcInterface.getStatus() + "\n").getBytes());
+                        socket.getOutputStream().write((lxcInterface.getStatus() + "\n\n").getBytes());
                         socket.close();
                         break;
                     case "upload-file":
-                        socket.getOutputStream().write((lxcInterface.uploadFile(commands[1]) + "\n").getBytes());
+                        socket.getOutputStream().write((lxcInterface.uploadFile(commands[1]) + "\n\n").getBytes());
                         socket.close();
                         break;
                     case "stop-uploading-file":
-                        socket.getOutputStream().write((lxcInterface.stopUploadFile(Integer.parseInt(commands[1])) + "\n").getBytes());
+                        socket.getOutputStream().write((lxcInterface.stopUploadFile(Integer.parseInt(commands[1])) + "\n\n").getBytes());
                         socket.close();
                         break;
                     default:
-                        socket.getOutputStream().write(("unknown command: " + commands[0]).getBytes());
+                        socket.getOutputStream().write(("unknown command: " + commands[0] + "\n\n").getBytes());
                         socket.close();
                 }
             } catch (IOException ex) {

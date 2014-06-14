@@ -26,7 +26,6 @@ import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,8 +47,8 @@ public class LXCDaemonUserInterface implements UserInterface {
             status += translator.getNumberForFile(file) + "  ";
             status += file.getFormattedName() + " ";
             if (file.isLocal()) {
-                if (file.getJobs().size() == 0) {
-                    status += " Offered by this machine\n";
+                if (file.getJobs().isEmpty()) {
+                    status += "Offered by this machine\n";
                 } else {
                     Iterator<LXCJob> iter = file.getJobs().iterator();
                     while (iter.hasNext()) {
@@ -60,10 +59,9 @@ public class LXCDaemonUserInterface implements UserInterface {
                         }
                     }
                 }
-
                 // TODO show downloaders and their progress
             } else {
-                if (file.getJobs().size() == 0) {
+                if (file.getJobs().isEmpty()) {
                     status += "Offered from " + file.getInstance().getName();
                 } else {
                     LXCJob job = file.getJobs().get(0);
@@ -118,24 +116,24 @@ public class LXCDaemonUserInterface implements UserInterface {
     public String uploadFile(String filename) {
         File file = new File(filename);
         if (!file.exists()) {
-            return "ERROR\nFile not found";
+            return "File not found";
         }
         List<File> files = new LinkedList<>();
         files.add(file);
         LXCFile lxcFile = new LXCFile(LXCFile.convertToVirtual(files), file.getName());
         guiListener.offerFile(lxcFile);
-        return "OK\nFile uploaded as " + translator.getNumberForFile(lxcFile) + "\n";
+        return "File uploaded as " + translator.getNumberForFile(lxcFile) + "\n";
     }
 
     public String stopUploadFile(int number) {
         LXCFile file = translator.getFileForNumber(number);
         if (file == null || !lxcFileList.contains(file)) {
-            return "ERROR\nNo such file.";
+            return "No such file.";
         } else if (!file.isLocal()) {
-            return "ERROR\nFile is uploaded from another system.";
+            return "File is uploaded from another system.";
         } else {
             guiListener.removeFile(file);
-            return "OK\nStopped uploading " + file.getShownName();
+            return "Stopped uploading " + file.getShownName();
         }
     }
 }
