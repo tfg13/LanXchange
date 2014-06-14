@@ -88,6 +88,15 @@ public class LxcDaemonController {
             } else {
                 System.out.println("LXC Daemon is not running.");
             }
+        } else if (Arrays.asList(args).contains("help") || Arrays.asList(args).contains("halp") || Arrays.asList(args).contains("hlep")) {
+            System.out.println("Usage:");
+            System.out.println("Show status:                lxc -nogui status");
+            System.out.println("Start daemon:               lxc -nogui start");
+            System.out.println("Stop daemon:                lxc -nogui stop");
+            System.out.println("List available files:       lxc -nogui list");
+            System.out.println("Download file:              lxc -nogui download [number]");
+            System.out.println("Upload file:                lxc -nogui upload-file [file]");
+            System.out.println("Stop Uploading file:        lxc -nogui stop-uploading-file [file]");
         } else { // Its a command to the deamon, send it and print the answer:
             String command = "";
             boolean daemonargs = false;
