@@ -26,7 +26,7 @@ import java.util.HashMap;
 
 /**
  * Provides a convinient number for LXCFiles and resolves that number back to the file.
- * 
+ *
  * @author Michael
  */
 public class FileNumberTranslator {
@@ -36,8 +36,8 @@ public class FileNumberTranslator {
     private int currentNumber = 0;
 
     public FileNumberTranslator() {
-        files = new HashMap<>();
-        numbers = new HashMap<>();
+        files = new HashMap<Integer, LXCFile>();
+        numbers = new HashMap<LXCFile, Integer>();
     }
 
     public LXCFile getFileForNumber(int number) {

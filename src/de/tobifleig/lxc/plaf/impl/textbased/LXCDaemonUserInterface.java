@@ -119,7 +119,7 @@ public class LXCDaemonUserInterface implements UserInterface {
         if (!file.exists()) {
             return "File not found";
         }
-        List<File> files = new LinkedList<>();
+        List<File> files = new LinkedList<File>();
         files.add(file);
         LXCFile lxcFile = new LXCFile(LXCFile.convertToVirtual(files), file.getName());
         guiListener.offerFile(lxcFile);

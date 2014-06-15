@@ -69,35 +69,29 @@ public class LxcDaemon implements Runnable {
 
                 String[] commands = reader.readLine().split(" ");
 
-                switch (commands[0]) {
-                    case "stop":
-                        socket.getOutputStream().write("stopping...\n\n".getBytes());
-                        socket.close();
-                        System.exit(0);
-                        break;
-                    case "list":
-                        socket.getOutputStream().write((lxcInterface.getStatus() + "\n\n").getBytes());
-                        socket.close();
-                        break;
-                    case "upload-file":
-                        socket.getOutputStream().write((lxcInterface.uploadFile(commands[1]) + "\n\n").getBytes());
-                        socket.close();
-                        break;
-                    case "stop-uploading-file":
-                        socket.getOutputStream().write((lxcInterface.stopUploadFile(Integer.parseInt(commands[1])) + "\n\n").getBytes());
-                        socket.close();
-                        break;
-                    case "download":
-                        String target = "";
-                        if (commands.length > 2) {
-                            target = commands[2];
-                        }
-                        socket.getOutputStream().write((lxcInterface.downloadFile(Integer.parseInt(commands[1]), target) + "\n\n").getBytes());
-                        socket.close();
-                        break;
-                    default:
-                        socket.getOutputStream().write(("unknown command: " + commands[0] + "\n\n").getBytes());
-                        socket.close();
+                if (commands[0].equals("stop")) {
+                    socket.getOutputStream().write("stopping...\n\n".getBytes());
+                    socket.close();
+                    System.exit(0);
+                } else if (commands[0].equals("list")) {
+                    socket.getOutputStream().write((lxcInterface.getStatus() + "\n\n").getBytes());
+                    socket.close();
+                } else if (commands[0].equals("upload-file")) {
+                    socket.getOutputStream().write((lxcInterface.uploadFile(commands[1]) + "\n\n").getBytes());
+                    socket.close();
+                } else if (commands[0].equals("stop-uploading-file")) {
+                    socket.getOutputStream().write((lxcInterface.stopUploadFile(Integer.parseInt(commands[1])) + "\n\n").getBytes());
+                    socket.close();
+                } else if (commands[0].equals("download")) {
+                    String target = "";
+                    if (commands.length > 2) {
+                        target = commands[2];
+                    }
+                    socket.getOutputStream().write((lxcInterface.downloadFile(Integer.parseInt(commands[1]), target) + "\n\n").getBytes());
+                    socket.close();
+                } else {
+                    socket.getOutputStream().write(("unknown command: " + commands[0] + "\n\n").getBytes());
+                    socket.close();
                 }
             } catch (IOException ex) {
                 // Connection closed before a command was sent
