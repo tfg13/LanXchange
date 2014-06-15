@@ -47,7 +47,7 @@ public class LxcDaemonController {
     public LxcDaemonController(String args[]) {
         try {
             socket = new Socket();
-            socket.connect(new InetSocketAddress("localhost", LxcDaemon.LXC_SERVER_PORT));
+            socket.connect(new InetSocketAddress("localhost", LxcDaemon.LXC_DAEMON_PORT));
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException ex) {
             // cant connect, lxcd propably isnt running
@@ -67,7 +67,7 @@ public class LxcDaemonController {
                 builder.command("lxc", "-nogui", "daemonize");
                 builder.start();
             } catch (IOException ex) {
-                System.out.println("Error starting lxc daemon");
+                System.out.println("Error starting LxcDaemon");
                 ex.printStackTrace();
             }
         } else if (Arrays.asList(args).contains("daemonize")) {
@@ -78,16 +78,16 @@ public class LxcDaemonController {
                     socket.getOutputStream().write("stop\n".getBytes());
                     String answer = reader.readLine();
                     if (answer.equals("stopping...")) {
-                        System.out.println("LXC Daemon shutting down.");
+                        System.out.println("LxcDaemon shutting down.");
                     } else {
-                        System.out.println("Error stopping daemon.");
+                        System.out.println("Error stopping LxcDaemon.");
                     }
                     socket.close();
                 } catch (IOException ex) {
-                    System.out.println("Error stopping daemon.");
+                    System.out.println("Error stopping LxcDaemon.");
                 }
             } else {
-                System.out.println("LXC Daemon is not running.");
+                System.out.println("LxcDaemon is not running.");
             }
         } else if (Arrays.asList(args).contains("help") || Arrays.asList(args).contains("halp") || Arrays.asList(args).contains("hlep")) {
             System.out.println("Usage:");
@@ -98,7 +98,8 @@ public class LxcDaemonController {
             System.out.println("Download file:              lxc -nogui download [number]");
             System.out.println("Upload file:                lxc -nogui upload-file [file]");
             System.out.println("Stop Uploading file:        lxc -nogui stop-uploading-file [file]");
-        } else { // Its a command to the deamon, send it and print the answer:
+        } else {
+            // Its a command to the deamon, send it and print the answer:
             String command = "";
             boolean daemonargs = false;
             for (int i = 0; i < args.length; i++) {

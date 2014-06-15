@@ -36,26 +36,25 @@ import java.net.Socket;
  */
 public class LxcDaemon implements Runnable {
 
-    public static int LXC_SERVER_PORT = 12345;
+    public static int LXC_DAEMON_PORT = 12345;
 
     private ServerSocket serverSocket;
     private Thread serverThread;
     private LXCDaemonUserInterface lxcInterface;
-    private LXC lxc;
 
     public LxcDaemon() {
         try {
             lxcInterface = new LXCDaemonUserInterface();
             Platform plattform = new GenericPCPlatform(lxcInterface);
             lxcInterface.setDefaultDownloadTarget(plattform.getDefaultDownloadTarget());
-            lxc = new LXC(plattform, new String[0]);
-            serverSocket = new ServerSocket(LXC_SERVER_PORT);
+            new LXC(plattform, new String[0]);
+            serverSocket = new ServerSocket(LXC_DAEMON_PORT);
             serverThread = new Thread(this);
             serverThread.setName("LxcDaemonThread");
             serverThread.start();
             System.out.println("LxcDaemon started successfully.");
         } catch (IOException ex) {
-            System.out.println("Error starting socket on port " + LXC_SERVER_PORT);
+            System.out.println("Error starting socket on port " + LXC_DAEMON_PORT);
             System.exit(1);
         }
     }
