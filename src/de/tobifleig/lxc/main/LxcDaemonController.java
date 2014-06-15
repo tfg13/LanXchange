@@ -63,7 +63,8 @@ public class LxcDaemonController {
             try {
                 ProcessBuilder builder = new ProcessBuilder();
                 builder.environment().putAll(System.getenv());
-                builder.command("java", "-jar", "LXC.jar", "-nogui", "daemonize");
+//                builder.command("java", "-jar", "LXC.jar", "-nogui", "daemonize");
+                builder.command("lxc", "-nogui", "daemonize");
                 builder.start();
             } catch (IOException ex) {
                 System.out.println("Error starting lxc daemon");
