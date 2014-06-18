@@ -36,7 +36,7 @@ import java.net.Socket;
  */
 public class LxcDaemon implements Runnable {
 
-    public static int LXC_DAEMON_PORT = 12345;
+    public static int LXC_DAEMON_PORT = 27718;
 
     private ServerSocket serverSocket;
     private Thread serverThread;
