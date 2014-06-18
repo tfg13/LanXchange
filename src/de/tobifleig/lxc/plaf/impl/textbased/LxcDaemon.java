@@ -26,8 +26,10 @@ import de.tobifleig.lxc.plaf.impl.GenericPCPlatform;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * The LXC Daemon runs LXC in the backgroud and talks to the LxcDaemonController over a socket.
@@ -41,6 +43,8 @@ public class LxcDaemon implements Runnable {
     private ServerSocket serverSocket;
     private Thread serverThread;
     private LXCDaemonUserInterface lxcInterface;
+
+    public static ArrayList<String> errorBuffer = new ArrayList<String>();
 
     public LxcDaemon() {
         try {
@@ -67,35 +71,47 @@ public class LxcDaemon implements Runnable {
                 Socket socket = serverSocket.accept();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+                // print the errors that have occured since the last call to LxcDaemon:
+                printErrors(socket.getOutputStream());
+
                 String[] commands = reader.readLine().split(" ");
 
                 if (commands[0].equals("stop")) {
-                    socket.getOutputStream().write("stopping...\n\n".getBytes());
-                    socket.close();
-                    System.exit(0);
+                    socket.getOutputStream().write("stopping...".getBytes());
                 } else if (commands[0].equals("list")) {
-                    socket.getOutputStream().write((lxcInterface.getStatus() + "\n\n").getBytes());
-                    socket.close();
+                    socket.getOutputStream().write((lxcInterface.getStatus()).getBytes());
                 } else if (commands[0].equals("upload-file")) {
-                    socket.getOutputStream().write((lxcInterface.uploadFile(commands[1]) + "\n\n").getBytes());
-                    socket.close();
+                    socket.getOutputStream().write((lxcInterface.uploadFile(commands[1])).getBytes());
                 } else if (commands[0].equals("stop-uploading-file")) {
-                    socket.getOutputStream().write((lxcInterface.stopUploadFile(Integer.parseInt(commands[1])) + "\n\n").getBytes());
-                    socket.close();
+                    socket.getOutputStream().write((lxcInterface.stopUploadFile(Integer.parseInt(commands[1]))).getBytes());
                 } else if (commands[0].equals("download")) {
                     String target = "";
                     if (commands.length > 2) {
                         target = commands[2];
                     }
-                    socket.getOutputStream().write((lxcInterface.downloadFile(Integer.parseInt(commands[1]), target) + "\n\n").getBytes());
-                    socket.close();
+                    socket.getOutputStream().write((lxcInterface.downloadFile(Integer.parseInt(commands[1]), target)).getBytes());
                 } else {
-                    socket.getOutputStream().write(("unknown command: " + commands[0] + "\n\n").getBytes());
-                    socket.close();
+                    socket.getOutputStream().write(("unknown command: " + commands[0]).getBytes());
                 }
+
+                // print the errors that have occured during command execution:
+                printErrors(socket.getOutputStream());
+
+                socket.getOutputStream().write("\n\n".getBytes());
+                socket.close();
             } catch (IOException ex) {
                 // Connection closed before a command was sent
                 // lets just ignore this and go on with the next request
+            }
+        }
+    }
+
+    private void printErrors(OutputStream stream) {
+        while (!errorBuffer.isEmpty()) {
+            try {
+                stream.write((errorBuffer.remove(0) + "\n").getBytes());
+            } catch (IOException ex) {
+                // connection error, abort
             }
         }
     }

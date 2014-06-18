@@ -86,7 +86,7 @@ public class LXCDaemonUserInterface implements UserInterface {
 
     @Override
     public void showError(String error) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        LxcDaemon.errorBuffer.add(error);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class LXCDaemonUserInterface implements UserInterface {
         files.add(file);
         LXCFile lxcFile = new LXCFile(LXCFile.convertToVirtual(files), file.getName());
         guiListener.offerFile(lxcFile);
-        return "File uploaded as " + translator.getNumberForFile(lxcFile) + "\n";
+        return "File uploaded as " + translator.getNumberForFile(lxcFile);
     }
 
     public String stopUploadFile(int number) {
