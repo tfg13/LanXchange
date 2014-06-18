@@ -45,35 +45,23 @@ public class LxcDaemonController {
     private BufferedReader reader;
 
     public LxcDaemonController(String args[]) {
-        try {
-            socket = new Socket();
-            socket.connect(new InetSocketAddress("localhost", LxcDaemon.LXC_DAEMON_PORT));
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        } catch (IOException ex) {
-            // cant connect, lxcd propably isnt running
-        }
 
         if (Arrays.asList(args).contains("status")) {
-            if (socket.isConnected()) {
+            if (tryConnectSocket()) {
                 System.out.println("LxcDaemon is running.");
             } else {
                 System.out.println("LxcDaemon is NOT running.");
             }
         } else if (Arrays.asList(args).contains("start")) {
-            try {
-                ProcessBuilder builder = new ProcessBuilder();
-                builder.environment().putAll(System.getenv());
-//                builder.command("java", "-jar", "LXC.jar", "-nogui", "daemonize");
-                builder.command("lxc", "-nogui", "daemonize");
-                builder.start();
-            } catch (IOException ex) {
-                System.out.println("Error starting LxcDaemon");
-                ex.printStackTrace();
+            if (startDaemon()) {
+                System.out.println("LxcDaemon started successfully.");
+            } else {
+                System.out.println("Error starting LxcDaemon.");
             }
         } else if (Arrays.asList(args).contains("daemonize")) {
             LxcDaemon daemon = new LxcDaemon();
         } else if (Arrays.asList(args).contains("stop")) {
-            if (socket.isConnected()) {
+            if (tryConnectSocket()) {
                 try {
                     socket.getOutputStream().write("stop\n".getBytes());
                     String answer = reader.readLine();
@@ -100,6 +88,15 @@ public class LxcDaemonController {
             System.out.println("Stop Uploading file:        lxc -nogui stop-uploading-file [file]");
         } else {
             // Its a command to the deamon, send it and print the answer:
+            if (!tryConnectSocket()) {
+                if (startDaemon()) {
+                    System.out.println("LxcDaemon started.");
+                } else {
+                    System.out.println("Cant start LxcDaemon!");
+                    tryCloseSocket();
+                    return;
+                }
+            }
             String command = "";
             boolean daemonargs = false;
             for (int i = 0; i < args.length; i++) {
@@ -122,6 +119,41 @@ public class LxcDaemonController {
             } catch (IOException ex) {
                 System.out.println("Cant connect to LXCDaemon.");
             }
+        }
+        tryCloseSocket();
+    }
+
+    private boolean startDaemon() {
+        try {
+            ProcessBuilder builder = new ProcessBuilder();
+            builder.environment().putAll(System.getenv());
+//                builder.command("java", "-jar", "LXC.jar", "-nogui", "daemonize");
+            builder.command("lxc", "-nogui", "daemonize");
+            builder.start();
+            return tryConnectSocket();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean tryConnectSocket() {
+        try {
+            socket = new Socket();
+            socket.connect(new InetSocketAddress("localhost", LxcDaemon.LXC_DAEMON_PORT));
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+
+    private void tryCloseSocket() {
+        try {
+            reader.close();
+            socket.close();
+        } catch (Exception ex) {
+
         }
     }
 }
