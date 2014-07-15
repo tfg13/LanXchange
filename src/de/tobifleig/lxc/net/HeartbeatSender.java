@@ -158,7 +158,7 @@ class HeartbeatSender {
      *
      * @param interf the new list containing all used interfaces
      */
-    void updateInterfaces(List<NetworkInterface> interf) {
+    synchronized void updateInterfaces(List<NetworkInterface> interf) {
         // close all interfaces no longer used
         ArrayList<NetworkInterface> removeList = new ArrayList<NetworkInterface>();
         for (NetworkInterface inter : sockets.keySet()) {
@@ -270,7 +270,7 @@ class HeartbeatSender {
      *
      * @param data the data to send
      */
-    private void direct(byte[] data, InetAddress address) {
+    private synchronized void direct(byte[] data, InetAddress address) {
         DatagramPacket pack = new DatagramPacket(data, data.length, address, 27716);
         for (MulticastSocket sock : sockets.values()) {
             try {
