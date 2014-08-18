@@ -22,13 +22,11 @@ package de.tobifleig.lxc.net;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -46,21 +44,21 @@ class HeartbeatSender {
     /**
      * Contains all sockets used to deploy multicasts.
      */
-    private HashMap<NetworkInterface, MulticastSocket> sockets;
+    private final HashMap<NetworkInterface, InterfaceHandler> sockets;
     /**
      * A private timer for sending heartbeats.
      */
-    private Timer timer;
+    private final Timer timer;
     /**
      * The heartbeat-packet. Always the same and therefore cached.
      */
-    private byte[] packet;
+    private final byte[] packet;
 
     /**
      * Creates a new HeartbeatSender
      */
     HeartbeatSender() {
-        sockets = new HashMap<NetworkInterface, MulticastSocket>();
+        sockets = new HashMap<NetworkInterface, InterfaceHandler>();
         // create packet
         packet = new byte[5];
         int id = LXCInstance.local.id;
@@ -69,6 +67,7 @@ class HeartbeatSender {
         packet[1] = (byte) (id >>> 16);
         packet[0] = (byte) (id >>> 24);
         packet[4] = 'h';
+        timer = new Timer();
     }
 
     /**
@@ -77,7 +76,6 @@ class HeartbeatSender {
      * Sends 5 heartbeats to get started.
      */
     void start() {
-        timer = new Timer();
         // start sending heartbeats
         TimerTask task = new TimerTask() {
             @Override
@@ -186,13 +184,7 @@ class HeartbeatSender {
      */
     private void createSocket(NetworkInterface inter) {
         try {
-            MulticastSocket sock = new MulticastSocket();
-            sock.setNetworkInterface(inter);
-            sock.setTimeToLive(254);
-            sock.setLoopbackMode(true);
-            sockets.put(inter, sock);
-        } catch (SocketException ex) {
-            ex.printStackTrace();
+            sockets.put(inter, new InterfaceHandler(inter));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -204,30 +196,19 @@ class HeartbeatSender {
      * @param data the packet
      */
     private synchronized void multicast(byte[] data) {
-        try {
-            DatagramPacket pack = new DatagramPacket(data, data.length, InetAddress.getByName("225.4.5.6"), 27716);
-            for (MulticastSocket sock : sockets.values()) {
-                try {
-                    sock.send(pack);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+        for (InterfaceHandler handler : sockets.values()) {
+            try {
+                handler.multicast();
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        } catch (UnknownHostException ex) {
-            ex.printStackTrace();
         }
-
     }
 
     /**
      * Send the given packet via UDP to all local network devices.
-     * This is intended for environments where multicast is not supported (Android).
-     * Simulates a broadcast by sending UDP packets to all possible network devices.
-     * This obviously only works for small (home) IPv4 networks,
-     * where the addresses only differ by the last byte.
-     *
-     * This is a (hopefully) temporary workaround, suggestions for better, more robust,
-     * more elegant solutions are welcome.
+     * This is only required to reach IPv4-only hosts on Android (because multicast is often not supported)
+     * Simulates a broadcast by sending UDP packets to all possible network devices (within a /24 IPv4 subnet).
      */
     private synchronized void manualBroadcast() {
         for (NetworkInterface inter : sockets.keySet()) {
@@ -244,23 +225,25 @@ class HeartbeatSender {
             }
             // found one?
             if (localAddress != null) {
-                DatagramSocket sock = sockets.get(inter);
-                byte[] localAddressBytes = localAddress.getAddress();
-                int localSuffix = localAddressBytes[3];
-                try {
-                    for (int i = 1; i < 255; i++) {
-                        if (i == localSuffix) {
-                            // don't ping self
-                            continue;
+                InterfaceHandler handler = sockets.get(inter);
+                // leave IPv6-only hosts alone
+                if (handler.pack4 != null) {
+                    byte[] localAddressBytes = localAddress.getAddress();
+                    int localSuffix = localAddressBytes[3];
+                    try {
+                        for (int i = 1; i < 255; i++) {
+                            if (i == localSuffix) {
+                                // don't ping self
+                                continue;
+                            }
+                            localAddressBytes[3] = (byte) i;
+                            DatagramPacket pack = new DatagramPacket(packet, packet.length, InetAddress.getByAddress(localAddressBytes), 27716);
+                            handler.socket.send(pack);
                         }
-                        localAddressBytes[3] = (byte) i;
-                        DatagramPacket pack = new DatagramPacket(packet, packet.length, InetAddress.getByAddress(localAddressBytes), 27716);
-                        sock.send(pack);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
                 }
-
             }
         }
     }
@@ -272,12 +255,117 @@ class HeartbeatSender {
      */
     private synchronized void direct(byte[] data, InetAddress address) {
         DatagramPacket pack = new DatagramPacket(data, data.length, address, 27716);
-        for (MulticastSocket sock : sockets.values()) {
+        for (InterfaceHandler handler : sockets.values()) {
             try {
-                sock.send(pack);
+                handler.direct(pack);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Handles one NetworkInterface.
+     * Sends heartbeats to the multicast groups for IPv4, IPv6 or both.
+     */
+    private class InterfaceHandler {
+
+        /**
+         * The MulticastSocket.
+         */
+        private final MulticastSocket socket;
+        /**
+         * The NetworkInterface to work with.
+         */
+        private final NetworkInterface networkInterface;
+        /**
+         * IPv4 heartbeat packet.
+         */
+        private DatagramPacket pack4;
+        /**
+         * IPv6 heartbeat packet.
+         */
+        private DatagramPacket pack6;
+        /**
+         * Packets must be created after constructor because android does not allow network access on main thread.
+         */
+        private boolean packetsCreated = false;
+
+        /**
+         * Create a new Handler and set up the MulticastSocket.
+         *
+         * @param interf the target interface.
+         * @throws IOException when there is trouble creating the socket
+         */
+        private InterfaceHandler(final NetworkInterface interf) throws IOException {
+            socket = new MulticastSocket(27716);
+            socket.setTimeToLive(254);
+            socket.setLoopbackMode(true);
+            networkInterface = interf;
+        }
+
+        /**
+         * Multicast now.
+         *
+         * @throws IOException in case anything goes wrong
+         */
+        private void multicast() throws IOException {
+            if (!packetsCreated) {
+                createPackets();
+            }
+            if (pack4 != null) {
+                socket.send(pack4);
+            }
+            if (pack6 != null) {
+                socket.send(pack6);
+            }
+        }
+
+        /**
+         * Just send the given packet.
+         *
+         * @param packet the packet
+         */
+        private void direct(DatagramPacket packet) throws IOException {
+            if (!packetsCreated) {
+                createPackets();
+            }
+            // protocol type must be supported
+            if (packet.getAddress() instanceof Inet4Address && pack4 != null) {
+                socket.send(packet);
+            }
+            if (packet.getAddress() instanceof Inet6Address && pack6 != null) {
+                socket.send(packet);
+            }
+        }
+
+        /**
+         * Closes the socket.
+         */
+        private void close() {
+            socket.close();
+        }
+
+        private void createPackets() throws IOException {
+            packetsCreated = true;
+            // figure out if this interface supports IPv4, IPv6 or both
+            Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+            boolean v4 = false, v6 = false;
+            while (addresses.hasMoreElements()) {
+                InetAddress address = addresses.nextElement();
+                if (address instanceof Inet4Address) {
+                    v4 = true;
+                } else if (address instanceof Inet6Address) {
+                    v6 = true;
+                }
+            }
+            // configure sockets
+            if (v4) {
+                socket.setNetworkInterface(networkInterface);
+            }
+            pack4 = v4 ? new DatagramPacket(packet, packet.length, Inet4Address.getByAddress(new byte[]{(byte) 225, 4, 5, 6}), 27716) : null;
+            pack6 = v6 ? new DatagramPacket(packet, packet.length, Inet6Address.getByAddress("ff15::4c61:6e58:6368:616e:6765", new byte[]{(byte) 0xff, (byte) 0x15, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x4c, (byte) 0x61, (byte) 0x6e, (byte) 0x58, (byte) 0x63, (byte) 0x68, (byte) 0x61, (byte) 0x6e, (byte) 0x67, (byte) 0x65}, networkInterface), 27716) : null;
+        }
+
     }
 }

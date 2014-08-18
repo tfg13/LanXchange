@@ -34,14 +34,14 @@ import java.util.TimerTask;
  */
 class InstanceManager {
 
-	/**
-	 * Instance was detected by the other side, we learned about it when receiving a file list.
-	 */
-	public static final int SOURCE_RECEIVED_LIST = 1;
-	/**
-	 * Instance was detected by heartbeats.
-	 */
-	public static final int SOURCE_HEARTBEAT = 2;
+    /**
+     * Instance was detected by the other side, we learned about it when receiving a file list.
+     */
+    public static final int SOURCE_RECEIVED_LIST = 1;
+    /**
+     * Instance was detected by heartbeats.
+     */
+    public static final int SOURCE_HEARTBEAT = 2;
     /**
      * Contains all known instances.
      * Enables access to them by addresses
