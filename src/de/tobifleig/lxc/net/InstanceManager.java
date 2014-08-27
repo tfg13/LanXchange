@@ -56,7 +56,7 @@ class InstanceManager {
      * Seems to contain all remote instances, without any duplicates.
      * Backed by the instances HashMap
      */
-    private Iterable<LXCInstance> remoteView;
+    private final Iterable<LXCInstance> remoteView;
     /**
      * The listener.
      */
@@ -80,8 +80,8 @@ class InstanceManager {
             @Override
             public Iterator<LXCInstance> iterator() {
                 return new Iterator<LXCInstance>() {
-                    private Iterator<LXCInstance> baseIter = instances.values().iterator();
-                    private HashMap<LXCInstance, Object> seenInstances = new HashMap<LXCInstance, Object>();
+                    private final Iterator<LXCInstance> baseIter = instances.values().iterator();
+                    private final HashMap<LXCInstance, Object> seenInstances = new HashMap<LXCInstance, Object>();
                     private LXCInstance next = computeNext();
 
                     @Override

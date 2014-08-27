@@ -43,11 +43,11 @@ public class PingServer {
     /**
      * The sockets currently in use.
      */
-    private ConcurrentHashMap<NetworkInterface, InterfaceHandler> listenSockets;
+    private final ConcurrentHashMap<NetworkInterface, InterfaceHandler> listenSockets;
     /**
      * The Listener to call when pings are received.
      */
-    private PingServerListener listener;
+    private final PingServerListener listener;
 
     /**
      * Creates a new PingServer.

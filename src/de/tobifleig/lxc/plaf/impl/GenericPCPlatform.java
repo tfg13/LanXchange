@@ -52,7 +52,7 @@ public class GenericPCPlatform implements Platform {
     /**
      * the swing-gui.
      */
-    private static SwingGui gui = new SwingGui();
+    private static final SwingGui gui = new SwingGui();
 
     @Override
     public boolean hasAutoUpdates() {

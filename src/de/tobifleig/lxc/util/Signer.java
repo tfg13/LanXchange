@@ -30,7 +30,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 /**
  * This class is used to sign updates.
- * Note: For obvious reason, you cannot do that, because the private key is not distributed.
+ * Note: The required private key is not distributed for obvious reasons.
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */

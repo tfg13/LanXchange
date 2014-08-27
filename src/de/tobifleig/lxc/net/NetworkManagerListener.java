@@ -20,9 +20,8 @@
  */
 package de.tobifleig.lxc.net;
 
-import java.io.File;
-
 import de.tobifleig.lxc.data.LXCFile;
+import java.io.File;
 
 /**
  * A Listener for NetworkManager.

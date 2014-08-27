@@ -20,15 +20,14 @@
  */
 package de.tobifleig.lxc.data;
 
+import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.net.LXCInstance;
 import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import de.tobifleig.lxc.data.impl.RealFile;
-import de.tobifleig.lxc.net.LXCInstance;
 
 /**
  * Represents a "file" offered by a certain LXCInstance.

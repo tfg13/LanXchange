@@ -58,15 +58,15 @@ public class LXC {
     /**
      * Our GUI.
      */
-    private GuiInterface gui;
+    private final GuiInterface gui;
     /**
      * The networkmanager.
      */
-    private NetworkManager network;
+    private final NetworkManager network;
     /**
      * The filemanager.
      */
-    private FileManager files;
+    private final FileManager files;
     /**
      * The default target for downloads.
      */

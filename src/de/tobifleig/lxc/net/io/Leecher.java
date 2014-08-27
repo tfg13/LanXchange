@@ -20,6 +20,9 @@
  */
 package de.tobifleig.lxc.net.io;
 
+import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.RealFile;
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -30,10 +33,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
-import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.data.VirtualFile;
-import de.tobifleig.lxc.data.impl.RealFile;
 
 /**
  * The actual file-receiver

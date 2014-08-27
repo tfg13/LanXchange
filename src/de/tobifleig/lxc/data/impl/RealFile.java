@@ -20,14 +20,13 @@
  */
 package de.tobifleig.lxc.data.impl;
 
+import de.tobifleig.lxc.data.VirtualFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import de.tobifleig.lxc.data.VirtualFile;
 
 /**
  * Default implementation for VirtualFile.

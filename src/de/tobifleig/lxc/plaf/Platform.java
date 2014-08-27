@@ -20,9 +20,8 @@
  */
 package de.tobifleig.lxc.plaf;
 
-import java.io.File;
-
 import de.tobifleig.lxc.data.LXCFile;
+import java.io.File;
 
 /**
  * Provides platform-specific settings and functions such as automatic updates.
