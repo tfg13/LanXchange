@@ -37,11 +37,16 @@ class InstanceManager {
     /**
      * Instance was detected by the other side, we learned about it when receiving a file list.
      */
-    public static final int SOURCE_RECEIVED_LIST = 1;
+    public static final String SOURCE_RECEIVED_LIST = "incoming list";
     /**
-     * Instance was detected by heartbeats.
+     * Instance was detected by regular heartbeats.
      */
-    public static final int SOURCE_HEARTBEAT = 2;
+    public static final String SOURCE_MULTICAST_HEARTBEAT = "multicast heartbeat";
+    /**
+     * Instance was detected by direct heartbeat.
+     * A direct heartbeat is a UDP unicast packet sent to known hosts on the local network.
+     */
+    public static final String SOURCE_UNICAST_HEARTBEAT = "unicast heartbeat";
     /**
      * Contains all known instances.
      * Enables access to them by addresses
@@ -166,9 +171,9 @@ class InstanceManager {
                 + ((data[1] & 0xFF) << 16)
                 + ((data[0]) << 24);
         // mode:
-        if (data[4] == 'h') {
+        if (data[4] == 'h' || data[4] == 'H') {
             // regular heartbeat
-            gotHeartbeat(origin, id);
+            gotHeartbeat(origin, id, data[4] == 'h');
         } else if (data[4] == 'o') {
             // offline
             removeInstance(id);
@@ -219,7 +224,7 @@ class InstanceManager {
      * @param address the address from which the signal was received
      * @param id the id of the remote instance
      */
-    synchronized private void gotHeartbeat(InetAddress address, int id) {
+    synchronized private void gotHeartbeat(InetAddress address, int id, boolean receivedByMulticast) {
         if (id == LXCInstance.local.id) {
             // ping from self, ignore
             return;
@@ -227,11 +232,11 @@ class InstanceManager {
         if (instances.containsKey(address) && id == instances.get(address).id) {
             instances.get(address).heartBeat();
         } else {
-            addInstance(address, id, SOURCE_HEARTBEAT);
+            addInstance(address, id, receivedByMulticast? SOURCE_MULTICAST_HEARTBEAT : SOURCE_UNICAST_HEARTBEAT);
         }
     }
 
-    synchronized private LXCInstance addInstance(InetAddress address, int id, int source) {
+    synchronized private LXCInstance addInstance(InetAddress address, int id, String source) {
         // try to merge with existing:
         for (LXCInstance inst : instances.values()) {
             if (inst.id == id) {
@@ -245,11 +250,11 @@ class InstanceManager {
         // check for override:
         if (instances.containsKey(address)) {
             // delete first
-            System.out.println("Overriding old instance at " + address + " " + id + " (d:" + source + ")");
+            System.out.println("Overriding old instance at " + address + " " + id + " (detected via:" + source + ")");
             removeAddress(address);
         }
         instances.put(address, newremote);
-        System.out.println("New Instance at " + address + " id: " + id + " (d:" + source + ")");
+        System.out.println("New Instance at " + address + " id: " + id + " (detected via:" + source + ")");
         // Send a file list to this new instance
         listener.instanceAdded(newremote);
         return newremote;
