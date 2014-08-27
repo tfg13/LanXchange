@@ -52,15 +52,11 @@ public abstract class Transceiver implements Runnable {
     /**
      * Buffer for five speed-measurements.
      */
-    private int[] lastSpeeds = new int[5];
+    private final int[] lastSpeeds = new int[5];
     /**
-     * Time of last speed-measurement.
+     * Begin of speed-measurement.
      */
-    private long lastMeasure = System.currentTimeMillis();
-    /**
-     * The number of transfered bytes at the time stored in lastMeasure.
-     */
-    private long lastTransferedBytes = 0;
+    private final long begin = System.currentTimeMillis();
     /**
      * A mod-5-counter.
      * Used for the rolling-average speed-calculations
@@ -148,13 +144,10 @@ public abstract class Transceiver implements Runnable {
      * Recalculates the current speed.
      */
     private void updateSpeeds() {
-        // bytes since last frame
-        long newBytes = transferedBytes - lastTransferedBytes;
-        // time since last frame
-        long within = System.currentTimeMillis() - lastMeasure;
+        long since = System.currentTimeMillis() - begin;
         // calc bytes/sec
-        if (within / 1000 != 0) {
-            lastSpeeds[nextArrayPos] = (int) (newBytes / (within / 1000));
+        if (since / 1000 != 0) {
+            lastSpeeds[nextArrayPos] = (int) (transferedBytes / (since / 1000));
         } else {
             lastSpeeds[nextArrayPos] = 0;
         }
