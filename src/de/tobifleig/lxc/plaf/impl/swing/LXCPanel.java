@@ -38,6 +38,8 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -92,6 +94,10 @@ public class LXCPanel extends JPanel {
     private GuiListener guiListener;
     private final OptionsDialog options;
     private boolean calcing;
+    /**
+     * Vertical scroll distance in files (entries in list)
+     */
+    private int scrollY = 0;
 
     @Override
     public void paintComponent(Graphics g) {
@@ -163,8 +169,11 @@ public class LXCPanel extends JPanel {
             // set up clipping
             Shape clip = g2.getClip();
             g2.clip(new Rectangle(0, 20, this.getWidth(), this.getHeight() - 20 - 30));
+            // file list may have changed, make sure scrollY is still within bounds
+            scrollY = Math.min(scrollY, Math.max(0, allFiles.size() - (LXCPanel.this.getHeight() - 20 - 30) / 30));
             // files
-            for (int i = 0; i < allFiles.size(); i++) {
+            int maxVisibleFiles = (this.getHeight() - 20 - 30) / 30 + 1;
+            for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles); i++) {
                 LXCFile file = allFiles.get(i);
                 // number of jobs?
                 int jobYPxl = 0;
@@ -291,6 +300,20 @@ public class LXCPanel extends JPanel {
                 g2.setPaint(grad);
                 g2.drawLine(0, y, this.getWidth(), y);
                 g2.setPaint(null);
+            }
+            // scrollbar
+            if (allFiles.size() > maxVisibleFiles - 1) {
+                // length of scrollbar
+                double visibleFraction = ((double) maxVisibleFiles - 1) / allFiles.size();
+                // position of scrollbar
+                double visibleRangeStart = ((double) scrollY) / allFiles.size();
+                // draw
+                int visAreaHeight = (this.getHeight() - 20 - 30);
+                int scrollbarStart = (int) (visAreaHeight * visibleRangeStart + 20);
+                int scrollbarLength = (int) (visAreaHeight * visibleFraction);
+                g2.setColor(Color.BLACK);
+                g2.drawLine(this.getWidth() - 2, scrollbarStart, this.getWidth() - 2, scrollbarStart + scrollbarLength);
+                g2.drawLine(this.getWidth() - 3, scrollbarStart, this.getWidth() - 3, scrollbarStart + scrollbarLength);
             }
             // reset clip
             g2.setClip(clip);
@@ -498,7 +521,7 @@ public class LXCPanel extends JPanel {
                         traySelected = -1;
                         selfTrigger();
                     }
-                    int newSelIndex = 0;
+                    int newSelIndex = scrollY;
                     int my = e.getY();
                     int pre = 20;
                     int prev = 20;
@@ -506,7 +529,7 @@ public class LXCPanel extends JPanel {
                         newSelIndex = -1;
                     } else {
                         // Add file after file until we get there
-                        for (int i = 0; i < allFiles.size(); i++) {
+                        for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + (LXCPanel.this.getHeight() - 20 - 30) / 30 + 1); i++) {
                             int plus;
                             LXCFile file = allFiles.get(i);
                             if (file.isLocal()) {
@@ -594,6 +617,28 @@ public class LXCPanel extends JPanel {
                     }
                     if (changed) {
                         selfTrigger();
+                    }
+                }
+            }
+        });
+        this.addMouseWheelListener(new MouseWheelListener() {
+
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                    int maxScrollY = allFiles.size() - (LXCPanel.this.getHeight() - 20 - 30) / 30;
+                    int delta = 0;
+                    if (e.getPreciseWheelRotation() > 0) {
+                        delta = 1;
+                    } else if (e.getPreciseWheelRotation() < 0) {
+                        delta = -1;
+                    }
+                    int newScrollY = scrollY + delta;
+                    if (newScrollY >= 0 && newScrollY <= maxScrollY) {
+                        if (newScrollY != scrollY) {
+                            selfTrigger();
+                        }
+                        scrollY = newScrollY;
                     }
                 }
             }
