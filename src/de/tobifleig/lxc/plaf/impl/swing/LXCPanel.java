@@ -32,7 +32,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -158,6 +160,9 @@ public class LXCPanel extends JPanel {
                 g2.drawString(noFilesText2, this.getWidth() / 2 - mer2.stringWidth(noFilesText2) / 2, 40 + mer2.getAscent() + 15);
             }
             int y = 20; // y-coordinate
+            // set up clipping
+            Shape clip = g2.getClip();
+            g2.clip(new Rectangle(0, 20, this.getWidth(), this.getHeight() - 20 - 30));
             // files
             for (int i = 0; i < allFiles.size(); i++) {
                 LXCFile file = allFiles.get(i);
@@ -287,6 +292,8 @@ public class LXCPanel extends JPanel {
                 g2.drawLine(0, y, this.getWidth(), y);
                 g2.setPaint(null);
             }
+            // reset clip
+            g2.setClip(clip);
             // display help text?
             if (helpHovered) {
                 g2.setColor(Color.WHITE);
