@@ -77,6 +77,7 @@ public class RealFile extends VirtualFile {
 
     /**
      * Returns the real file backing this virtual file.
+     *
      * @return the real file
      */
     public File getBackingFile() {
@@ -111,8 +112,12 @@ public class RealFile extends VirtualFile {
         }
         File[] content = file.listFiles();
         ArrayList<VirtualFile> result = new ArrayList<VirtualFile>();
-        for (File contentFile : content) {
-            result.add(new RealFile(contentFile, getTransferPath()));
+        if (content != null) {
+            for (File contentFile : content) {
+                result.add(new RealFile(contentFile, getTransferPath()));
+            }
+        } else {
+            System.out.println("Cannot read " + file.getAbsolutePath());
         }
         return result;
     }
