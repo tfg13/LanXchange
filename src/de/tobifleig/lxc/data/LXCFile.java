@@ -306,6 +306,7 @@ public class LXCFile implements Serializable {
     /**
      * Sets the list of base files.
      * This is required after downloads.
+     *
      * @param baseFiles
      */
     public void setBaseFiles(List<VirtualFile> baseFiles) {
@@ -351,25 +352,25 @@ public class LXCFile implements Serializable {
         // Search toplevel node(s):
         LinkedList<File> topLevelNodes = new LinkedList<File>();
         outer:
-            for (File file : files) {
-                // Check if this file is below any toplevel node
-                for (File topLevelNode : topLevelNodes) {
-                    if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
-                        // below - this means file is not a toplevel node
-                        continue outer;
-                    }
+        for (File file : files) {
+            // Check if this file is below any toplevel node
+            for (File topLevelNode : topLevelNodes) {
+                if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
+                    // below - this means file is not a toplevel node
+                    continue outer;
                 }
-                // This file is a toplevel node - check if this makes other toplevel nodes obsolete
-                for (int i = 0; i < topLevelNodes.size(); i++) {
-                    File topLevelNode = topLevelNodes.get(i);
-                    if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
-                        // the new file is a parent of this toplevel node
-                        topLevelNodes.remove(i);
-                    }
-                }
-                // Insert the new toplevel node
-                topLevelNodes.add(file);
             }
+            // This file is a toplevel node - check if this makes other toplevel nodes obsolete
+            for (int i = 0; i < topLevelNodes.size(); i++) {
+                File topLevelNode = topLevelNodes.get(i);
+                if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
+                    // the new file is a parent of this toplevel node
+                    topLevelNodes.remove(i);
+                }
+            }
+            // Insert the new toplevel node
+            topLevelNodes.add(file);
+        }
 
         ArrayList<VirtualFile> result = new ArrayList<VirtualFile>();
         // Each of these files now either has a parent in topLevelNodes or is a toplevel node itself.
