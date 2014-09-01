@@ -232,7 +232,7 @@ class InstanceManager {
         if (instances.containsKey(address) && id == instances.get(address).id) {
             instances.get(address).heartBeat();
         } else {
-            addInstance(address, id, receivedByMulticast? SOURCE_MULTICAST_HEARTBEAT : SOURCE_UNICAST_HEARTBEAT);
+            addInstance(address, id, receivedByMulticast ? SOURCE_MULTICAST_HEARTBEAT : SOURCE_UNICAST_HEARTBEAT);
         }
     }
 
@@ -250,11 +250,11 @@ class InstanceManager {
         // check for override:
         if (instances.containsKey(address)) {
             // delete first
-            System.out.println("Overriding old instance at " + address + " " + id + " (detected via:" + source + ")");
+            System.out.println("Overriding old instance at " + address + " " + id + " (detected via: " + source + ")");
             removeAddress(address);
         }
         instances.put(address, newremote);
-        System.out.println("New Instance at " + address + " id: " + id + " (detected via:" + source + ")");
+        System.out.println("New Instance at " + address + " id: " + id + " (detected via: " + source + ")");
         // Send a file list to this new instance
         listener.instanceAdded(newremote);
         return newremote;
