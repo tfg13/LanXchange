@@ -230,7 +230,13 @@ public class LXCPanel extends JPanel {
                     if (file.isLocal()) {
                         g2.setFont(f2);
                         g2.setColor(Color.BLACK);
-                        g2.drawString("0 downloads", 47, y + 27);
+                        String downloads;
+                        if (file.getNumberOfTransfers() != 1) {
+                            downloads = file.getNumberOfTransfers() + " downloads";
+                        } else {
+                            downloads = "1 download";
+                        }
+                        g2.drawString(downloads, 47, y + 27);
                     }
                     if (jobYPxl == 0 && !file.isLocal()) {
                         g2.setFont(f2);
