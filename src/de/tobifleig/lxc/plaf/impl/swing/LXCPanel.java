@@ -170,9 +170,10 @@ public class LXCPanel extends JPanel {
             Shape clip = g2.getClip();
             g2.clip(new Rectangle(0, 20, this.getWidth(), this.getHeight() - 20 - 30));
             // file list may have changed, make sure scrollY is still within bounds
-            scrollY = Math.min(scrollY, Math.max(0, allFiles.size() - (LXCPanel.this.getHeight() - 20 - 30) / 30));
+            int maxVisibleFiles = getMaxVisibleFiles();
+            scrollY = Math.min(scrollY, Math.max(0, allFiles.size() - maxVisibleFiles));
             // files
-            int maxVisibleFiles = (this.getHeight() - 20 - 30) / 30 + 1;
+            maxVisibleFiles++;
             for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles); i++) {
                 LXCFile file = allFiles.get(i);
                 // number of jobs?
@@ -374,6 +375,35 @@ public class LXCPanel extends JPanel {
 
     }
 
+    private int getMaxVisibleFiles() {
+        int maxPixel = LXCPanel.this.getHeight() - 20 - 30;
+        int total = 0;
+        for (int i = 0; i < allFiles.size(); i++) {
+            int plus;
+            LXCFile file = allFiles.get(i);
+            if (file.isLocal()) {
+                int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
+                plus = 30 + jobnum * 20;
+            } else {
+                int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
+                if (jobnum == 0) {
+                    if (selectedIndex == i) {
+                        plus = 40;
+                    } else {
+                        plus = 30;
+                    }
+                } else {
+                    plus = 30 + jobnum * 20;
+                }
+            }
+            total += plus;
+            if (total > maxPixel) {
+                return i;
+            }
+        }
+        return allFiles.size();
+    }
+
     /**
      * Renders a String, but guarantees a maximum width.
      *
@@ -549,7 +579,8 @@ public class LXCPanel extends JPanel {
                         newSelIndex = -1;
                     } else {
                         // Add file after file until we get there
-                        for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + (LXCPanel.this.getHeight() - 20 - 30) / 30 + 1); i++) {
+                        int maxVisibleFiles = LXCPanel.this.getMaxVisibleFiles();
+                        for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles + 1); i++) {
                             int plus;
                             LXCFile file = allFiles.get(i);
                             if (file.isLocal()) {
@@ -646,7 +677,8 @@ public class LXCPanel extends JPanel {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                    int maxScrollY = allFiles.size() - (LXCPanel.this.getHeight() - 20 - 30) / 30;
+                    int maxVisibleFiles = getMaxVisibleFiles();
+                    int maxScrollY = allFiles.size() - maxVisibleFiles;
                     int delta = 0;
                     if (e.getPreciseWheelRotation() > 0) {
                         delta = 1;
