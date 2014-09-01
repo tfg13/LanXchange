@@ -203,9 +203,19 @@ public class LXCPanel extends JPanel {
                 // name
                 g2.setColor(Color.BLACK);
                 g2.setFont(f1);
-                renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (mer.getAscent() / 2), mer);
+                if (selectedIndex == i && file.isLocal()) {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (mer.getAscent() / 2), mer);
+                } else {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (mer.getAscent() / 2), mer);
+                }
                 // size
-                g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 14 + (mer.getAscent() / 2));
+                if (detailSelected && selectedIndex == i && file.isLocal()) {
+                    g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 8 + (mer.getAscent() / 2));
+                    g2.setFont(f2);
+                    g2.drawString("Click to remove", (int) (1.0 * this.getWidth() * 0.7), y + 27);
+                } else {
+                    g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 14 + (mer.getAscent() / 2));
+                }
                 if (file.isLocal()) {
                     if (detailSelected && selectedIndex == i) {
                         g2.setColor(background);
@@ -217,6 +227,11 @@ public class LXCPanel extends JPanel {
                     g2.drawImage(file.isAvailable() ? done : download, this.getWidth() - 25, y + 5, this);
                 }
                 if (selectedIndex == i) {
+                    if (file.isLocal()) {
+                        g2.setFont(f2);
+                        g2.setColor(Color.BLACK);
+                        g2.drawString("0 downloads", 47, y + 27);
+                    }
                     if (jobYPxl == 0 && !file.isLocal()) {
                         g2.setFont(f2);
                         String status = "Available - Click to download";
@@ -226,7 +241,6 @@ public class LXCPanel extends JPanel {
                         if (!file.isLocked()) {
                             g2.drawString(status, this.getWidth() / 2 - mer2.stringWidth(status) / 2, y + 36); // center
                         }
-
                     }
                 }
                 if (file.isLocked() && jobYPxl == 0) {
