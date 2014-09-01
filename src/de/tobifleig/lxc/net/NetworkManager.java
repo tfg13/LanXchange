@@ -123,7 +123,7 @@ public class NetworkManager {
                 TransceiverListener seedListener = new TransceiverListener() {
                     @Override
                     public void finished(boolean success, boolean removeFile) {
-                        file.removeJob(jobs.get(seed));
+                        file.removeJob(jobs.get(seed), success);
                         if (removeFile) {
                             // File no longer available --> remove
                             NetworkManager.this.fileManager.removeLocal(file);
@@ -249,7 +249,7 @@ public class NetworkManager {
                             file.setAvailable(true);
                             listener.downloadComplete(file, targetFolder);
                         }
-                        file.removeJob(jobs.get(leech));
+                        file.removeJob(jobs.get(leech), success);
                         if (removeFile) {
                             listener.downloadFailedFileMissing();
                         }
