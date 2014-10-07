@@ -35,7 +35,7 @@ public class Configuration {
     /**
      * the backing Hashmap
      */
-    private static HashMap<String, String> map = new HashMap<String, String>();
+    private static final HashMap<String, String> map = new HashMap<String, String>();
 
     /**
      * private constructor
@@ -52,7 +52,7 @@ public class Configuration {
     public static long getLongSetting(String setting) {
         long ret = 0;
         try {
-            ret = Long.parseLong(map.get(setting).toString());
+            ret = Long.parseLong(map.get(setting));
         } catch (Exception ex) {
         }
         return ret;
@@ -67,7 +67,7 @@ public class Configuration {
     public static String getStringSetting(String setting) {
         String ret = null;
         try {
-            ret = map.get(setting).toString();
+            ret = map.get(setting);
         } catch (Exception ex) {
         }
         return ret;

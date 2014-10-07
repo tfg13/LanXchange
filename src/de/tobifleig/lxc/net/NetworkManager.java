@@ -58,40 +58,40 @@ public class NetworkManager {
     /**
      * this server listens for incoming file-requests.
      */
-    private FileServer fileServer;
+    private final FileServer fileServer;
     /**
      * this server listens for incoming file-lists.
      */
-    private ListServer listServer;
+    private final ListServer listServer;
     /**
      * this server listens for ping/keepalives sent by other instances.
      */
-    private PingServer pingServer;
+    private final PingServer pingServer;
     /**
      * Manages and performs multicasts.
      */
-    private HeartbeatSender multicaster;
+    private final HeartbeatSender multicaster;
     /**
      * Manages NetworkInterfaces.
      * Triggers required actions if an interface goes online or offline
      */
-    private InterfaceManager interfacesurveillance;
+    private final InterfaceManager interfacesurveillance;
     /**
      * Manages remote LXCInstances.
      */
-    private InstanceManager instances;
+    private final InstanceManager instances;
     /**
      * Used to call LXC when certain events occur.
      */
-    private NetworkManagerListener listener;
+    private final NetworkManagerListener listener;
     /**
      * Contains all the running jobs.
      */
-    private HashMap<Transceiver, LXCJob> jobs;
+    private final HashMap<Transceiver, LXCJob> jobs;
     /**
      * Manages all local/remote files.
      */
-    private FileManager fileManager;
+    private final FileManager fileManager;
 
     /**
      * creates a new NetworkManager with the given parameters.
@@ -123,7 +123,7 @@ public class NetworkManager {
                 TransceiverListener seedListener = new TransceiverListener() {
                     @Override
                     public void finished(boolean success, boolean removeFile) {
-                        file.removeJob(jobs.get(seed));
+                        file.removeJob(jobs.get(seed), success);
                         if (removeFile) {
                             // File no longer available --> remove
                             NetworkManager.this.fileManager.removeLocal(file);
@@ -249,7 +249,7 @@ public class NetworkManager {
                             file.setAvailable(true);
                             listener.downloadComplete(file, targetFolder);
                         }
-                        file.removeJob(jobs.get(leech));
+                        file.removeJob(jobs.get(leech), success);
                         if (removeFile) {
                             listener.downloadFailedFileMissing();
                         }

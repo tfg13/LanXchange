@@ -101,6 +101,10 @@ public class LXCFile implements Serializable {
      * The maximum version number supported by this client.
      */
     private final transient int lxcTransVersionMax = 1;
+    /**
+     * Number of successful transfers.
+     */
+    private transient int numberOfTransfers = 0;
 
     /**
      * The new constructor, creates a LXCFile with the given parameters.
@@ -153,9 +157,13 @@ public class LXCFile implements Serializable {
      * Removes a certain job from this LXCFile.
      *
      * @param job the job to be removed
+     * @param success true if transfer was successful
      */
-    public void removeJob(LXCJob job) {
+    public void removeJob(LXCJob job, boolean success) {
         jobs.remove(job);
+        if (success) {
+            numberOfTransfers++;
+        }
     }
 
     /**
@@ -325,6 +333,7 @@ public class LXCFile implements Serializable {
     /**
      * Sets the list of base files.
      * This is required after downloads.
+     *
      * @param baseFiles
      */
     public void setBaseFiles(List<VirtualFile> baseFiles) {
@@ -357,6 +366,15 @@ public class LXCFile implements Serializable {
      */
     public boolean isLocal() {
         return instance.id == LXCInstance.local.id;
+    }
+
+    /**
+     * Returns the number of (completed) transfers.
+     *
+     * @return number of transfers
+     */
+    public int getNumberOfTransfers() {
+        return numberOfTransfers;
     }
 
     /**
