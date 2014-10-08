@@ -20,9 +20,8 @@
  */
 package de.tobifleig.lxc.plaf;
 
-import java.util.List;
-
 import de.tobifleig.lxc.data.LXCFile;
+import java.util.List;
 
 /**
  * The Listener for LXC GUIs.

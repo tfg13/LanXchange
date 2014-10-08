@@ -43,7 +43,7 @@ public class TransFileList implements Serializable {
     /**
      * The id of the LXCInstance that created this list.
      */
-    private int originId;
+    private final int originId;
 
     /**
      * Create a new TransFileList based on the given List of offered LXCFiles.

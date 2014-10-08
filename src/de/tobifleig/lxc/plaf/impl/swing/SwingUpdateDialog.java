@@ -175,6 +175,7 @@ public class SwingUpdateDialog extends javax.swing.JDialog implements UpdateDial
         setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon("/home/tfg/NetBeansProjects/LanXchange/img/update.png")); // NOI18N
 
         jLabel2.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);

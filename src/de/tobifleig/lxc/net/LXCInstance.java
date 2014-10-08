@@ -41,7 +41,7 @@ public class LXCInstance {
      * Contains all the addresses under which this instance is known.
      * Must contains at least one address.
      */
-    private ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
+    private final ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
     /**
      * A human-readable name.
      */
@@ -49,7 +49,7 @@ public class LXCInstance {
     /**
      * Only true, if this LXCInstance represents the local instance.
      */
-    private boolean isLocal;
+    private final boolean isLocal;
     /**
      * The time when the last heartbeat was received.
      * Unused for local instances

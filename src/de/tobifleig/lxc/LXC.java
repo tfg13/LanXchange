@@ -46,11 +46,11 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 156;
+    public static final int versionId = 157;
     /**
      * The external version id.
      */
-    public static final String versionString = "v1.21";
+    public static final String versionString = "v1.22";
     /**
      * The Platform we are running on.
      */
@@ -62,11 +62,11 @@ public class LXC {
     /**
      * The networkmanager.
      */
-    private NetworkManager network;
+    private final NetworkManager network;
     /**
      * The filemanager.
      */
-    private FileManager files;
+    private final FileManager files;
     /**
      * The default target for downloads.
      */

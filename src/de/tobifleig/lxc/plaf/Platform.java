@@ -24,6 +24,7 @@ import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import java.io.File;
 
 import de.tobifleig.lxc.data.LXCFile;
+import java.io.File;
 
 /**
  * Provides platform-specific settings and functions such as automatic updates.

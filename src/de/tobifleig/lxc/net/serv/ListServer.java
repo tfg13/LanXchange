@@ -42,7 +42,7 @@ public class ListServer implements Runnable {
     /**
      * The listener, used to deliver incoming filelists.
      */
-    private ListServerListener listener;
+    private final ListServerListener listener;
 
     @Override
     public void run() {
