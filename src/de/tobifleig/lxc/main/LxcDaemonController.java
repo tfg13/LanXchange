@@ -29,7 +29,8 @@ import java.net.Socket;
 import java.util.Arrays;
 
 /**
- * Control the Lxc-Daemon. Sends start, stop, file-upload etc. commands to the daemon
+ * Control the Lxc-Daemon. Sends start, stop, file-upload etc. commands to the
+ * daemon
  *
  * @author Michael
  */
@@ -49,6 +50,10 @@ public class LxcDaemonController {
         if (Arrays.asList(args).contains("status")) {
             if (tryConnectSocket()) {
                 System.out.println("LxcDaemon is running.");
+                try {
+                    socket.close();
+                } catch (Exception ex) {
+                };
             } else {
                 System.out.println("LxcDaemon is NOT running.");
             }

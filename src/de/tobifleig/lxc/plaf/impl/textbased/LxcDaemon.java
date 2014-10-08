@@ -32,7 +32,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 /**
- * The LXC Daemon runs LXC in the backgroud and talks to the LxcDaemonController over a socket.
+ * The LXC Daemon runs LXC in the backgroud and talks to the LxcDaemonController
+ * over a socket.
  *
  * @author Michael
  */
@@ -77,7 +78,10 @@ public class LxcDaemon implements Runnable {
                 String[] commands = reader.readLine().split(" ");
 
                 if (commands[0].equals("stop")) {
-                    socket.getOutputStream().write("stopping...".getBytes());
+                    socket.getOutputStream().write("stopping...\n".getBytes());
+                    socket.close();
+                    run = false;
+                    System.exit(0);
                 } else if (commands[0].equals("list")) {
                     socket.getOutputStream().write((lxcInterface.getStatus()).getBytes());
                 } else if (commands[0].equals("upload-file")) {
@@ -99,7 +103,7 @@ public class LxcDaemon implements Runnable {
 
                 socket.getOutputStream().write("\n\n".getBytes());
                 socket.close();
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 // Connection closed before a command was sent
                 // lets just ignore this and go on with the next request
             }
