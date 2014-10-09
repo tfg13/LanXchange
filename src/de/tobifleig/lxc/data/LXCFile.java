@@ -254,17 +254,7 @@ public class LXCFile implements Serializable {
      * @return
      */
     public String getFormattedName() {
-        String name = getShownName();
-        if (name.length() > 30) {
-            return name.substring(30);
-        } else if (name.length() < 30) {
-            for (int i = name.length(); i < 30; i++) {
-                name += " ";
-            }
-            return name;
-        } else {
-            return name;
-        }
+        return String.format("%-30.30s", getShownName());
     }
 
     /**
