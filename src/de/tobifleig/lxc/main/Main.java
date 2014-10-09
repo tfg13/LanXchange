@@ -35,14 +35,10 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        boolean gui = true;
         if (Arrays.asList(args).contains("-nogui")) {
-            gui = false;
-        }
-        if (gui) {
-            new SwingGUILauncher(args);
-        } else {
             new LxcDaemonController(args);
+        } else {
+            new SwingGUILauncher(args);
         }
 
     }
