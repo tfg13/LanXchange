@@ -111,7 +111,7 @@ public class LXCDaemonUserInterface implements UserInterface {
 
     @Override
     public UpdateDialog getUpdateDialog() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new TextBasedUpdateDialog();
     }
 
     public String uploadFile(String filename) {
