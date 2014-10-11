@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.net;
 
+import de.tobifleig.lxc.net.mchelper.IPv4ManualBroadcaster;
+import de.tobifleig.lxc.net.mchelper.MulticastHelper;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.Inet4Address;
@@ -42,6 +44,20 @@ import java.util.TimerTask;
 class HeartbeatSender {
 
     /**
+     * All known MulticastHelpers.
+     */
+    private static final HashMap<String, MulticastHelper> knownHelpers;
+
+    /**
+     * Static initializer, prepare known MulitcastHelpers
+     */
+    static {
+        knownHelpers = new HashMap<String, MulticastHelper>();
+        IPv4ManualBroadcaster v4Helper = new IPv4ManualBroadcaster();
+        knownHelpers.put(v4Helper.getIdentifier(), v4Helper);
+    }
+
+    /**
      * Contains all sockets used to deploy multicasts.
      */
     private final HashMap<NetworkInterface, InterfaceHandler> sockets;
@@ -53,11 +69,15 @@ class HeartbeatSender {
      * The heartbeat-packet. Always the same and therefore cached.
      */
     private final byte[] packet;
+    /**
+     * All multicast helpers in effect.
+     */
+    private final List<MulticastHelper> helpers;
 
     /**
      * Creates a new HeartbeatSender
      */
-    HeartbeatSender() {
+    HeartbeatSender(String[] applicableHelpers) {
         sockets = new HashMap<NetworkInterface, InterfaceHandler>();
         // create packet
         packet = new byte[5];
@@ -68,6 +88,11 @@ class HeartbeatSender {
         packet[0] = (byte) (id >>> 24);
         packet[4] = 'h';
         timer = new Timer();
+        // use helpers as requested
+        helpers = new ArrayList<MulticastHelper>();
+        for (String helperId : applicableHelpers) {
+            helpers.add(knownHelpers.get(helperId));
+        }
     }
 
     /**
@@ -125,15 +150,12 @@ class HeartbeatSender {
      * If asyncRepetitions equals -1, sending is synchronous.
      * Otherwise the internal timer is used. In this case there is a delay of one second after each packet.
      *
-     * Only synchronous hearthbeats contain
-     *
      * @param asyncRepetitions # of async packets, -1 for 1 sync packet
      */
     void sendHeartbeat(final int asyncRepetitions) {
         if (asyncRepetitions == -1) {
             // synchronous
             multicast(packet);
-            manualBroadcast();
         } else {
             // asynchronous (multiple times)
             TimerTask multicastTask = new TimerTask() {
@@ -201,49 +223,6 @@ class HeartbeatSender {
                 handler.multicast();
             } catch (IOException ex) {
                 ex.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Send the given packet via UDP to all local network devices.
-     * This is only required to reach IPv4-only hosts on Android (because multicast is often not supported)
-     * Simulates a broadcast by sending UDP packets to all possible network devices (within a /24 IPv4 subnet).
-     */
-    private synchronized void manualBroadcast() {
-        for (NetworkInterface inter : sockets.keySet()) {
-            // get local ipv4 address of this interface
-            InetAddress localAddress = null;
-            Enumeration<InetAddress> inetAddresses = inter.getInetAddresses();
-            while (inetAddresses.hasMoreElements()) {
-                InetAddress testAddress = inetAddresses.nextElement();
-                if (!testAddress.isLoopbackAddress() && testAddress instanceof Inet4Address) {
-                    // just pick this one
-                    localAddress = testAddress;
-                    break;
-                }
-            }
-            // found one?
-            if (localAddress != null) {
-                InterfaceHandler handler = sockets.get(inter);
-                // leave IPv6-only hosts alone
-                if (handler.pack4 != null) {
-                    byte[] localAddressBytes = localAddress.getAddress();
-                    int localSuffix = localAddressBytes[3];
-                    try {
-                        for (int i = 1; i < 255; i++) {
-                            if (i == localSuffix) {
-                                // don't ping self
-                                continue;
-                            }
-                            localAddressBytes[3] = (byte) i;
-                            DatagramPacket pack = new DatagramPacket(packet, packet.length, InetAddress.getByAddress(localAddressBytes), 27716);
-                            handler.socket.send(pack);
-                        }
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
             }
         }
     }
@@ -318,6 +297,15 @@ class HeartbeatSender {
             }
             if (pack6 != null) {
                 socket.send(pack6);
+            }
+            // Send additional helper multicasts, if required
+            for (MulticastHelper helper : helpers) {
+                if (helper.supportsIPv4() && pack4 != null) {
+                    helper.helpIPv4(pack4.getData(), networkInterface, socket);
+                }
+                if (helper.supportsIPv6() && pack6 != null) {
+                    helper.helpIPv6(pack6.getData(), networkInterface, socket);
+                }
             }
         }
 

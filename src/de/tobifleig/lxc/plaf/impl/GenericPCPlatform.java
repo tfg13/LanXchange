@@ -240,4 +240,9 @@ public class GenericPCPlatform implements Platform {
     public void downloadComplete(LXCFile file, File targetFolder) {
         // not required for generic pcs
     }
+
+    @Override
+    public String[] getRequiredMulticastHelpers() {
+        return new String[0];
+    }
 }

@@ -92,4 +92,12 @@ public interface Platform {
      * Some platforms (like android) need to be informed about this so they can index the new files.
      */
     public void downloadComplete(LXCFile file, File targetFolder);
+
+    /**
+     * Returns ids of MulticastHelpers that are required to
+     * make discovery work reliably on this platform.
+     *
+     * @return all required MulticastHelpers
+     */
+    public String[] getRequiredMulticastHelpers();
 }

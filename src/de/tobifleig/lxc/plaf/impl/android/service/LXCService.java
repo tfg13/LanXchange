@@ -324,4 +324,9 @@ public class LXCService extends Service implements Platform {
         }
         super.onDestroy();
     }
+
+    @Override
+    public String[] getRequiredMulticastHelpers() {
+	return new String[]{"v4_manual_broadcast"};
+    }
 }

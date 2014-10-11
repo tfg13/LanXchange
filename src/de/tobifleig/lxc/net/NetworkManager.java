@@ -33,6 +33,7 @@ import de.tobifleig.lxc.net.serv.ListServer;
 import de.tobifleig.lxc.net.serv.ListServerListener;
 import de.tobifleig.lxc.net.serv.PingServer;
 import de.tobifleig.lxc.net.serv.PingServerListener;
+import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -98,8 +99,9 @@ public class NetworkManager {
      *
      * @param listener the listener to pass events to
      * @param fileManager the filemanager who must be informed about received filelists etc.
+     * @param platform the platform we are running on
      */
-    public NetworkManager(NetworkManagerListener listener, FileManager fileManager) {
+    public NetworkManager(NetworkManagerListener listener, FileManager fileManager, Platform platform) {
         this.listener = listener;
         this.fileManager = fileManager;
         jobs = new HashMap<Transceiver, LXCJob>();
@@ -166,7 +168,7 @@ public class NetworkManager {
                 instances.computePing(data, host);
             }
         });
-        multicaster = new HeartbeatSender();
+        multicaster = new HeartbeatSender(platform.getRequiredMulticastHelpers());
         interfacesurveillance = new InterfaceManager(pingServer, multicaster);
     }
 

@@ -148,7 +148,7 @@ public class LXC {
                     gui.showError("Uploading \"" + file.getShownName() + "\" failed, at least one file cannot be located anymore (did you move/delete it?)\n To avoid future errors, these files are no longer offered.");
                 }
             }
-        }, files);
+        }, files, platform);
 
         // start networking
         if (!network.checkSingletonAndStart()) {
