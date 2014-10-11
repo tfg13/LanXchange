@@ -213,7 +213,7 @@ public class FileListView extends ListView {
         // only clicks to second list for now
         if (position >= files.getLocalList().size() + 2) {
             final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
-            if (!file.isLocal() && !file.isAvailable()) {
+            if (!file.isLocked() && !file.isLocal() && !file.isAvailable()) {
                 file.setLocked(true);
                 updateGui();
                 Thread t = new Thread(new Runnable() {
@@ -235,7 +235,6 @@ public class FileListView extends ListView {
                 String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                         MimeTypeMap.getFileExtensionFromUrl(realFile.getBackingFile().getAbsolutePath()));
                 openIntent.setDataAndType(fileUri, mimeType);
-                System.out.println("Starting intent for uri " + fileUri + " mimeType is " + mimeType);
                 // check if intent can be processed
                 List<ResolveInfo> list = getContext().getPackageManager().queryIntentActivities(openIntent, 0);
                 if (list.isEmpty()) {

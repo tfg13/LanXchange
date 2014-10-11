@@ -20,7 +20,11 @@
  */
 package de.tobifleig.lxc.net.io;
 
+import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.RealFile;
 import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,10 +33,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
-import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.data.VirtualFile;
-import de.tobifleig.lxc.data.impl.RealFile;
 
 /**
  * The actual file-receiver
@@ -87,6 +87,10 @@ public class Leecher extends Transceiver {
                                 read = in.read(buffer);
                             } else {
                                 read = in.read(buffer, 0, (int) size);
+                            }
+                            if (read == -1) {
+                                // EOF
+                                throw new EOFException("Sudden EOF, aborting.");
                             }
                             fileout.write(buffer, 0, read);
                             size -= read;

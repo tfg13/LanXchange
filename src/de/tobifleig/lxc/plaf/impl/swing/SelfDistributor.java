@@ -85,18 +85,16 @@ public final class SelfDistributor {
         "img/multiple.png",
         "img/plus.png",
         "img/screw.png",
+        "img/selfdist.png",
+        "img/selfdist_small.png",
         "img/stop.png",
         "img/txt.png",
         "img/update.png",
-        "img/selfdist.png",
-        "img/selfdist_small.png",
         "COPYING",
-        "Ubuntu-R.ttf",
         "font_license.txt",
         "lanxchange.jar",
         "lxc",
-        "lxc.exe",
-        "lxc_updates.pub"};
+        "lxc.exe",};
 
     /**
      * Displays the GUI.

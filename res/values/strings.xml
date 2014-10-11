@@ -78,4 +78,5 @@
 	<string name="dialog_closewithrunning_text">Stopping now will abort them. Continue anyway?</string>
 	<string name="dialog_closewithrunning_yes">Yes</string>
 	<string name="dialog_closewithrunning_no">No</string>
+	<string name="accessibility_filetype">filetype (single file, folder or multi)</string>
 </resources>

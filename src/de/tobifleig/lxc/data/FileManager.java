@@ -39,11 +39,11 @@ public class FileManager {
     /**
      * Contains all LXCFiles.
      */
-    private LinkedList<LXCFile> files;
+    private final LinkedList<LXCFile> files;
     /**
      * Stores the latest List of available Files for each instance.
      */
-    private HashMap<LXCInstance, List<LXCFile>> recentFileLists;
+    private final HashMap<LXCInstance, List<LXCFile>> recentFileLists;
 
     /**
      * Creates a new FileManager.

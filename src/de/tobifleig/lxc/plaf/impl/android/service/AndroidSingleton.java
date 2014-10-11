@@ -72,7 +72,8 @@ public class AndroidSingleton {
         if (!running) {
             running = true;
             activity.startService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.service.LXCService.class));
-        } else if (guiListener != null) {
+        }
+        if (guiListener != null) {
             activity.setGuiListener(guiListener);
             sendQuickShare();
         }
@@ -128,8 +129,10 @@ public class AndroidSingleton {
      */
     public static void serviceReady(AndroidGuiListener guiListener) {
         AndroidSingleton.guiListener = guiListener;
-        activity.setGuiListener(guiListener);
-        sendQuickShare();
+        if (activity != null) {
+            activity.setGuiListener(guiListener);
+            sendQuickShare();
+        }
     }
 
     public static GuiInterfaceBridge getInterfaceBridge() {
@@ -137,7 +140,7 @@ public class AndroidSingleton {
     }
 
     private static void sendQuickShare() {
-        if (quickShare != null) {
+        if (activity != null && quickShare != null) {
             activity.quickShare(quickShare);
             quickShare = null;
         }

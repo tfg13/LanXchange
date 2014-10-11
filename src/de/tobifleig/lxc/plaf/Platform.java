@@ -22,6 +22,8 @@ package de.tobifleig.lxc.plaf;
 
 import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import java.io.File;
+import de.tobifleig.lxc.data.LXCFile;
+import java.io.File;
 
 import de.tobifleig.lxc.data.LXCFile;
 

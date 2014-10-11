@@ -21,9 +21,9 @@ Requirements
 Getting started
 ---------------
 
-(Google Play download Link coming soon!)
-
-1. [Download LanXchange](https://github.com/tfg13/LanXchange/raw/master/releases/stable/lxc.zip)
+1. Download LanXchange:
+  * [PC (Win/Mac/Linux/JVM)](https://github.com/tfg13/LanXchange/raw/master/releases/stable/lxc.zip)
+  * [Android](https://play.google.com/store/apps/details?id=de.tobifleig.lxc)
 2. Unzip the downloaded archive to some place in your home folder (like "My Documents")
 3. Run it by double-clicking "LXC.exe" (Windows) or "lxc" (OS X, Linux)
 4. Repeat these steps for all computers and start sharing!

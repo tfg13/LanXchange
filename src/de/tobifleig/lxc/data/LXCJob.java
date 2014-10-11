@@ -38,11 +38,11 @@ public class LXCJob {
     /**
      * The remote LXCInstance.
      */
-    private LXCInstance remote;
+    private final LXCInstance remote;
     /**
      * The corresponding Transceiver.
      */
-    private Transceiver trans;
+    private final Transceiver trans;
 
     /**
      * Creates a new LXCJob with the given parameters.
@@ -53,11 +53,7 @@ public class LXCJob {
     public LXCJob(Transceiver trans, LXCInstance remote) {
         this.trans = trans;
         this.remote = remote;
-        if (trans instanceof Seeder) {
-            isSeeder = true;
-        } else {
-            isSeeder = false;
-        }
+        isSeeder = trans instanceof Seeder;
     }
 
     /**

@@ -239,7 +239,6 @@ public class AndroidPlatform extends Activity {
     protected void onNewIntent(Intent intent) {
         // only act if there is an action and it is not MAIN
         if (intent.getAction() != null && !intent.getAction().equals(Intent.ACTION_MAIN)) {
-            System.out.println(intent.getAction());
             List<Uri> uris = computeInputIntent(intent);
             if (uris != null && !uris.isEmpty()) {
                 offerFiles(uris);

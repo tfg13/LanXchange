@@ -43,11 +43,11 @@ public class InterfaceManager {
     /**
      * Server listening for pings/heartbeats.
      */
-    private PingServer pingListener;
+    private final PingServer pingListener;
     /**
      * Multicast-Sender.
      */
-    private HeartbeatSender pingMulticaster;
+    private final HeartbeatSender pingMulticaster;
     /**
      * Interfaces that are actively used.
      */

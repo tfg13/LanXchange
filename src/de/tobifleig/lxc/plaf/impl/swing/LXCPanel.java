@@ -32,10 +32,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -58,9 +62,14 @@ public class LXCPanel extends JPanel {
      * Code is "quick and dirty", needs a rewrite...
      */
     private static final long serialVersionUID = 1L;
+    private static final int HOVER_NONE = -1;
+    private static final int HOVER_SELFDIST = 0;
+    private static final int HOVER_SETTINGS = 1;
+    private static final int HOVER_HELP = 2;
     @Deprecated
     private List<LXCFile> allFiles;
     private transient Image logo;
+    private transient Image small;
     private transient Image txt;
     private transient Image mini;
     private transient Image harddisk;
@@ -77,19 +86,26 @@ public class LXCPanel extends JPanel {
     private transient Image selfdist_small;
     private final Color background;
     private final Color selBackground;
+    private Font f0;
     private Font f1;
+    private Font f1b;
     private Font f2;
-    private FontMetrics mer;
+    private FontMetrics mer0;
+    private FontMetrics mer1;
+    private FontMetrics mer1b;
     private FontMetrics mer2;
     private int selectedIndex = -1;
     private int subJobDeleteSelected = -1;
-    private int traySelected = -1;
+    private int traySelected = HOVER_NONE;
     boolean detailSelected = false;
     boolean running = false;
-    boolean helpHovered = false;
     private GuiListener guiListener;
     private final OptionsDialog options;
     private boolean calcing;
+    /**
+     * Vertical scroll distance in files (entries in list)
+     */
+    private int scrollY = 0;
 
     @Override
     public void paintComponent(Graphics g) {
@@ -101,36 +117,36 @@ public class LXCPanel extends JPanel {
             g2.fillRect(0, 0, this.getWidth(), this.getHeight());
             // center LXC-Logo
             g2.drawImage(logo, (this.getWidth() / 2) - (logo.getWidth(this) / 2), (this.getHeight() / 2) - (logo.getHeight(this) / 2), this);
-
-            g2.setColor(background);
-            g2.fillRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
-            g2.setPaint(grad);
-            g2.drawRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
-            g2.setPaint(null);
-            if (traySelected == -1) {
-                // Text "LanXchange" (bottom, center)
-                g2.drawImage(txt, (this.getWidth() / 2) - (txt.getWidth(this) / 2), this.getHeight() - txt.getHeight(this) - 2, this);
+            if (traySelected != HOVER_HELP) {
+                g2.setColor(background);
+                g2.fillRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
+                g2.setPaint(grad);
+                g2.drawRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
+                g2.setPaint(null);
+                if (traySelected == HOVER_NONE) {
+                    // Text "LanXchange" (bottom, center)
+                    g2.drawImage(txt, (this.getWidth() / 2) - (txt.getWidth(this) / 2), this.getHeight() - txt.getHeight(this) - 2, this);
+                }
+                g2.drawImage(help, 5, this.getHeight() - 25, this);
+                // selfdist button
+                // hover?
+                if (traySelected == HOVER_SELFDIST) {
+                    g2.setColor(selBackground);
+                    g2.fillRect(this.getWidth() - 59, this.getHeight() - 30, 29, 30);
+                    g2.setColor(Color.GRAY);
+                    g2.drawString("self distribution", this.getWidth() / 2 - (mer1.stringWidth("self distribution") / 2), this.getHeight() - 10);
+                }
+                g2.drawImage(selfdist_small, this.getWidth() - 55, this.getHeight() - 25, this);
+                // settings button
+                // hover?
+                if (traySelected == HOVER_SETTINGS) {
+                    g2.setColor(selBackground);
+                    g2.fillRect(this.getWidth() - 30, this.getHeight() - 30, 30, 30);
+                    g2.setColor(Color.GRAY);
+                    g2.drawString("settings", this.getWidth() / 2 - (mer1.stringWidth("settings") / 2), this.getHeight() - 10);
+                }
+                g2.drawImage(screw, this.getWidth() - 25, this.getHeight() - 25, this);
             }
-            // help button
-            g2.drawImage(help, 5, this.getHeight() - 25, this);
-            // selfdist button
-            // hover?
-            if (traySelected == 0) {
-                g2.setColor(selBackground);
-                g2.fillRect(this.getWidth() - 59, this.getHeight() - 30, 29, 30);
-                g2.setColor(Color.GRAY);
-                g2.drawString("self distribution", this.getWidth() / 2 - (mer.stringWidth("Self Distribution") / 2), this.getHeight() - 10);
-            }
-            g2.drawImage(selfdist_small, this.getWidth() - 55, this.getHeight() - 25, this);
-            // settings button
-            // hover?
-            if (traySelected == 1) {
-                g2.setColor(selBackground);
-                g2.fillRect(this.getWidth() - 30, this.getHeight() - 30, 30, 30);
-                g2.setColor(Color.GRAY);
-                g2.drawString("settings", this.getWidth() / 2 - (mer.stringWidth("settings") / 2), this.getHeight() - 10);
-            }
-            g2.drawImage(screw, this.getWidth() - 25, this.getHeight() - 25, this);
 
             // header
             if (!allFiles.isEmpty()) {
@@ -144,7 +160,7 @@ public class LXCPanel extends JPanel {
                 g2.drawString("Type", 6, 8 + (mer2.getAscent() / 2));
                 g2.drawString("Name", 47, 8 + (mer2.getAscent() / 2));
                 g2.drawString("Size", (int) (1.0 * this.getWidth() * 0.7), 8 + (mer2.getAscent() / 2));
-            } else {
+            } else if (traySelected != HOVER_HELP) {
                 g2.setColor(background);
                 g2.fillRect(-1, 40, this.getWidth() + 1, 30);
                 g2.setPaint(grad);
@@ -152,14 +168,21 @@ public class LXCPanel extends JPanel {
                 g2.setPaint(null);
                 g2.setFont(f2);
                 g2.setColor(Color.BLACK);
-                String noFilesText1 = "nothing found in your home network";
+                String noFilesText1 = "files shared by other devices appear in this window";
                 g2.drawString(noFilesText1, this.getWidth() / 2 - mer2.stringWidth(noFilesText1) / 2, 40 + mer2.getAscent() + 4);
                 String noFilesText2 = "drop or paste files here to start sharing";
                 g2.drawString(noFilesText2, this.getWidth() / 2 - mer2.stringWidth(noFilesText2) / 2, 40 + mer2.getAscent() + 15);
             }
             int y = 20; // y-coordinate
+            // set up clipping
+            Shape clip = g2.getClip();
+            g2.clip(new Rectangle(0, 20, this.getWidth(), this.getHeight() - 20 - 30));
+            // file list may have changed, make sure scrollY is still within bounds
+            int maxVisibleFiles = getMaxVisibleFiles();
+            scrollY = Math.min(scrollY, Math.max(0, allFiles.size() - maxVisibleFiles));
             // files
-            for (int i = 0; i < allFiles.size(); i++) {
+            maxVisibleFiles++;
+            for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles); i++) {
                 LXCFile file = allFiles.get(i);
                 // number of jobs?
                 int jobYPxl = 0;
@@ -189,9 +212,19 @@ public class LXCPanel extends JPanel {
                 // name
                 g2.setColor(Color.BLACK);
                 g2.setFont(f1);
-                renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (mer.getAscent() / 2), mer);
+                if (selectedIndex == i && file.isLocal()) {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (mer1.getAscent() / 2), mer1);
+                } else {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (mer1.getAscent() / 2), mer1);
+                }
                 // size
-                g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 14 + (mer.getAscent() / 2));
+                if (detailSelected && selectedIndex == i && file.isLocal()) {
+                    g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 8 + (mer1.getAscent() / 2));
+                    g2.setFont(f2);
+                    g2.drawString("Click to remove", (int) (1.0 * this.getWidth() * 0.7), y + 27);
+                } else {
+                    g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 14 + (mer1.getAscent() / 2));
+                }
                 if (file.isLocal()) {
                     if (detailSelected && selectedIndex == i) {
                         g2.setColor(background);
@@ -203,6 +236,17 @@ public class LXCPanel extends JPanel {
                     g2.drawImage(file.isAvailable() ? done : download, this.getWidth() - 25, y + 5, this);
                 }
                 if (selectedIndex == i) {
+                    if (file.isLocal()) {
+                        g2.setFont(f2);
+                        g2.setColor(Color.BLACK);
+                        String downloads;
+                        if (file.getNumberOfTransfers() != 1) {
+                            downloads = file.getNumberOfTransfers() + " downloads";
+                        } else {
+                            downloads = "1 download";
+                        }
+                        g2.drawString(downloads, 47, y + 27);
+                    }
                     if (jobYPxl == 0 && !file.isLocal()) {
                         g2.setFont(f2);
                         String status = "Available - Click to download";
@@ -212,7 +256,6 @@ public class LXCPanel extends JPanel {
                         if (!file.isLocked()) {
                             g2.drawString(status, this.getWidth() / 2 - mer2.stringWidth(status) / 2, y + 36); // center
                         }
-
                     }
                 }
                 if (file.isLocked() && jobYPxl == 0) {
@@ -265,6 +308,7 @@ public class LXCPanel extends JPanel {
                     y += 30 + jobYPxl;
                 }
             }
+
             // calcing
             if (calcing) {
                 g2.setColor(background);
@@ -279,7 +323,7 @@ public class LXCPanel extends JPanel {
                 g2.setColor(Color.BLACK);
                 g2.setFont(f1);
                 String calcText = "calculating file size...";
-                g2.drawString(calcText, this.getWidth() / 2 - mer.stringWidth(calcText) / 2, y + 9 + (mer.getAscent() / 2));
+                g2.drawString(calcText, this.getWidth() / 2 - mer1.stringWidth(calcText) / 2, y + 9 + (mer1.getAscent() / 2));
             }
             // seperator line
             if (!allFiles.isEmpty()) {
@@ -287,31 +331,119 @@ public class LXCPanel extends JPanel {
                 g2.drawLine(0, y, this.getWidth(), y);
                 g2.setPaint(null);
             }
-            // display help text?
-            if (helpHovered) {
-                g2.setColor(Color.WHITE);
-                g2.fillRect(5, this.getHeight() - 205, 190, 200);
+            // scrollbar
+            if (allFiles.size() > maxVisibleFiles - 1) {
+                // length of scrollbar
+                double visibleFraction = ((double) maxVisibleFiles - 1) / allFiles.size();
+                // position of scrollbar
+                double visibleRangeStart = ((double) scrollY) / allFiles.size();
+                // draw
+                int visAreaHeight = (this.getHeight() - 20 - 30);
+                int scrollbarStart = (int) (visAreaHeight * visibleRangeStart + 20);
+                int scrollbarLength = (int) (visAreaHeight * visibleFraction);
                 g2.setColor(Color.BLACK);
-                g2.drawRect(5, this.getHeight() - 205, 190, 200);
-                g2.setFont(f1);
-                g2.drawString("quick help", 15, this.getHeight() - 180);
-                g2.setFont(f2);
-                g2.drawString("This window contains all files", 15, this.getHeight() - 150);
-                g2.drawString("currently available in your", 15, this.getHeight() - 140);
-                g2.drawString("home network.", 15, this.getHeight() - 130);
-                g2.drawString("To download files, simply", 15, this.getHeight() - 110);
-                g2.drawString("click on them with your mouse.", 15, this.getHeight() - 100);
-                g2.drawString("", 15, this.getHeight() - 90);
-                g2.drawString("To offer files yourself,", 15, this.getHeight() - 80);
-                g2.drawString("drag them into this window.", 15, this.getHeight() - 70);
-                g2.drawString("", 15, this.getHeight() - 60);
-                g2.drawString("", 15, this.getHeight() - 50);
-                g2.drawString("Modify the default settings", 15, this.getHeight() - 40);
-                g2.drawString("by clicking the wrench", 15, this.getHeight() - 30);
-                g2.setColor(Color.LIGHT_GRAY);
-                g2.drawString("v" + LXC.versionId, 190 - mer2.stringWidth("v" + LXC.versionId), this.getHeight() - 10);
-
+                g2.drawLine(this.getWidth() - 2, scrollbarStart, this.getWidth() - 2, scrollbarStart + scrollbarLength);
+                g2.drawLine(this.getWidth() - 3, scrollbarStart, this.getWidth() - 3, scrollbarStart + scrollbarLength);
             }
+            // reset clip
+            g2.setClip(clip);
+
+            // help screen
+            if (traySelected == HOVER_HELP) {
+                // background
+                g2.setColor(background);
+                g2.fillRect(-1, -1, this.getWidth() + 1, this.getHeight() + 2);
+                g2.fillRect(-1, -1, this.getWidth() + 1, this.getHeight() + 2);
+                // help symbol + hover
+                g2.setColor(selBackground);
+                g2.fillRect(0, this.getHeight() - 30, 29, 30);
+                g2.drawImage(help, 5, this.getHeight() - 25, this);
+                // header - LanXchange
+                g2.setFont(f0);
+                g2.setColor(Color.BLACK);
+                g2.drawString("Lan    change", this.getWidth() / 2 - mer0.stringWidth("Lan    change") / 2, 35);
+                g2.drawImage(small, this.getWidth() / 2 - 31, 16, this);
+                // seperator line
+                g2.setPaint(grad);
+                g2.drawLine(0, 55, this.getWidth(), 55);
+                g2.setPaint(null);
+                int xstart = 20;
+                if (this.getWidth() < 375 && this.getWidth() >= 360) {
+                    xstart = 10;
+                } else if (this.getWidth() < 360) {
+                    xstart = 5;
+                }
+                // howto
+                g2.setColor(Color.BLACK);
+                g2.setFont(f1b);
+                g2.drawString("How-to: ", xstart, 80);
+                g2.setFont(f1);
+                g2.drawString("- to share files, drop them in this window", xstart, 105);
+                g2.drawString("- start LanXchange on another device", xstart, 125);
+                if (this.getWidth() >= 350) {
+                    g2.drawString("- your files should show up there, click to transfer", xstart, 145);
+                } else {
+                    g2.drawString("- your files show up there, click to transfer", xstart, 145);
+                }
+                // files won't show up
+                g2.setFont(f1b);
+                g2.drawString("Files don't show up?", xstart, 175);
+                g2.setFont(f1);
+                if (this.getWidth() >= 350) {
+                    g2.drawString("- made for small local networks (think: home wifi)", xstart, 200);
+                    g2.drawString("- all devices must be connected at the same time", xstart, 220);
+                } else {
+                    g2.drawString("- made for local networks (home wifi)", xstart, 200);
+                    g2.drawString("- all devices must be connected", xstart, 220);
+                }
+                g2.drawString("- check your firewall", xstart, 240);
+                if (this.getHeight() >= 284) {
+                    // seperator line
+                    g2.setPaint(grad);
+                    g2.drawLine(0, 253, this.getWidth(), 253);
+                    g2.setPaint(null);
+                }
+                // mail
+                g2.setColor(Color.BLACK);
+                if (this.getHeight() >= 325) {
+                    if (this.getWidth() >= 382) {
+                        g2.drawString("Tell me what you think!", 20, 283);
+                    } else {
+                        g2.drawString("Mail:", 20, 283);
+                    }
+                    g2.setFont(f1b);
+                    g2.drawString("mail@lanxchange.com", this.getWidth() - 20 - mer1b.stringWidth("mail@lanxchange.com"), 283);
+                }
+                // github
+                if (this.getHeight() >= 360) {
+                    g2.setFont(f1);
+                    if (this.getWidth() >= 375) {
+                        g2.drawString("Source Code:", 20, 318);
+                    }
+                    g2.setFont(f1b);
+                    g2.drawString("github.com/tfg13/lanxchange", this.getWidth() - 20 - mer1b.stringWidth("github.com/tfg13/lanxchange"), 318);
+                }
+                // License
+                if (this.getHeight() >= 387) {
+                    g2.setFont(f1);
+                    if (this.getWidth() >= 365) {
+                        g2.drawString("Free Software!  License:", 20, 353);
+                    } else {
+                        g2.drawString("License:", 20, 353);
+                    }
+                    g2.setFont(f1b);
+                    g2.drawString("GNU GPL v3+", this.getWidth() - 20 - mer1b.stringWidth("GNU GPL v3+"), 353);
+                }
+                // version
+                g2.setFont(f2);
+                g2.setColor(Color.BLACK);
+                String versionText = LXC.versionString + "   (" + LXC.versionId + ")";
+                g2.drawString(versionText, this.getWidth() - mer2.stringWidth(versionText) - 5, this.getHeight() - 18);
+                // legal
+                String legalText = "Copyright  2009-2014  Tobias Fleig  -  All rights reserved";
+                g2.drawString(legalText, this.getWidth() - mer2.stringWidth(legalText) - 5, this.getHeight() - 6);
+            }
+
         } else {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, this.getWidth(), this.getHeight());
@@ -320,6 +452,35 @@ public class LXCPanel extends JPanel {
             g.drawString("...", getWidth() / 4 * 3, getHeight() / 4 * 3);
         }
 
+    }
+
+    private int getMaxVisibleFiles() {
+        int maxPixel = LXCPanel.this.getHeight() - 20 - 30;
+        int total = 0;
+        for (int i = 0; i < allFiles.size(); i++) {
+            int plus;
+            LXCFile file = allFiles.get(i);
+            if (file.isLocal()) {
+                int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
+                plus = 30 + jobnum * 20;
+            } else {
+                int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
+                if (jobnum == 0) {
+                    if (selectedIndex == i) {
+                        plus = 40;
+                    } else {
+                        plus = 30;
+                    }
+                } else {
+                    plus = 30 + jobnum * 20;
+                }
+            }
+            total += plus;
+            if (total > maxPixel) {
+                return i;
+            }
+        }
+        return allFiles.size();
     }
 
     /**
@@ -365,6 +526,7 @@ public class LXCPanel extends JPanel {
         try {
             logo = ImageIO.read(new File("img/logo.png"));
             mini = ImageIO.read(new File("img/mini.png"));
+            small = ImageIO.read(new File("img/small.png"));
             harddisk = ImageIO.read(new File("img/harddisk.png"));
             txt = ImageIO.read(new File("img/txt.png"));
             fileImg = ImageIO.read(new File("img/file.png"));
@@ -381,7 +543,9 @@ public class LXCPanel extends JPanel {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        mer = this.getGraphics().getFontMetrics(f1);
+        mer0 = this.getGraphics().getFontMetrics(f0);
+        mer1 = this.getGraphics().getFontMetrics(f1);
+        mer1b = this.getGraphics().getFontMetrics(f1b);
         mer2 = this.getGraphics().getFontMetrics(f2);
         running = true;
         this.addMouseListener(new MouseListener() {
@@ -462,34 +626,29 @@ public class LXCPanel extends JPanel {
             public void mouseMoved(MouseEvent e) {
                 // help-button?
                 if (e.getX() < 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                    if (!helpHovered) {
+                    if (traySelected != HOVER_HELP) {
                         selfTrigger();
-                        helpHovered = true;
+                        traySelected = HOVER_HELP;
                     }
                 } else if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
                     // self-distribution button
-                    if (traySelected != 0) {
-                        traySelected = 0;
+                    if (traySelected != HOVER_SELFDIST) {
+                        traySelected = HOVER_SELFDIST;
                         selfTrigger();
                     }
                 } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
                     // settings button
-                    if (traySelected != 1) {
-                        traySelected = 1;
+                    if (traySelected != HOVER_SETTINGS) {
+                        traySelected = HOVER_SETTINGS;
                         selfTrigger();
                     }
                 } else {
-                    // turn off help
-                    if (helpHovered) {
-                        selfTrigger();
-                        helpHovered = false;
-                    }
                     // turn off hovers
                     if (traySelected != -1) {
                         traySelected = -1;
                         selfTrigger();
                     }
-                    int newSelIndex = 0;
+                    int newSelIndex = scrollY;
                     int my = e.getY();
                     int pre = 20;
                     int prev = 20;
@@ -497,7 +656,8 @@ public class LXCPanel extends JPanel {
                         newSelIndex = -1;
                     } else {
                         // Add file after file until we get there
-                        for (int i = 0; i < allFiles.size(); i++) {
+                        int maxVisibleFiles = LXCPanel.this.getMaxVisibleFiles();
+                        for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles + 1); i++) {
                             int plus;
                             LXCFile file = allFiles.get(i);
                             if (file.isLocal()) {
@@ -589,6 +749,29 @@ public class LXCPanel extends JPanel {
                 }
             }
         });
+        this.addMouseWheelListener(new MouseWheelListener() {
+
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                    int maxVisibleFiles = getMaxVisibleFiles();
+                    int maxScrollY = allFiles.size() - maxVisibleFiles;
+                    int delta = 0;
+                    if (e.getPreciseWheelRotation() > 0) {
+                        delta = 1;
+                    } else if (e.getPreciseWheelRotation() < 0) {
+                        delta = -1;
+                    }
+                    int newScrollY = scrollY + delta;
+                    if (newScrollY >= 0 && newScrollY <= maxScrollY) {
+                        if (newScrollY != scrollY) {
+                            selfTrigger();
+                        }
+                        scrollY = newScrollY;
+                    }
+                }
+            }
+        });
 
         selfTrigger();
     }
@@ -640,7 +823,9 @@ public class LXCPanel extends JPanel {
      * @param font
      */
     void setUsedFont(Font font) {
+        f0 = font.deriveFont(Font.BOLD, 20f);
         f1 = font.deriveFont(15f);
+        f1b = f1.deriveFont(Font.BOLD);
         f2 = font.deriveFont(10f);
     }
 }
