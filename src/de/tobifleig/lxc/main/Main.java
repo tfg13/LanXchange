@@ -18,24 +18,29 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.impl.android;
+package de.tobifleig.lxc.main;
+
+import java.util.Arrays;
 
 /**
- * Required to forward some events from LXCService (that implements GuiInterface)
- * to the real Gui (that LXC cannot handle because it can be recreated etc)
- * @author tfg
+ * Application entry point. Every project should have a main class.
  *
+ * @author Michael
  */
-public interface GuiInterfaceBridge {
+public class Main {
 
     /**
-     * Forwards some update()-calls to the gui.
+     * Entry point Launch Swing-GUI unless -nogui was given as argument
+     *
+     * @param args the command line arguments
      */
-    public void update();
+    public static void main(String args[]) {
+        if (Arrays.asList(args).contains("-nogui")) {
+            new LxcDaemonController(args);
+        } else {
+            new SwingGUILauncher(args);
+        }
 
-    /**
-     * Forwards confirmCloseWithTransfersRunning()-calls to the gui.
-     */
-    public boolean confirmCloseWithTransfersRunning();
+    }
 
 }

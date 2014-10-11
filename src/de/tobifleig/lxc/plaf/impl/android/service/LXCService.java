@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -39,7 +39,7 @@ import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
-import de.tobifleig.lxc.plaf.GuiInterface;
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.impl.AndroidPlatform;
@@ -122,8 +122,8 @@ public class LXCService extends Service implements Platform {
     }
 
     @Override
-    public GuiInterface getGui(String[] args) {
-        return new GuiInterface() {
+    public UserInterface getGui(String[] args) {
+        return new UserInterface() {
 
             @Override
             public void update() {

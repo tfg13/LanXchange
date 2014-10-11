@@ -31,7 +31,7 @@ import de.tobifleig.lxc.net.LXCInstance;
 import de.tobifleig.lxc.net.NetworkManager;
 import de.tobifleig.lxc.net.NetworkManagerListener;
 import de.tobifleig.lxc.net.TransFileList;
-import de.tobifleig.lxc.plaf.GuiInterface;
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 
@@ -47,11 +47,11 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 154;
+    public static final int versionId = 156;
     /**
      * The external version id.
      */
-    public static final String versionString = "v1.1";
+    public static final String versionString = "v1.22";
     /**
      * The Platform we are running on.
      */
@@ -59,15 +59,15 @@ public class LXC {
     /**
      * Our GUI.
      */
-    private GuiInterface gui;
+    private final UserInterface gui;
     /**
      * The networkmanager.
      */
-    private NetworkManager network;
+    private final NetworkManager network;
     /**
      * The filemanager.
      */
-    private FileManager files;
+    private final FileManager files;
     /**
      * The default target for downloads.
      */
