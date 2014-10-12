@@ -35,7 +35,7 @@ import java.util.TimerTask;
 class InstanceManager {
 
     /**
-     * Instance was detected by the other side, we learned about it when receiving a file list.
+     * Instance was detected by the other side, we learned about it when we received a file list.
      */
     public static final String SOURCE_RECEIVED_LIST = "incoming list";
     /**
