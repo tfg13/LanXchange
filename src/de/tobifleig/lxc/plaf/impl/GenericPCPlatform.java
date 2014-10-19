@@ -117,8 +117,7 @@ public class GenericPCPlatform implements Platform {
             t.setDaemon(true);
             t.start();
         } else {
-            System.out
-                    .println("Not checking for updates. (disabled via lxc.cfg)");
+            System.out.println("Not checking for updates. (disabled via lxc.cfg)");
         }
     }
 
