@@ -20,8 +20,12 @@
  */
 package de.tobifleig.lxc.plaf;
 
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
+import java.io.File;
 import de.tobifleig.lxc.data.LXCFile;
 import java.io.File;
+
+import de.tobifleig.lxc.data.LXCFile;
 
 /**
  * Provides platform-specific settings and functions such as automatic updates.
@@ -51,7 +55,7 @@ public interface Platform {
      * @param args the start-parameters
      * @return the platform-specific user interface
      */
-    public GuiInterface getGui(String[] args);
+    public UserInterface getGui(String[] args);
 
     /**
      * Reads and returns the configuration.

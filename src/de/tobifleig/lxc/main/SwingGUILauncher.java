@@ -18,13 +18,21 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.impl;
+
+package de.tobifleig.lxc.main;
+
+import de.tobifleig.lxc.plaf.impl.GenericPCPlatform;
+import de.tobifleig.lxc.plaf.impl.swing.SwingGui;
 
 /**
- * Windows-specific behaviors/settings.
+ * Start LXC with a swing GUI.
  *
- * @author Tobias Fleig <tobifleig googlemail com>
+ * @author Michael
  */
-public class WinPlatform extends GenericPCPlatform {
-    // Room for future enhancements
+public class SwingGUILauncher {
+
+    public SwingGUILauncher(String args[]) {
+        GenericPCPlatform.startLXC(new SwingGui(), args);
+    }
+
 }
