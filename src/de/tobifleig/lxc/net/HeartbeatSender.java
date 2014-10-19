@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.net;
 
 import de.tobifleig.lxc.net.mchelper.IPv4ManualBroadcaster;
+import de.tobifleig.lxc.net.mchelper.IPv6AllNodesBroadcaster;
 import de.tobifleig.lxc.net.mchelper.MulticastHelper;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -55,6 +56,8 @@ class HeartbeatSender {
         knownHelpers = new HashMap<String, MulticastHelper>();
         IPv4ManualBroadcaster v4Helper = new IPv4ManualBroadcaster();
         knownHelpers.put(v4Helper.getIdentifier(), v4Helper);
+        IPv6AllNodesBroadcaster v6Helper = new IPv6AllNodesBroadcaster();
+        knownHelpers.put(v6Helper.getIdentifier(), v6Helper);
     }
 
     /**
