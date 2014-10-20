@@ -20,8 +20,9 @@
  */
 package de.tobifleig.lxc.plaf.impl.swing;
 
+import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.plaf.GuiInterface;
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -30,6 +31,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.imageio.ImageIO;
@@ -46,7 +48,7 @@ import javax.swing.UIManager;
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class SwingGui extends javax.swing.JFrame implements GuiInterface {
+public class SwingGui extends javax.swing.JFrame implements UserInterface {
 
     private static final long serialVersionUID = 1L;
     /**
@@ -262,5 +264,10 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     @Override
     public boolean confirmCloseWithTransfersRunning() {
         return (JOptionPane.showConfirmDialog(rootPane, "Exiting now will kill all running transfers. Quit anyway?", "Transfers running", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION);
+    }
+
+    @Override
+    public UpdateDialog getUpdateDialog() {
+        return new SwingUpdateDialog(this);
     }
 }

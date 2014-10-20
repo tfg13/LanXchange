@@ -242,6 +242,15 @@ public class LXCFile implements Serializable {
     }
 
     /**
+     * Return a String with exactly 30 chars containing the name. The name is cut or suffixed with extra spaces to fill the 30 chars.
+     *
+     * @return
+     */
+    public String getFormattedName() {
+        return String.format("%-30.30s", getShownName());
+    }
+
+    /**
      * Returns the type.
      *
      * @return
