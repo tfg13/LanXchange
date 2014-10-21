@@ -113,8 +113,8 @@ public class LXCPanel extends JPanel {
             GradientPaint grad = new GradientPaint(new Point(0, 0), new Color(192, 192, 192, 0), new Point(this.getWidth() / 2, 0), Color.LIGHT_GRAY, true);
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(Color.WHITE);
-            g2.fillRect(0, 0, this.getWidth(), this.getHeight());
+            g2.setBackground(Color.WHITE);
+            g2.clearRect(0, 0, this.getWidth(), this.getHeight());
             // center LXC-Logo
             g2.drawImage(logo, (this.getWidth() / 2) - (logo.getWidth(this) / 2), (this.getHeight() / 2) - (logo.getHeight(this) / 2), this);
             if (traySelected != HOVER_HELP) {
