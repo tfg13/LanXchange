@@ -31,6 +31,7 @@ import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.imageio.ImageIO;
@@ -79,34 +80,46 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
      * Creates new form LXCGui3
      */
     public SwingGui() {
-        // set look and feel
         try {
-            // Do not set L&F on linux, on some systems (ubuntu) this gets you a very ugly GTK file chooser
-            if (!System.getProperty("os.name").toLowerCase().equals("linux")) {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        try {
-            InputStream ubuFontRes = ClassLoader.getSystemClassLoader().getResourceAsStream("Ubuntu-R.ttf");
-            if (ubuFontRes != null) {
-                ubuFont = Font.createFont(Font.TRUETYPE_FONT, ubuFontRes);
-            } else {
-                // try file
-                ubuFont = Font.createFont(Font.TRUETYPE_FONT, new File("Ubuntu-R.ttf"));
-            }
+            SwingUtilities.invokeAndWait(new Runnable() {
 
-        } catch (FontFormatException ex) {
+                @Override
+                public void run() {
+                    // set look and feel
+                    try {
+                        // Do not set L&F on linux, on some systems (ubuntu) this gets you a very ugly GTK file chooser
+                        if (!System.getProperty("os.name").toLowerCase().equals("linux")) {
+                            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    try {
+                        InputStream ubuFontRes = ClassLoader.getSystemClassLoader().getResourceAsStream("Ubuntu-R.ttf");
+                        if (ubuFontRes != null) {
+                            ubuFont = Font.createFont(Font.TRUETYPE_FONT, ubuFontRes);
+                        } else {
+                            // try file
+                            ubuFont = Font.createFont(Font.TRUETYPE_FONT, new File("Ubuntu-R.ttf"));
+                        }
+
+                    } catch (FontFormatException ex) {
+                        ex.printStackTrace();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    if (ubuFont == null) {
+                        System.out.println("WARNING: Cannot find fontfile \"Ubuntu-R.ttf\"!");
+                        ubuFont = Font.decode("Sans");
+                    }
+                    initComponents();
+                }
+            });
+        } catch (InterruptedException ex) {
             ex.printStackTrace();
-        } catch (IOException ex) {
+        } catch (InvocationTargetException ex) {
             ex.printStackTrace();
         }
-        if (ubuFont == null) {
-            System.out.println("WARNING: Cannot find fontfile \"Ubuntu-R.ttf\"!");
-            ubuFont = Font.decode("Sans");
-        }
-        initComponents();
     }
 
     private void start() {
@@ -184,50 +197,86 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
 
     @Override
     public void init(String[] args) {
-        // setup dnd
-        panel.setTransferHandler(new DropTransferHandler(new FileDropListener() {
-            @Override
-            public void displayCalcing() {
-                panel.setCalcing(true);
-            }
-
-            @Override
-            public void newCalcedFile(LXCFile file) {
-                panel.setCalcing(false);
-                listener.offerFile(file);
-            }
-        }));
-        // setup pasting
-        panel.getActionMap().put(TransferHandler.getPasteAction().getValue(Action.NAME), TransferHandler.getPasteAction());
-        panel.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), TransferHandler.getPasteAction().getValue(Action.NAME));
         try {
-            setIconImage(ImageIO.read(new File("img/logo.png")));
-        } catch (Exception ex) {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                    // setup dnd
+                    panel.setTransferHandler(new DropTransferHandler(new FileDropListener() {
+                        @Override
+                        public void displayCalcing() {
+                            panel.setCalcing(true);
+                        }
+
+                        @Override
+                        public void newCalcedFile(LXCFile file) {
+                            panel.setCalcing(false);
+                            listener.offerFile(file);
+                        }
+                    }));
+                    // setup pasting
+                    panel.getActionMap().put(TransferHandler.getPasteAction().getValue(Action.NAME), TransferHandler.getPasteAction());
+                    panel.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), TransferHandler.getPasteAction().getValue(Action.NAME));
+                    try {
+                        setIconImage(ImageIO.read(new File("img/logo.png")));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent e) {
+                            if (listener.shutdown(false, true)) {
+                                // swing sometimes refuses to shutdown correctly
+                                System.exit(0);
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        } catch (InvocationTargetException ex) {
             ex.printStackTrace();
         }
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                if (listener.shutdown(false, true)) {
-                    // swing sometimes refuses to shutdown correctly
-                    System.exit(0);
-                }
-            }
-        });
     }
 
     @Override
     public void display() {
-        panel.setFileList(listener.getFileList());
-        panel.setUsedFont(ubuFont);
-        setVisible(true);
-        panel.start();
-        start();
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                    panel.setFileList(listener.getFileList());
+                    panel.setUsedFont(ubuFont);
+                    setVisible(true);
+                    panel.start();
+                    start();
+                }
+            });
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        } catch (InvocationTargetException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
-    public void showError(String error) {
-        JOptionPane.showMessageDialog(this, error, "LXC - Error", JOptionPane.ERROR_MESSAGE);
+    public void showError(final String error) {
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                    JOptionPane.showMessageDialog(SwingGui.this, error, "LXC - Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        } catch (InvocationTargetException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
