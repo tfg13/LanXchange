@@ -150,6 +150,8 @@ public class Leecher extends Transceiver {
                 socket.close();
             } catch (Exception ex) {
             }
+            // force immediate release of file handles
+            System.gc();
         }
     }
 
