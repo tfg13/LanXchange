@@ -327,6 +327,6 @@ public class LXCService extends Service implements Platform {
 
     @Override
     public String[] getRequiredMulticastHelpers() {
-	return new String[]{"v4_manual_broadcast"};
+	return new String[]{"v4_manual_broadcast", "v6_allnodes_broadcast"};
     }
 }

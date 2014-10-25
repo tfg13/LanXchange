@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.net;
 
 import de.tobifleig.lxc.net.mchelper.IPv4ManualBroadcaster;
+import de.tobifleig.lxc.net.mchelper.IPv6AllNodesBroadcaster;
 import de.tobifleig.lxc.net.mchelper.MulticastHelper;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -56,6 +57,8 @@ class HeartbeatSender {
         knownHelpers = new HashMap<String, MulticastHelper>();
         IPv4ManualBroadcaster v4Helper = new IPv4ManualBroadcaster();
         knownHelpers.put(v4Helper.getIdentifier(), v4Helper);
+        IPv6AllNodesBroadcaster v6Helper = new IPv6AllNodesBroadcaster();
+        knownHelpers.put(v6Helper.getIdentifier(), v6Helper);
     }
 
     /**
@@ -74,11 +77,16 @@ class HeartbeatSender {
      * All multicast helpers in effect.
      */
     private final List<MulticastHelper> helpers;
+    /**
+     * Provides iterators for all remote instances.
+     */
+    private final Iterable<LXCInstance> remoteInstances;
 
     /**
      * Creates a new HeartbeatSender
      */
-    HeartbeatSender(String[] applicableHelpers) {
+    HeartbeatSender(String[] applicableHelpers, Iterable<LXCInstance> remoteInstances) {
+        this.remoteInstances = remoteInstances;
         sockets = new HashMap<NetworkInterface, InterfaceHandler>();
         // create packet
         packet = new byte[5];
@@ -118,7 +126,7 @@ class HeartbeatSender {
      * Stops sending heartbeats and sends a special, last offline-beat.
      * Needs all known remote instances to send offline-signals to them.
      */
-    void stop(final Iterable<LXCInstance> remoteInstances) {
+    void stop() {
         // Set packet content to "offline-signal"
         packet[4] = 'o';
         // cancel heartbeats:
@@ -128,10 +136,6 @@ class HeartbeatSender {
             @Override
             public void run() {
                 multicast(packet);
-                // offline signals to all known instances
-                for (LXCInstance instance : remoteInstances) {
-                    direct(packet, instance.getDownloadAddress());
-                }
                 // shutdown timer thread
                 timer.cancel();
             }
@@ -225,6 +229,10 @@ class HeartbeatSender {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+        }
+        // prevent timeouts on android
+        for (LXCInstance instance : remoteInstances) {
+            direct(data, instance.getDownloadAddress());
         }
     }
 

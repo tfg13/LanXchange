@@ -168,7 +168,7 @@ public class NetworkManager {
                 instances.computePing(data, host);
             }
         });
-        multicaster = new HeartbeatSender(platform.getRequiredMulticastHelpers());
+        multicaster = new HeartbeatSender(platform.getRequiredMulticastHelpers(), instances.getRemotes());
         interfacesurveillance = new InterfaceManager(pingServer, multicaster);
     }
 
@@ -199,7 +199,7 @@ public class NetworkManager {
      * Kills all running transfers without further notice.
      */
     public void stop() {
-        multicaster.stop(instances.getRemotes());
+        multicaster.stop();
         interfacesurveillance.stop();
         fileServer.stop();
         listServer.stop();
