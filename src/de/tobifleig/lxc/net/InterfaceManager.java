@@ -82,7 +82,6 @@ public class InterfaceManager {
             }
             // any changes?
             if (!nextList.equals(usedInterfaces)) {
-                System.out.println("Interfaces have changed!");
                 usedInterfaces = nextList;
                 pingListener.updateInterfaces(usedInterfaces);
                 pingMulticaster.updateInterfaces(usedInterfaces);
