@@ -31,6 +31,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -266,13 +267,22 @@ class HeartbeatSender {
          */
         private final NetworkInterface networkInterface;
         /**
-         * IPv4 heartbeat packet.
+         * IPv4 heartbeat multicast packet.
          */
         private DatagramPacket pack4;
         /**
-         * IPv6 heartbeat packet.
+         * IPv4 heartbeat direct UDP data.
+         */
+        private byte[] pack4Help;
+        /**
+         * IPv6 heartbeat multicast packet.
          */
         private DatagramPacket pack6;
+        /**
+         * IPv6 heartbeat direct UDP data.
+         */
+        private byte[] pack6Help;
+
         /**
          * Packets must be created after constructor because android does not allow network access on main thread.
          */
@@ -309,10 +319,10 @@ class HeartbeatSender {
             // Send additional helper multicasts, if required
             for (MulticastHelper helper : helpers) {
                 if (helper.supportsIPv4() && pack4 != null) {
-                    helper.helpIPv4(pack4.getData(), networkInterface, socket);
+                    helper.helpIPv4(pack4Help, networkInterface, socket);
                 }
                 if (helper.supportsIPv6() && pack6 != null) {
-                    helper.helpIPv6(pack6.getData(), networkInterface, socket);
+                    helper.helpIPv6(pack6Help, networkInterface, socket);
                 }
             }
         }
@@ -361,6 +371,11 @@ class HeartbeatSender {
             }
             pack4 = v4 ? new DatagramPacket(packet, packet.length, Inet4Address.getByAddress(new byte[]{(byte) 225, 4, 5, 6}), 27716) : null;
             pack6 = v6 ? new DatagramPacket(packet, packet.length, Inet6Address.getByAddress("ff15::4c61:6e58:6368:616e:6765", new byte[]{(byte) 0xff, (byte) 0x15, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x4c, (byte) 0x61, (byte) 0x6e, (byte) 0x58, (byte) 0x63, (byte) 0x68, (byte) 0x61, (byte) 0x6e, (byte) 0x67, (byte) 0x65}, networkInterface), 27716) : null;
+            // create helper data
+            pack4Help = Arrays.copyOf(packet, packet.length);
+            pack4Help[4] = 'H';
+            // same for now
+            pack6Help = pack4Help;
         }
 
     }
