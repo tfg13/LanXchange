@@ -20,7 +20,9 @@
  */
 package de.tobifleig.lxc.plaf.impl.swing;
 
+import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import de.tobifleig.lxc.LXC;
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -75,7 +77,7 @@ public final class LXCUpdater {
      * @param restartable if true, whoever started LXC is aware of this updatesystem and wants to be notifiyed when LXC should be restarted rather than regularely terminated (this is done by returning exit code 6 rather than 0)
      * @throws Exception may throw a bunch of exceptions, this class requires, working internet, github, signature checks etc.
      */
-    public static void checkAndPerformUpdate(SwingGui gui, boolean forceUpdate, boolean overrideVerification, boolean restartable) throws Exception {
+    public static void checkAndPerformUpdate(UserInterface userInterface, boolean forceUpdate, boolean overrideVerification, boolean restartable) throws Exception {
         if (forceUpdate) {
             System.out.println("Info: Forcing update...");
         }
@@ -88,10 +90,11 @@ public final class LXCUpdater {
         // compare version number
         if (gotver > LXC.versionId || forceUpdate) {
             System.out.println("Newer Version available!");
-            UpdateDialog updateGui = new UpdateDialog(gui, true, title);
+            UpdateDialog updateDialog = userInterface.getUpdateDialog();
+            updateDialog.setTitle(title);
             // prompt user
-            if (updateGui.isUpdate()) {
-                updateGui.toProgressView();
+            if (updateDialog.isUpdate()) {
+                updateDialog.toProgressView();
                 // download update
                 URL url = new URL("http://updates.lanxchange.com/update_master.zip");
                 FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
@@ -110,7 +113,7 @@ public final class LXCUpdater {
                 }
                 os.close();
                 // verify signature
-                updateGui.setStatusToVerify();
+                updateDialog.setStatusToVerify();
                 // extract update & signature file
                 File psource = new File("update_dl.zip");
                 ZipFile masterZip = new ZipFile(psource);
@@ -169,7 +172,7 @@ public final class LXCUpdater {
                 inss.close();
                 // signature ok?
                 if (sign.verify(bs) || overrideVerification) {
-                    updateGui.setStatusToInstall();
+                    updateDialog.setStatusToInstall();
                     // extract update
                     File source = new File("temp_update.zip");
                     File target = new File(".");
@@ -219,30 +222,30 @@ public final class LXCUpdater {
                     }
 
                     //done
-                    updateGui.setStatusToRestart();
-                    updateGui.setRestartTime(5, !restartable);
+                    updateDialog.setStatusToRestart();
+                    updateDialog.setRestartTime(5, !restartable);
                     Thread.sleep(1000);
-                    updateGui.setRestartTime(4, !restartable);
+                    updateDialog.setRestartTime(4, !restartable);
                     Thread.sleep(1000);
-                    updateGui.setRestartTime(3, !restartable);
+                    updateDialog.setRestartTime(3, !restartable);
                     Thread.sleep(1000);
-                    updateGui.setRestartTime(2, !restartable);
+                    updateDialog.setRestartTime(2, !restartable);
                     Thread.sleep(1000);
-                    updateGui.setRestartTime(1, !restartable);
+                    updateDialog.setRestartTime(1, !restartable);
                     Thread.sleep(1000);
-                    updateGui.setRestartTime(0, !restartable);
+                    updateDialog.setRestartTime(0, !restartable);
                     System.exit(6);
 
                 } else {
                     System.out.println("ERROR: Bad signature! File corrupted (OR MANIPULATED!!!). Will not update!");
-                    updateGui.setStatusToError();
+                    updateDialog.setStatusToError();
                     return;
                 }
             } else {
                 System.out.println("Update rejected by user");
             }
-            updateGui.setVisible(false);
-            updateGui.dispose();
+            updateDialog.setVisible(false);
+            updateDialog.dispose();
         } else {
             System.out.println("You have the latest version");
         }

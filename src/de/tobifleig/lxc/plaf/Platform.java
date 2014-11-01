@@ -20,6 +20,7 @@
  */
 package de.tobifleig.lxc.plaf;
 
+import de.tobifleig.lxc.plaf.impl.ui.UserInterface;
 import de.tobifleig.lxc.data.LXCFile;
 import java.io.File;
 
@@ -51,7 +52,7 @@ public interface Platform {
      * @param args the start-parameters
      * @return the platform-specific user interface
      */
-    public GuiInterface getGui(String[] args);
+    public UserInterface getGui(String[] args);
 
     /**
      * Reads and returns the configuration.

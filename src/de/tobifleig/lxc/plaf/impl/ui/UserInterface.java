@@ -18,19 +18,21 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf;
+package de.tobifleig.lxc.plaf.impl.ui;
 
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.plaf.GuiListener;
+import de.tobifleig.lxc.plaf.impl.ui.UpdateDialog;
 import java.io.File;
 
 /**
- * Defines a LXC-GUI.
+ * Defines a LXC-UI.
  *
- * Enables the same codebase to use Swing or the Android-UI
+ * Enables the same codebase to use Swing or the Android-UI or a textbased interface
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public interface GuiInterface {
+public interface UserInterface {
 
     /**
      * Initialize the user-inferface.
@@ -82,4 +84,11 @@ public interface GuiInterface {
      * @return true, if user really wants to quit and cancel all running transfers
      */
     public boolean confirmCloseWithTransfersRunning();
+
+    /**
+     * Return a dialog that can be used to inform the user of the update process.
+     *
+     * @return
+     */
+    public UpdateDialog getUpdateDialog();
 }
