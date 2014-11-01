@@ -132,6 +132,7 @@ public class NetworkManager {
                             broadcastList();
                             NetworkManager.this.listener.uploadFailedFileMissing(file);
                         }
+                        jobs.remove(seed);
                         NetworkManager.this.listener.refreshGui();
                     }
                 };
@@ -255,6 +256,7 @@ public class NetworkManager {
                         if (removeFile) {
                             listener.downloadFailedFileMissing();
                         }
+                        jobs.remove(leech);
                         listener.refreshGui();
                     }
                 };
