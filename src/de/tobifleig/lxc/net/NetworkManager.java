@@ -46,6 +46,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
 /**
@@ -294,9 +295,22 @@ public class NetworkManager {
             @Override
             public void run() {
                 TransFileList list = fileManager.getTransFileList();
-                // Vorbereitungen fertig, senden
-                for (LXCInstance inst : instances.getRemotes()) {
-                    sendList(list, inst);
+                // prep done, send
+                while (true) {
+                    try {
+                        for (LXCInstance inst : instances.getRemotes()) {
+                            sendList(list, inst);
+                        }
+                        // this worked
+                        break;
+                    } catch (ConcurrentModificationException ex) {
+                        // whoops, instance list was changed while iterating over it
+                        // just re-send everything (= continue while)
+                        System.out.println("Warning: Re-starting list broadcast due to unexpected instance list modification");
+                        // this is obviously not a proper fix, but most fixed are much uglier
+                        // since java lacks a CopyOnWriteMap
+                        // additionally, this only happened once in 4 years ;)
+                    }
                 }
             }
         });
