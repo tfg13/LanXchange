@@ -154,7 +154,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     }
                 }
             }
-        }, 3000, 100);
+        }, 100, 100);
 
         this.addWindowStateListener(new WindowStateListener() {
             @Override
