@@ -307,7 +307,7 @@ public class NetworkManager {
                         // whoops, instance list was changed while iterating over it
                         // just re-send everything (= continue while)
                         System.out.println("Warning: Re-starting list broadcast due to unexpected instance list modification");
-                        // this is obviously not a proper fix, but most fixed are much uglier
+                        // this is obviously not a proper fix, but most fixes are much uglier
                         // since java lacks a CopyOnWriteMap
                         // additionally, this only happened once in 4 years ;)
                     }
