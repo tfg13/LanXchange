@@ -5,7 +5,7 @@
     <string name="hello_world">Android-Version coming soon!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_lxc">LanXchange</string>
-    <string name="nofiles">No files found in your home network. \nTap + to start sharing</string>
+    <string name="nofiles">Files shared by LanXchange on other devices automatically appear here.\nTap + to start sharing</string>
     <string name="menu_stop">Stop LanXchange</string>
     <string name="menu_add">Share file(s)</string>
     <string name="menu_help">Help</string>
@@ -38,7 +38,7 @@
     <string name="help_receive">How do I receive files with LanXchange?</string>
     <string name="help_receive_text">Just start the app! LanXchange will automatically discover other devices in your local network running LanXchange and display all files that are shared by them. Just tap the file you want to download.</string>
     <string name="help_nofiles">Files from other devices don\'t show up!</string>
-    <string name="help_nofiles_text">Be patient! Files take up to 20 seconds on some devices to appear. Also make sure that all devices have Wifi enabled and are connected to the same network. Additionally, check that no firewall prevents LanXchange from accessing the network.</string>
+    <string name="help_nofiles_text">1. Be patient! Files take up to 20 seconds on some devices to appear. \n2. Make sure that all devices have Wifi enabled and are connected to the same network. \n3. Keeping the app open and the screen turned on also improves detection.\n4. Check that no firewall prevents LanXchange from accessing the network.\n5. Sharing between PC and Android? Starting the PC version first usually works better.\n6. Some devices offer a setting for wifi power-saving (in the wifi menu). Try turning that off, it doesn\'t save too much power, anyway.\n7. LanXchange is designed for small (home) networks. Big company or university networks may be too large for devices to find each other!</string>
 	<string name="help_download_location">Where do downloaded files go?</string>
 	<string name="help_download_location_text">All files are saved to the internal memory of your device (also known as internal SD-Card). Look out for the \"download\" folder. LanXchange also notifiys Android about received files, so they should apper in all your apps.</string>
 	<string name="help_multiple">Can I share multiple files at once?</string>
@@ -46,7 +46,7 @@
 	<string name="help_filetypes">What kind of files can I share with LanXchange?</string>
 	<string name="help_filetypes_text">Basically everything that is a file and that is stored locally on your phone. Files in cloud storage may or may not work, but even if they do keep in mind that they have to be downloaded in the background to be read by LanXchange and that may be slow.</string>
 	<string name="help_android_selector_dumb">I cannot select other files than images, videos and audio!</string>
-	<string name="help_android_selector_dumb_text">Lets say you want to share a .PDF file but the android file selector (the thing that pops up when you tap the + button) only offers images, videos and images. In this case, you can install a file manager/explorer from the store. Having such an app installed should allow you to use it for file selection - without type limitations. Another trick is to try sharing the file directly from another app. Most apps offer a "Share with" functionality - LanXchange should be one of the options.</string>
+	<string name="help_android_selector_dumb_text">Lets say you want to share a .PDF file but the android file selector (the thing that pops up when you tap the + button) only offers images, videos and images. In this case, you can install a file manager/explorer from the store. Having such an app installed should allow you to use it for file selection - without type limitations. Another trick is to try sharing the file directly from another app. Most apps offer a \"Share with\" functionality - LanXchange should be one of the options.</string>
 	<string name="help_download_select_target">Is it possible to save received files somewhere else?</string>
 	<string name="help_download_select_target_text">Not yet. I may add this feature in the future, so write me a mail if you need it!</string>
 	<string name="help_share_crossplatform">Can I use LanXchange to transfer files between different platforms? (e.g. PC to Android, Mac to Windows)</string>
@@ -79,4 +79,6 @@
 	<string name="dialog_closewithrunning_yes">Yes</string>
 	<string name="dialog_closewithrunning_no">No</string>
 	<string name="accessibility_filetype">filetype (single file, folder or multi)</string>
+	<string name="help_android_selector_nofolder">I cannot select directories!</string>
+    <string name="help_android_selector_nofolder_text">If you tap + but cannot select directories, try the other way around: Use a file-browser to select the folder and choose \"Share with\". LanXchange should be one of the options.</string>
 </resources>

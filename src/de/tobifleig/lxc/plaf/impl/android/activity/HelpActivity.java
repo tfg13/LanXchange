@@ -34,14 +34,15 @@ public class HelpActivity extends KeepServiceRunningActivity {
             R.string.help_send, R.string.help_send_text,
             R.string.help_receive, R.string.help_receive_text,
             R.string.help_nofiles, R.string.help_nofiles_text,
+            R.string.help_nofiles2, R.string.help_nofiles2_text,
             R.string.help_download_location, R.string.help_download_location_text,
             R.string.help_multiple, R.string.help_multiple_text,
             R.string.help_filetypes, R.string.help_filetypes_text,
             R.string.help_android_selector_dumb, R.string.help_android_selector_dumb_text,
+            R.string.help_android_selector_nofolder, R.string.help_android_selector_nofolder_text,
             R.string.help_download_select_target, R.string.help_download_select_target_text,
             R.string.help_share_crossplatform, R.string.help_share_crossplatform_text,
             R.string.help_pcversion, R.string.help_pcversion_text,
-            R.string.help_nofiles2, R.string.help_nofiles2_text,
             R.string.help_bugfeature, R.string.help_bugfeature_text
     };
 
