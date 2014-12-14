@@ -66,7 +66,9 @@ public class AndroidSingleton {
      * way that it is only run if needed.
      */
     public static void onCreateMainActivity(AndroidPlatform activity, GuiInterfaceBridge bridge, List<Uri> quickShare) {
-        AndroidSingleton.quickShare = quickShare;
+        if (quickShare != null) {
+            AndroidSingleton.quickShare = quickShare;
+        }
         AndroidSingleton.activity = activity;
         AndroidSingleton.currentBridge = bridge;
         if (!running) {
@@ -110,6 +112,7 @@ public class AndroidSingleton {
     public static void onRealDestroy(Activity activity) {
         if (running) {
             running = false;
+            guiListener = null;
             activity.stopService(new Intent(activity, de.tobifleig.lxc.plaf.impl.android.service.LXCService.class));
         }
     }
