@@ -368,9 +368,20 @@ class HeartbeatSender {
             // configure sockets
             if (v4) {
                 socket.setNetworkInterface(networkInterface);
+            } else if (v6 && System.getProperty("os.name").toLowerCase().contains("windows")) {
+                // for some reason, windows cannot send IPv6 multicast packets when the scope identifier is set (BindException)
+                // this should not be required for IPv6, but since windows doesn't like
+                // binding via the scope identifier, this is used instead
+                // windows may or may not honor this
+                socket.setNetworkInterface(networkInterface);
             }
             pack4 = v4 ? new DatagramPacket(packet, packet.length, Inet4Address.getByAddress(new byte[]{(byte) 225, 4, 5, 6}), 27716) : null;
-            pack6 = v6 ? new DatagramPacket(packet, packet.length, Inet6Address.getByAddress("ff15::4c61:6e58:6368:616e:6765", new byte[]{(byte) 0xff, (byte) 0x15, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x4c, (byte) 0x61, (byte) 0x6e, (byte) 0x58, (byte) 0x63, (byte) 0x68, (byte) 0x61, (byte) 0x6e, (byte) 0x67, (byte) 0x65}, networkInterface), 27716) : null;
+            // see above, windows does not like the scope identifier
+            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+                pack6 = v6 ? new DatagramPacket(packet, packet.length, Inet6Address.getByName("ff15::4c61:6e58:6368:616e:6765"), 27716) : null;
+            } else {
+                pack6 = v6 ? new DatagramPacket(packet, packet.length, Inet6Address.getByAddress("ff15::4c61:6e58:6368:616e:6765", new byte[]{(byte) 0xff, (byte) 0x15, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x4c, (byte) 0x61, (byte) 0x6e, (byte) 0x58, (byte) 0x63, (byte) 0x68, (byte) 0x61, (byte) 0x6e, (byte) 0x67, (byte) 0x65}, networkInterface.getIndex()), 27716) : null;
+            }
             // create helper data
             pack4Help = Arrays.copyOf(packet, packet.length);
             pack4Help[4] = 'H';
