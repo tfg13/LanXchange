@@ -253,6 +253,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     setVisible(true);
                     panel.start();
                     start();
+                    update();
                 }
             });
         } catch (InterruptedException ex) {

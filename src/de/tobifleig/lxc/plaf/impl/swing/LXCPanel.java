@@ -772,13 +772,6 @@ public class LXCPanel extends JPanel {
                 }
             }
         });
-
-        // this was intended to repaint the panel immediately after loading is completed.
-        // unfortunately, on linux this triggers a deadlock in swing. very similar to JDK-8001463
-        // somehow related to having multiple monitors.
-        // I never reported this because I failed to reproduce it in a simpler program (I spent hours trying!)
-        // so this is commented out for now, instead the initial auto-repaint is preponed
-        //selfTrigger();
     }
 
     /**
