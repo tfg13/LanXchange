@@ -48,36 +48,47 @@ public class ListServer implements Runnable {
     public void run() {
         try {
             while (true) {
-                Socket client;
+                Socket client = null;
                 try {
                     client = servSock.accept();
                 } catch (SocketException ex) {
                     // servSock was closed, ignore
+                    closeSocket(client);
                     break;
                 }
 
                 // Wait for next list, blocks
                 try {
                     ObjectInputStream input = new ObjectInputStream(client.getInputStream());
-                    try {
-                        TransFileList list = (TransFileList) input.readObject();
-                        if (list != null) {
-                            listener.listReceived(list, client.getInetAddress());
-                        } else {
-                            // List-request
-                            listener.listRequested();
-                        }
-                    } catch (ClassNotFoundException ex) {
-                        ex.printStackTrace();
-                    } catch (ClassCastException ex) {
-                        ex.printStackTrace();
+                    TransFileList list = (TransFileList) input.readObject();
+                    if (list != null) {
+                        listener.listReceived(list, client.getInetAddress());
+                    } else {
+                        // List-request
+                        listener.listRequested();
                     }
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                } catch (ClassCastException ex) {
+                    ex.printStackTrace();
                 } catch (IOException ex) {
                     ex.printStackTrace();
+                } finally {
+                    closeSocket(client);
                 }
             }
         } catch (IOException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void closeSocket(Socket socket) {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
