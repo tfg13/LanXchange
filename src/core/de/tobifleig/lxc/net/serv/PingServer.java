@@ -30,6 +30,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,7 +44,7 @@ public class PingServer {
     /**
      * The sockets currently in use.
      */
-    private final ConcurrentHashMap<NetworkInterface, InterfaceHandler> listenSockets;
+    private final Map<NetworkInterface, InterfaceHandler> listenSockets;
     /**
      * The Listener to call when pings are received.
      */
