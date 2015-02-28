@@ -8,3 +8,6 @@ lxc.log
 /gen/
 /libs/android-support-v4.jar
 /dist/
+/out/
+/.idea/
+/.navigation/
