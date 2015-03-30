@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -203,6 +203,29 @@ public class FileManager {
             throw new IllegalArgumentException("Cannot reset given file! (debug: "
                     + file.getShownName() + " " + file.isAvailable() + " "
                     + file.isLocal() + " " + file.isLocked());
+        }
+    }
+
+    /**
+     * Generates a new file name that is currently unused.
+     * Collisions are resolved by adding a number after the base name
+     * @param base base name, like "image"
+     * @param extension extension, without the dot, like "png"
+     * @return (probably) unique name like "image05.png"
+     */
+    public String generateUniqueFileName(String base, String extension) {
+        int counter = 0;
+        outer:
+        while (true) {
+            counter++;
+            String proposal = base + counter + "." + extension;
+            for (LXCFile file : files) {
+                if (file.getShownName().equals(proposal)) {
+                    continue outer;
+                }
+            }
+            // no such file
+            return proposal;
         }
     }
 }
