@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -22,6 +22,7 @@ package de.tobifleig.lxc.data;
 
 import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.net.LXCInstance;
+
 import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -32,8 +33,8 @@ import java.util.List;
 /**
  * Represents a "file" offered by a certain LXCInstance.
  * A LXCFile can represent a single file, a single folder or multiple files and folders mixed.
- *
- * The name "LXCFile" does not describe the purpose of this class very well, it is kepts to avoid breaking compatibility with older clients.
+ * <p/>
+ * The name "LXCFile" does not describe the purpose of this class very well, it is kept to avoid breaking compatibility with older clients.
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
@@ -52,6 +53,10 @@ public class LXCFile implements Serializable {
      * The user wants to share multiple files (and/or folders).
      */
     public static final int TYPE_MULTI = 3;
+    /**
+     * Identifier, chosen at random, required for equals.
+     */
+    public final long id;
     /**
      * If true, the file has been downloaded successfully.
      * Only valid for remote files.
@@ -111,9 +116,10 @@ public class LXCFile implements Serializable {
      * May take a long time to calculate the size if many files are involved.
      *
      * @param fileList a list of VirtualFiles
-     * @param shownN the name that is shown
+     * @param shownN   the name that is shown
      */
     public LXCFile(List<VirtualFile> fileList, String shownN) {
+        id = Double.doubleToLongBits(Math.random());
         // create a copy:
         this.files = new ArrayList<VirtualFile>(fileList);
         // Create name
@@ -156,7 +162,7 @@ public class LXCFile implements Serializable {
     /**
      * Removes a certain job from this LXCFile.
      *
-     * @param job the job to be removed
+     * @param job     the job to be removed
      * @param success true if transfer was successful
      */
     public void removeJob(LXCJob job, boolean success) {
@@ -179,21 +185,18 @@ public class LXCFile implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof LXCFile) {
-            LXCFile test = (LXCFile) obj;
-            return (shownName.equals(test.shownName) && fileSize == test.fileSize);
-        } else {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LXCFile lxcFile = (LXCFile) o;
+
+        return id == lxcFile.id;
     }
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 71 * hash + (this.shownName != null ? this.shownName.hashCode() : 0);
-        hash = 71 * hash + (int) (this.fileSize ^ (this.fileSize >>> 32));
-        return hash;
+        return (int) (id ^ (id >>> 32));
     }
 
     /**
