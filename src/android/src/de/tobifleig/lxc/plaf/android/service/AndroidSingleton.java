@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -25,6 +25,7 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.plaf.android.activity.AndroidPlatform;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
 import de.tobifleig.lxc.plaf.android.GuiInterfaceBridge;
@@ -49,7 +50,7 @@ public class AndroidSingleton {
         }
     };
     private static GuiInterfaceBridge currentBridge = genericBridge;
-    private static List<Uri> quickShare;
+    private static List<VirtualFile> quickShare;
 
     private AndroidSingleton() {
     }
@@ -65,7 +66,7 @@ public class AndroidSingleton {
      * Call this when the main activity is created. Handles initialization in a
      * way that it is only run if needed.
      */
-    public static void onCreateMainActivity(AndroidPlatform activity, GuiInterfaceBridge bridge, List<Uri> quickShare) {
+    public static void onCreateMainActivity(AndroidPlatform activity, GuiInterfaceBridge bridge, List<VirtualFile> quickShare) {
         if (quickShare != null) {
             AndroidSingleton.quickShare = quickShare;
         }

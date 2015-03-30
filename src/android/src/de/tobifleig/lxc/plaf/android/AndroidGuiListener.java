@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -83,6 +83,11 @@ public abstract class AndroidGuiListener implements GuiListener {
     @Override
     public void reloadConfiguration() {
         basicGuiListener.reloadConfiguration();
+    }
+
+    @Override
+    public String generateUniqueFileName(String base, String extension){
+        return basicGuiListener.generateUniqueFileName(base, extension);
     }
 
 }

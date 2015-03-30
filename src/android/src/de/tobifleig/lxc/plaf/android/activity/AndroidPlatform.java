@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -20,8 +20,7 @@
  */
 package de.tobifleig.lxc.plaf.android.activity;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,15 +48,13 @@ import android.widget.TextView;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.InMemoryFile;
 import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
 import de.tobifleig.lxc.plaf.android.ConnectivityChangeListener;
 import de.tobifleig.lxc.plaf.android.ConnectivityChangeReceiver;
 import de.tobifleig.lxc.plaf.android.GuiInterfaceBridge;
 import de.tobifleig.lxc.plaf.android.NonFileContent;
-import de.tobifleig.lxc.plaf.android.activity.AboutActivity;
-import de.tobifleig.lxc.plaf.android.activity.HelpActivity;
-import de.tobifleig.lxc.plaf.android.activity.PCVersionActivity;
 import de.tobifleig.lxc.plaf.android.service.AndroidSingleton;
 import de.tobifleig.lxc.plaf.android.ui.FileListView;
 
@@ -84,7 +81,7 @@ public class AndroidPlatform extends Activity {
         super.onCreate(savedInstanceState);
 
         // Check intent first
-        List<Uri> quickShare = null;
+        List<VirtualFile> quickShare = null;
         Intent launchIntent = getIntent();
         if (launchIntent.getAction() != null) {
             quickShare = computeInputIntent(launchIntent);
@@ -222,26 +219,24 @@ public class AndroidPlatform extends Activity {
             return;
         }
 
-        ArrayList<Uri> uris = new ArrayList<Uri>();
+        ArrayList<VirtualFile> files = new ArrayList<VirtualFile>();
         // multiple files
         if (android.os.Build.VERSION.SDK_INT >= 18 && data.getData() == null && data.getClipData() != null) {
-            if (data.getData() == null && data.getClipData() != null) {
-                uris.addAll(urisFromClipData(data.getClipData()));
-            }
+            files.addAll(virtualFilesFromClipData(data.getClipData()));
         } else if (data.getData() != null) {
-            uris.add(data.getData());
+            files.add(uriToVirtualFile(data.getData()));
         }
 
-        offerFiles(uris);
+        offerFiles(files);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         // only act if there is an action and it is not MAIN
         if (intent.getAction() != null && !intent.getAction().equals(Intent.ACTION_MAIN)) {
-            List<Uri> uris = computeInputIntent(intent);
-            if (uris != null && !uris.isEmpty()) {
-                offerFiles(uris);
+            List<VirtualFile> files = computeInputIntent(intent);
+            if (files != null && !files.isEmpty()) {
+                offerFiles(files);
             } else {
                 // cannot compute input, display error
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -259,28 +254,36 @@ public class AndroidPlatform extends Activity {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private List<Uri> urisFromClipData(ClipData clipdata) {
-        ArrayList<Uri> result = new ArrayList<Uri>();
+    private List<VirtualFile> virtualFilesFromClipData(ClipData clipdata) {
+        ArrayList<VirtualFile> result = new ArrayList<VirtualFile>();
         for (int i = 0; i < clipdata.getItemCount(); i++) {
             ClipData.Item item = clipdata.getItemAt(i);
             // may contain Uri or String
             if (item.getUri() != null) {
-                result.add(item.getUri());
+                result.add(uriToVirtualFile(item.getUri()));
             } else if (item.getText() != null) {
-
+                // plain text
+                try {
+                    ByteArrayOutputStream arrayOutput = new ByteArrayOutputStream();
+                    OutputStreamWriter writer = new OutputStreamWriter(arrayOutput);
+                    writer.write(item.getText().toString());
+                    writer.close();
+                    result.add(new InMemoryFile("test.txt", arrayOutput.toByteArray()));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
-
         }
         return result;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private List<Uri> computeInputIntent(Intent intent) {
+    private List<VirtualFile> computeInputIntent(Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_SEND)) {
             // use ClipData if available (newer api)
             ClipData clip = intent.getClipData();
             if (clip != null) {
-                return urisFromClipData(clip);
+                return virtualFilesFromClipData(clip);
             } else {
                 // no clip, try extra stream
                 Object data = intent.getExtras().get(Intent.EXTRA_STREAM);
@@ -288,14 +291,14 @@ public class AndroidPlatform extends Activity {
                     // Make file available asap:
                     ArrayList<Uri> uris = new ArrayList<Uri>();
                     uris.add(Uri.parse(intent.getExtras().get(Intent.EXTRA_STREAM).toString()));
-                    return uris;
+                    return urisToVirtualFiles(uris);
                 }
             }
         } else if (intent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
             // there is a legacy and a new way to receive multiple files
             // try the new first
             if (android.os.Build.VERSION.SDK_INT >= 16 && intent.getClipData() != null) {
-                return urisFromClipData(intent.getClipData());
+                return virtualFilesFromClipData(intent.getClipData());
             } else if (intent.getStringArrayListExtra(Intent.EXTRA_STREAM) != null) {
                 ArrayList<Uri> uris = new ArrayList<Uri>();
                 @SuppressWarnings("rawtypes")
@@ -303,7 +306,7 @@ public class AndroidPlatform extends Activity {
                 for (Object uriString : uriStrings) {
                     uris.add(Uri.parse(uriString.toString()));
                 }
-                return uris;
+                return urisToVirtualFiles(uris);
             }
         }
         return null;
@@ -314,14 +317,21 @@ public class AndroidPlatform extends Activity {
     }
 
     /**
-     * Offers a file.
+     * Offers files.
      * 
-     * @param uris
-     *            uris to the files
+     * @param files the files to offer
      */
-    private void offerFiles(List<Uri> uris) {
-        System.out.println("First uri string is " + uris.get(0).toString());
+    private void offerFiles(List<VirtualFile> files) {
+        if (files.isEmpty()) {
+            System.err.println("invalid input!");
+            return;
+        }
 
+        LXCFile lxcfile = new LXCFile(files, files.get(0).getName());
+        guiListener.offerFile(lxcfile);
+    }
+
+    private List<VirtualFile> urisToVirtualFiles(List<Uri> uris) {
         List<VirtualFile> list = new ArrayList<VirtualFile>();
         for (Uri uri : uris) {
             VirtualFile virtualFile = uriToVirtualFile(uri);
@@ -329,15 +339,7 @@ public class AndroidPlatform extends Activity {
                 list.add(virtualFile);
             }
         }
-
-        // we tried everything
-        if (list.isEmpty()) {
-            System.err.println("invalid input!");
-            return;
-        }
-
-        LXCFile lxcfile = new LXCFile(list, list.get(0).getName());
-        guiListener.offerFile(lxcfile);
+        return list;
     }
 
     private VirtualFile uriToVirtualFile(Uri uri) {
@@ -394,7 +396,7 @@ public class AndroidPlatform extends Activity {
      * 
      * @param uris a list of Uris to share
      */
-    public void quickShare(List<Uri> uris) {
+    public void quickShare(List<VirtualFile> uris) {
         offerFiles(uris);
     }
 }
