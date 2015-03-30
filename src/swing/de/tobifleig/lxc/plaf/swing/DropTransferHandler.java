@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -22,17 +22,23 @@ package de.tobifleig.lxc.plaf.swing;
 
 import de.tobifleig.lxc.Configuration;
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.InMemoryFile;
+
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.InvalidDnDOperationException;
-import java.io.File;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
@@ -49,9 +55,17 @@ public class DropTransferHandler extends TransferHandler {
      */
     private static final String URI_LIST_MIME_TYPE = "text/uri-list;class=java.lang.String";
     /**
-     * The known flavors.
+     * Flavor for copy-pasted plain text.
      */
-    private DataFlavor fileFlavor, stringFlavor, uriListFlavor;
+    private static final String PLAIN_TEXT_MIME_TYPE = "application/x-java-serialized-object; class=java.lang.String";
+    /**
+     * The known flavors for actual files.
+     */
+    private DataFlavor fileFlavor, uriListFlavor;
+    /**
+     * The known flavors for in-memory data that can be shared and saved as a file by the downloader.
+     */
+    private DataFlavor[] inMemoryFlavors;
     /**
      * The listener to pass events to.
      */
@@ -65,10 +79,12 @@ public class DropTransferHandler extends TransferHandler {
     public DropTransferHandler(FileDropListener listener) {
         this.listener = listener;
         fileFlavor = DataFlavor.javaFileListFlavor;
-        stringFlavor = DataFlavor.stringFlavor;
-
         try {
             uriListFlavor = new DataFlavor(URI_LIST_MIME_TYPE);
+            // generate flavors for in-memory types
+            inMemoryFlavors = new DataFlavor[2];
+            inMemoryFlavors[0] = new DataFlavor(PLAIN_TEXT_MIME_TYPE);
+            inMemoryFlavors[1] = DataFlavor.imageFlavor;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -80,14 +96,15 @@ public class DropTransferHandler extends TransferHandler {
     }
 
     /**
-     * Computes if the given list of flavors contains the FileListFlavor
+     * Checks if the flavor array contains the given flavor
      *
-     * @param flavors the list of flavors
-     * @return ture, if FileListFlavor is contained
+     * @param flavors the array of flavors
+     * @param flavor  the flavor to search
+     * @return true, iff found
      */
-    private boolean hasFileFlavor(DataFlavor[] flavors) {
-        for (int i = 0; i < flavors.length; i++) {
-            if (fileFlavor.equals(flavors[i])) {
+    private static boolean containsFlavor(DataFlavor[] flavors, DataFlavor flavor) {
+        for (DataFlavor f : flavors) {
+            if (flavor.equals(f)) {
                 return true;
             }
         }
@@ -95,34 +112,20 @@ public class DropTransferHandler extends TransferHandler {
     }
 
     /**
-     * Computes if the given list of flavors contains the StringFlavor
+     * Returns the most fitting DataFlavor that can be used for in-memory content.
      *
      * @param flavors the list of flavors
-     * @return ture, if StringFlavor is contained
+     * @return the best DataFlavor or null
      */
-    private boolean hasStringFlavor(DataFlavor[] flavors) {
-        for (int i = 0; i < flavors.length; i++) {
-            if (stringFlavor.equals(flavors[i])) {
-                return true;
+    private DataFlavor getBestInMemoryFlavor(DataFlavor[] flavors) {
+        for (DataFlavor inMemoryFlavor : inMemoryFlavors) {
+            for (DataFlavor flavor : flavors) {
+                if (inMemoryFlavor.equals(flavor)) {
+                    return inMemoryFlavor;
+                }
             }
         }
-        return false;
-    }
-
-    /**
-     * Computes if the given list of flavors contains the URIListFlavor
-     *
-     * @param flavors the list of flavors
-     * @return ture, if URIListFlavor is contained
-     */
-    private boolean hasURIListFlavor(DataFlavor[] flavors) {
-        for (int i = 0; i < flavors.length; i++) {
-            if (uriListFlavor.equals(flavors[i])) {
-                System.out.println("URI detected: " + flavors[i]);
-                return true;
-            }
-        }
-        return false;
+        return null;
     }
 
     @Override
@@ -136,26 +139,17 @@ public class DropTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(JComponent c, DataFlavor[] flavors) {
-        if (hasFileFlavor(flavors)) {
-            return true;
-        }
-        if (hasStringFlavor(flavors)) {
-            return true;
-        }
-        if (hasURIListFlavor(flavors)) {
-            return true;
-        }
-        return false;
+        return containsFlavor(flavors, fileFlavor) || containsFlavor(flavors, uriListFlavor) || getBestInMemoryFlavor(flavors) != null;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean importData(JComponent c, Transferable t) {
+        DataFlavor[] importFlavors = t.getTransferDataFlavors();
 
         if ("true".equals(Configuration.getStringSetting("debug_printDropFlavors"))) {
-            DataFlavor[] dlist = t.getTransferDataFlavors();
-            System.out.println("Printing flavors: " + dlist.length);
-            for (DataFlavor f : dlist) {
+            System.out.println("Printing flavors: " + importFlavors.length);
+            for (DataFlavor f : importFlavors) {
                 try {
                     System.out.println(f.getMimeType());
                     System.out.println(t.getTransferData(f));
@@ -165,22 +159,23 @@ public class DropTransferHandler extends TransferHandler {
             }
         }
 
-        if (!canImport(c, t.getTransferDataFlavors())) {
+        if (!canImport(c, importFlavors)) {
             return false;
         }
 
         try {
-            if (hasFileFlavor(t.getTransferDataFlavors()) || hasURIListFlavor(t.getTransferDataFlavors())) {
+            if (containsFlavor(importFlavors, fileFlavor) || containsFlavor(importFlavors, uriListFlavor)) {
+                // actual files
 
                 List<File> files = null;
-                if (hasFileFlavor(t.getTransferDataFlavors())) {
+                if (containsFlavor(importFlavors, fileFlavor)) {
                     // Windows & OS X & Linux
                     try {
                         files = (java.util.List<File>) t.getTransferData(fileFlavor);
                     } catch (InvalidDnDOperationException ex) {
                         // OpenJDK bug 7188838
-                        // no known resulution, fall back to manual uri-lists if possible
-                        if (hasURIListFlavor(t.getTransferDataFlavors())) {
+                        // no known resolution, fall back to manual uri-lists if possible
+                        if (containsFlavor(importFlavors, uriListFlavor)) {
                             files = textURIListToFileList((String) t.getTransferData(uriListFlavor));
                         }
                     }
@@ -206,11 +201,40 @@ public class DropTransferHandler extends TransferHandler {
 
                 return false;
 
-            } else if (hasStringFlavor(t.getTransferDataFlavors())) {
+            } else {
+                DataFlavor inMemoryFlavor = getBestInMemoryFlavor(importFlavors);
+                if (inMemoryFlavor != null) {
+                    // memory cached content like copy-pasted strings, can be downloaded as a file anyway
+                    byte[] data;
+                    String name;
+                    if (inMemoryFlavor.equals(inMemoryFlavors[0])) {
+                        // string
+                        // convert to byte array
+                        ByteArrayOutputStream arrayOutput = new ByteArrayOutputStream();
+                        OutputStreamWriter writer = new OutputStreamWriter(arrayOutput);
+                        writer.write((String) t.getTransferData(inMemoryFlavors[0]));
+                        writer.close();
+                        data = arrayOutput.toByteArray();
+                        name = listener.generateUniqueFileName("text", "txt");
+                    } else {
+                        // image
+                        ByteArrayOutputStream arrayOutput = new ByteArrayOutputStream();
+                        Object image = t.getTransferData(inMemoryFlavors[1]);
+                        if (!(image instanceof RenderedImage)) {
+                            System.out.println("Unsupported image format");
+                            return false;
+                        }
+                        ImageIO.write((RenderedImage) image, "png", arrayOutput);
+                        data = arrayOutput.toByteArray();
+                        name = listener.generateUniqueFileName("image","png");
+                    }
 
-                System.out.println("Unsupported Drop-Operation. Sry");
-
-                return true;
+                    LXCFile memFile = new LXCFile(Collections.<VirtualFile>singletonList(new InMemoryFile(name, data)), name);
+                    listener.newCalcedFile(memFile);
+                    return true;
+                } else {
+                    System.out.println("Unsupported Drop-Operation. Sry");
+                }
             }
         } catch (UnsupportedFlavorException ufe) {
             System.out.println("importData: unsupported data flavor");
@@ -233,7 +257,7 @@ public class DropTransferHandler extends TransferHandler {
      */
     private java.util.List<File> textURIListToFileList(String data) {
         java.util.List<File> list = new ArrayList<File>(1);
-        for (StringTokenizer st = new StringTokenizer(data, "\r\n"); st.hasMoreTokens();) {
+        for (StringTokenizer st = new StringTokenizer(data, "\r\n"); st.hasMoreTokens(); ) {
             String s = st.nextToken();
             if (s.startsWith("#")) {
                 // the line is a comment (as per the RFC 2483)

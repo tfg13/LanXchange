@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -213,6 +213,11 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                         public void newCalcedFile(LXCFile file) {
                             panel.setCalcing(false);
                             listener.offerFile(file);
+                        }
+
+                        @Override
+                        public String generateUniqueFileName(String base, String extension) {
+                            return listener.generateUniqueFileName(base, extension);
                         }
                     }));
                     // setup pasting
