@@ -1,5 +1,4 @@
 apply plugin: 'java'
-
 sourceSets {
     main {
         java {
@@ -9,4 +8,6 @@ sourceSets {
 //            srcDir 'src/resources'
 //        }
     }
+}
+dependencies {
 }

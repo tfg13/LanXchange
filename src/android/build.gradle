@@ -11,6 +11,7 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile project(':core')
+    compile "com.android.support:appcompat-v7:22.1.1"
 }
 
 android {
@@ -24,6 +25,12 @@ android {
             resources.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
     }
 } 

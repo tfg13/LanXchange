@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+        <!-- Main theme colors -->
+        <item name="android:colorPrimary">@color/material_primary</item>
+        <item name="android:colorPrimaryDark">@color/material_primary_dark</item>
+        <item name="android:colorAccent">@color/material_accent</item>
+        <!--<item name="android:textColorPrimary">@color/material_text_primary</item>-->
+    </style>
+</resources>
