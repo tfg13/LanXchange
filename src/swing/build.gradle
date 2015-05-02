@@ -1,0 +1,14 @@
+dependencies {
+    compile project(':core')
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir '.'
+        }
+//        resources {
+//            srcDir 'src/resources'
+//        }
+    }
+}
