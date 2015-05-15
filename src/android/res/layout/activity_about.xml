@@ -1,21 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:lanxchange="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/about_scroll"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
-    <TextView
-        android:id="@+id/about_category_header_general"
-        style="?android:attr/listSeparatorTextViewStyle"
+    <LinearLayout
+        android:id="@+id/about_root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:text="@string/about_category_general" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/about_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </ListView>
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_version"
+            android:id="@+id/about_version"/>
 
-</LinearLayout>
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_copyright"
+            lanxchange:contentText="@string/about_copyright_text"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_mailme"
+            lanxchange:contentText="@string/about_mailme_text"
+            android:id="@+id/about_mailme"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_license"
+            lanxchange:contentText="@string/about_license_text"
+            android:id="@+id/about_license"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_source"
+            lanxchange:contentText="@string/about_source_text"
+            android:id="@+id/about_source"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_twitter"
+            lanxchange:contentText="@string/about_twitter_text"
+            android:id="@+id/about_twitter"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_version_internal"
+            android:id="@+id/about_version_internal"/>
+
+        <View style="@style/Divider"/>
+
+        <TextView
+            android:id="@+id/about_category_header_licenses"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textStyle="bold"
+            android:textColor="@color/material_accent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@string/about_category_licenses"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_licenses_icons"
+            lanxchange:contentText="@string/about_licenses_icons_text"
+            android:id="@+id/about_license_icons"/>
+
+    </LinearLayout>
+
+</ScrollView>

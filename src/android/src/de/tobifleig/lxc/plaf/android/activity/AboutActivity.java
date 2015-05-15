@@ -21,20 +21,13 @@
 package de.tobifleig.lxc.plaf.android.activity;
 
 import android.content.Intent;
-import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
+import de.tobifleig.lxc.plaf.android.ui.AboutElement;
 
 public class AboutActivity extends KeepServiceRunningActivity {
 
@@ -45,136 +38,42 @@ public class AboutActivity extends KeepServiceRunningActivity {
         setContentView(R.layout.activity_about);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        final LayoutInflater inflater = getLayoutInflater();
+        // fill in dynamic content
+        ((AboutElement) findViewById(R.id.about_version)).setText(LXC.versionString);
+        ((AboutElement) findViewById(R.id.about_version_internal)).setText(Integer.toString(LXC.versionId));
 
-        // fill with content
-        ListView contentList = (ListView) findViewById(R.id.about_content);
-        contentList.setAdapter(new ListAdapter() {
-
-            @Override
-            public void unregisterDataSetObserver(DataSetObserver observer) {
-                // ignore
-            }
-
-            @Override
-            public void registerDataSetObserver(DataSetObserver observer) {
-                // ignore
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-
-            @Override
-            public boolean hasStableIds() {
-                return true;
-            }
-
-            @Override
-            public int getViewTypeCount() {
-                return 6;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View cell = inflater.inflate(R.layout.about_element, null);
-                TextView header = (TextView) cell.findViewById(R.id.about_header);
-                TextView text = (TextView) cell.findViewById(R.id.about_text);
-                switch (position) {
-                case 0:
-                    header.setText(R.string.about_version);
-                    text.setText(LXC.versionString);
-                    break;
-                case 1:
-                    header.setText(R.string.about_copyright);
-                    text.setText(R.string.about_copyright_text);
-                    break;
-                case 2:
-                    header.setText(R.string.about_mailme);
-                    text.setText(R.string.about_mailme_text);
-                    break;
-                case 3:
-                    header.setText(R.string.about_license);
-                    text.setText(R.string.about_license_text);
-                    break;
-                case 4:
-                    header.setText(R.string.about_source);
-                    text.setText(R.string.about_source_text);
-                    break;
-                case 5:
-                    header.setText(R.string.about_twitter);
-                    text.setText(R.string.about_twitter_text);
-                    break;
-                case 6:
-                    header.setText(R.string.about_version_internal);
-                    text.setText(Integer.toString(LXC.versionId));
-                    break;
-                }
-                return cell;
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                return Adapter.IGNORE_ITEM_VIEW_TYPE;
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
-
-            @Override
-            public int getCount() {
-                return 7;
-            }
-
-            @Override
-            public boolean isEnabled(int position) {
-                return true;
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return true;
-            }
-        });
 
         // handle input
-        contentList.setOnItemClickListener(new OnItemClickListener() {
-
+        findViewById(R.id.about_mailme).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                case 0:
-                case 1:
-                    // do nothing
-                    break;
-                case 2:
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_mailme_text))));
-                    break;
-                case 3:
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_license_text))));
-                    break;
-                case 4:
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_source_text))));
-                    break;
-                case 5:
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_twitter_text))));
-                    break;
-                case 6:
-                    // do nothing
-                    break;
-                }
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto",getResources().getString(R.string.about_mailme_text), null)));
             }
-
         });
-
+        findViewById(R.id.about_license).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_license_text))));
+            }
+        });
+        findViewById(R.id.about_source).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_source_text))));
+            }
+        });
+        findViewById(R.id.about_twitter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.about_twitter_text))));
+            }
+        });
+        findViewById(R.id.about_license_icons).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://creativecommons.org/licenses/by/4.0/")));
+            }
+        });
     }
 
 }
