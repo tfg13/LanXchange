@@ -8,28 +8,27 @@
         android:id="@+id/help_question"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="7dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
         android:text="@string/help_send"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textStyle="bold" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text_default_material_light"/>
 
     <TextView
         android:id="@+id/help_answer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:text="@string/help_send_text"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-    
-    <View
-    	android:layout_width="fill_parent"
-    	android:layout_height="1dp"
-    	android:background="@android:color/darker_gray"/>
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/secondary_text_default_material_light"/>
     
 
 </LinearLayout>

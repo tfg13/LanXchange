@@ -1,25 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/help_scroll"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
-        
-    <LinearLayout
-    android:id="@+id/help_root"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+            xmlns:lanxchange="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/help_scroll"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
-    <TextView
-        android:id="@+id/help_category_header_general"
-        style="?android:attr/listSeparatorTextViewStyle"
+    <LinearLayout
+        android:id="@+id/help_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:text="@string/help_category_general" />
-    
-    <!-- Content is inserted at runtime -->
+        android:orientation="vertical">
 
-</LinearLayout>
-    
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_send"
+            lanxchange:answerText="@string/help_send_text"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_receive"
+            lanxchange:answerText="@string/help_receive_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_nofiles"
+            lanxchange:answerText="@string/help_nofiles_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_nofiles2"
+            lanxchange:answerText="@string/help_nofiles2_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_download_location"
+            lanxchange:answerText="@string/help_download_location_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_multiple"
+            lanxchange:answerText="@string/help_multiple_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_filetypes"
+            lanxchange:answerText="@string/help_filetypes_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_android_selector_dumb"
+            lanxchange:answerText="@string/help_android_selector_dumb_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_android_selector_nofolder"
+            lanxchange:answerText="@string/help_android_selector_nofolder_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_download_select_target"
+            lanxchange:answerText="@string/help_download_select_target_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_share_crossplatform"
+            lanxchange:answerText="@string/help_share_crossplatform_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_pcversion"
+            lanxchange:answerText="@string/help_pcversion_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_bugfeature"
+            lanxchange:answerText="@string/help_bugfeature_text"/>
+
+
+
+
+    </LinearLayout>
+
 </ScrollView>
