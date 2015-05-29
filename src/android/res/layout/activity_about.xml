@@ -2,8 +2,6 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:lanxchange="http://schemas.android.com/apk/res-auto"
             android:id="@+id/about_scroll"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
@@ -68,8 +66,8 @@
             android:textColor="@color/material_accent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:text="@string/about_category_licenses"/>
