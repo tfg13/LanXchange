@@ -1,70 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/toplevel"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
-    android:orientation="vertical" >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+              android:id="@+id/toplevel"
+              android:layout_width="match_parent"
+              android:layout_height="72dp"
+              android:layout_alignParentLeft="true"
+              android:layout_alignParentStart="true"
+              android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/typeView"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:id="@+id/downloadStatus"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:contentDescription="@string/accessibility_filetype" />
+            android:layout_marginLeft="24dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_marginEnd="24dp"
+            android:contentDescription="@string/accessibility_downloadStatus" />
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/RelativeLayout1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/filename"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="2dp"
                 android:text="TextView"
-                android:textSize="18sp" />
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"/>
 
             <TextView
-                android:id="@+id/filesize"
+                android:id="@+id/fileInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/filename"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
                 android:text="Size: 3GiB"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-light"
+                android:textColor="?android:attr/textColorSecondary"/>
 
-            <TextView
-                android:id="@+id/instruction"
-                android:layout_width="wrap_content"
+            <ProgressBar
+                android:id="@+id/progressBar1"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@+id/filename"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="@string/ui_taptoload"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-        </RelativeLayout>
-    </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/progressBar1"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:maxHeight="3dp"
-        android:minHeight="16dp"
-        android:visibility="gone" />
+                android:indeterminate="true"
+                android:maxHeight="10dp"
+                android:minHeight="6dp"
+                android:visibility="invisible" />
+        </LinearLayout>
 
 </LinearLayout>

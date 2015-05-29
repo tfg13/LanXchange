@@ -84,7 +84,7 @@
 	<string name="dialog_closewithrunning_text">Stopping now will abort them. Continue anyway?</string>
 	<string name="dialog_closewithrunning_yes">Yes</string>
 	<string name="dialog_closewithrunning_no">No</string>
-	<string name="accessibility_filetype">filetype (single file, folder or multi)</string>
+	<string name="accessibility_downloadStatus">download status</string>
 	<string name="help_android_selector_nofolder">I cannot select directories!</string>
     <string name="help_android_selector_nofolder_text">If you tap + but cannot select directories, try the other way around: Use a file-browser to select the folder and choose \"Share with\". LanXchange should be one of the options.</string>
 </resources>

@@ -55,7 +55,7 @@ import de.tobifleig.lxc.plaf.android.FileListWrapper;
  */
 public class FileListView extends ListView {
 
-    private LayoutInflater inflator;
+    private LayoutInflater inflater;
     private DataSetObserver observer;
     private FileListWrapper files;
     private GuiListener guiListener;
@@ -90,8 +90,8 @@ public class FileListView extends ListView {
      * Sets up this view.
      */
     private void setup() {
-        // get layout inflator
-        inflator = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        // get layout inflater
+        inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // setup listener
         setAdapter(new ListAdapter() {
@@ -123,24 +123,34 @@ public class FileListView extends ListView {
 
             @Override
             public View getView(int n, View view, ViewGroup group) {
-                // insert header
+                List<LXCFile> localFiles = files.getLocalList();
+                List<LXCFile> remoteFiles = files.getRemoteList();
+                // first element is always a header
                 if (n == 0) {
-                    TextView yourfiles = (TextView) inflator.inflate(R.layout.listheader, group, false);
-                    yourfiles.setText(R.string.ui_yourfiles);
-                    return yourfiles;
+                    if (!localFiles.isEmpty()) {
+                        // local files
+                        TextView yourFiles = (TextView) inflater.inflate(R.layout.listheader, group, false);
+                        yourFiles.setText(R.string.ui_yourfiles);
+                        return yourFiles;
+                    } else {
+                        // remote files
+                        TextView sharedWithYou = (TextView) inflater.inflate(R.layout.listheader, group, false);
+                        sharedWithYou.setText(R.string.ui_sharedwithyou);
+                        return sharedWithYou;
+                    }
                 }
-                // element own files?
-                if (n <= files.getLocalList().size()) {
-                    return createLocalListItem(files.getLocalList().get(n - 1), group);
+                // own files
+                if (n <= localFiles.size()) {
+                    return createLocalListItem(localFiles.get(n - 1), group);
                 }
                 // second header
-                if (n == files.getLocalList().size() + 1) {
-                    TextView sharedwithyou = (TextView) inflator.inflate(R.layout.listheader, group, false);
-                    sharedwithyou.setText(R.string.ui_sharedwithyou);
-                    return sharedwithyou;
+                if (n == localFiles.size() + (localFiles.isEmpty() ? 0 : 1)) {
+                    TextView sharedWithYou = (TextView) inflater.inflate(R.layout.listheader, group, false);
+                    sharedWithYou.setText(R.string.ui_sharedwithyou);
+                    return sharedWithYou;
                 }
                 // network files
-                return createRemoteListItem(files.getRemoteList().get(n - (2 + files.getLocalList().size())), group);
+                return createRemoteListItem(remoteFiles.get(n - ((localFiles.isEmpty() ? 1 : 2) + localFiles.size())), group);
             }
 
             @Override
@@ -160,13 +170,27 @@ public class FileListView extends ListView {
 
             @Override
             public int getCount() {
-                return guiListener == null ? 0 : (files.getLocalList().size() + files.getRemoteList().size()) + 2;
+                if (guiListener == null) {
+                    return 0;
+                }
+                int numberOfLocalFiles = files.getLocalList().size();
+                int numberOfRemoteFiles = files.getRemoteList().size();
+
+                // increment to account for category headers
+                if (numberOfLocalFiles > 0) {
+                    numberOfLocalFiles++;
+                }
+                if (numberOfRemoteFiles > 0) {
+                    numberOfRemoteFiles++;
+                }
+
+                return numberOfLocalFiles + numberOfRemoteFiles;
             }
 
             @Override
             public boolean isEnabled(int position) {
                 // cannot click on category headers
-                if (position == 0 || position == files.getLocalList().size() + 1) {
+                if (position == 0 || position == files.getLocalList().size() + (files.getLocalList().isEmpty() ? 0 : 1)) {
                     return false;
                 }
                 return true;
@@ -276,20 +300,11 @@ public class FileListView extends ListView {
     }
 
     private View createLocalListItem(LXCFile file, ViewGroup group) {
-        View item = inflator.inflate(R.layout.file_item, group, false);
+        View item = inflater.inflate(R.layout.file_item, group, false);
         ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
-        ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
+        ((TextView) item.findViewById(R.id.fileInfo)).setText(LXCFile.getFormattedSize(file.getFileSize()));
         // set image
-        if (file.getType() == LXCFile.TYPE_FILE) {
-            ((ImageView) item.findViewById(R.id.typeView)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
-        } else if (file.getType() == LXCFile.TYPE_FOLDER) {
-            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.folder);
-        } else { // multi
-            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.multifile);
-        }
-        // Status text is different for own files
-        TextView statusText = (TextView) item.findViewById(R.id.instruction);
-        statusText.setText(R.string.ui_holdtoremove);
+        ((ImageView) item.findViewById(R.id.downloadStatus)).setImageResource(R.drawable.ic_file_upload);
         // Override all default ProgressIndicators
         for (LXCJob job : file.getJobs()) {
             job.getTrans().setProgressIndicator(noopIndicator);
@@ -298,22 +313,19 @@ public class FileListView extends ListView {
     }
 
     private View createRemoteListItem(LXCFile file, ViewGroup group) {
-        View item = inflator.inflate(R.layout.file_item, group, false);
+        View item = inflater.inflate(R.layout.file_item, group, false);
         ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
-        ((TextView) item.findViewById(R.id.filesize)).setText(LXCFile.getFormattedSize(file.getFileSize()));
+        // set info text
+        ((TextView) item.findViewById(R.id.fileInfo)).setText(LXCFile.getFormattedSize(file.getFileSize()));
         // set image
-        if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FILE) {
-            ((ImageView) item.findViewById(R.id.typeView)).setImageDrawable(getResources().getDrawable(R.drawable.singlefile));
-        } else if (!file.isAvailable() && file.getType() == LXCFile.TYPE_FOLDER) {
-            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.folder);
-        } else if (!file.isAvailable()) { // multi
-            ((ImageView) item.findViewById(R.id.typeView)).setImageResource(R.drawable.multifile);
+        if (!file.isAvailable()) {
+            ((ImageView) item.findViewById(R.id.downloadStatus)).setImageResource(R.drawable.ic_file_download);
         } else {
-            ((ImageView) item.findViewById(R.id.typeView)).setImageDrawable(getResources().getDrawable(R.drawable.done));
+            ((ImageView) item.findViewById(R.id.downloadStatus)).setImageResource(R.drawable.done);
         }
         // Show status
         final ProgressBar progressBar = (ProgressBar) item.findViewById(R.id.progressBar1);
-        final TextView statusText = (TextView) item.findViewById(R.id.instruction);
+        final TextView statusText = (TextView) item.findViewById(R.id.fileInfo);
         // download starting?
         if (file.isLocked() && file.getJobs().size() == 0) {
             progressBar.setVisibility(View.VISIBLE);
