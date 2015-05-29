@@ -79,6 +79,13 @@
             lanxchange:contentText="@string/about_licenses_icons_text"
             android:id="@+id/about_license_icons"/>
 
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_licenses_fab"
+            lanxchange:contentText="@string/about_licenses_fab_text"
+            android:id="@+id/about_license_fab"/>
+
     </LinearLayout>
 
 </ScrollView>

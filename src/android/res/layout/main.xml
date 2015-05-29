@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -8,17 +9,33 @@
         android:id="@+id/noWifiWarning"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#FF4444"
+        android:layout_gravity="top"
+        android:background="@color/material_accent"
         android:gravity="center"
         android:text="@string/ui_nowifi"
         android:textColor="?android:attr/textColorPrimaryInverse"
-        android:textSize="18sp" />
+        android:textSize="18sp"/>
 
     <de.tobifleig.lxc.plaf.android.ui.FileListView
         android:id="@+id/fileList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:longClickable="true" >
     </de.tobifleig.lxc.plaf.android.ui.FileListView>
 
-</LinearLayout>
+    <com.getbase.floatingactionbutton.AddFloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="7dp"
+        android:layout_marginRight="7dp"
+        fab:fab_plusIconColor="@color/white"
+        fab:fab_colorNormal="@color/material_accent"
+        fab:fab_colorPressed="@color/material_accent_light"
+        />
+
+
+</FrameLayout>

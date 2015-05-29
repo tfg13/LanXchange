@@ -143,6 +143,22 @@ public class AndroidPlatform extends Activity {
                 return false;
             }
         };
+
+        // setup floating action button
+        findViewById(R.id.fab_add).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent testIntent = new Intent();
+                testIntent.setAction(Intent.ACTION_GET_CONTENT);
+                testIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                if (android.os.Build.VERSION.SDK_INT >= 18) {
+                    testIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                }
+                testIntent.setType("*/*");
+                startActivityForResult(testIntent, RETURNCODE_FILEINTENT);
+            }
+        });
+
         AndroidSingleton.onCreateMainActivity(this, guiBridge, quickShare);
     }
 
@@ -177,16 +193,6 @@ public class AndroidPlatform extends Activity {
                 AndroidSingleton.onRealDestroy(this);
                 finish();
             }
-            return true;
-        case R.id.addFile:
-            Intent testIntent = new Intent();
-            testIntent.setAction(Intent.ACTION_GET_CONTENT);
-            testIntent.addCategory(Intent.CATEGORY_OPENABLE);
-            if (android.os.Build.VERSION.SDK_INT >= 18) {
-                testIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            }
-            testIntent.setType("*/*");
-            startActivityForResult(testIntent, RETURNCODE_FILEINTENT);
             return true;
         case R.id.help:
             // display help

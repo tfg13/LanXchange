@@ -68,6 +68,8 @@
 	<string name="about_3rd_party_licenses">License for Google Material Design Icons</string>
     <string name="about_licenses_icons">Material Design Icons</string>
     <string name="about_licenses_icons_text">© Google Inc. Used under license: CC-BY 4.0\nIcons unmodified, tap for license details.</string>
+    <string name="about_licenses_fab">Floating Action Button</string>
+    <string name="about_licenses_fab_text">© 2014 Jerzy Chalupski.\nApache License 2.0 - tap for details.</string>
 	<string name="about_source">Source Code</string>
 	<string name="about_source_text">https://github.com/tfg13/LanXchange</string>
 	<string name="about_mailme">Email me!</string>

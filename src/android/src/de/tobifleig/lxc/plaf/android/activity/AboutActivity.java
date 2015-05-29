@@ -74,6 +74,12 @@ public class AboutActivity extends KeepServiceRunningActivity {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://creativecommons.org/licenses/by/4.0/")));
             }
         });
+        findViewById(R.id.about_license_fab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.apache.org/licenses/LICENSE-2.0")));
+            }
+        });
     }
 
 }

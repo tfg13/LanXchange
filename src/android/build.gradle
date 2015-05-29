@@ -7,11 +7,16 @@ buildscript {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 apply plugin: 'com.android.application'
 
 dependencies {
     compile project(':core')
-    compile "com.android.support:appcompat-v7:22.1.1"
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.getbase:floatingactionbutton:1.9.0'
 }
 
 android {

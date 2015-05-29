@@ -1,29 +1,24 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <item
-        android:id="@+id/addFile"
-        android:icon="@drawable/ic_action_new"
-        android:showAsAction="always"
-        android:title="@string/menu_add"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/quit"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_stop"/>
 
     <item
         android:id="@+id/help"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_help"/>
 
     <item
         android:id="@+id/about"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_about"/>
 
     <item
         android:id="@+id/pcversion"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_pcversion"/>
 
 </menu>
