@@ -281,13 +281,7 @@ public class FileListView extends ListView {
     }
 
     private boolean onLongListItemClick(int position) {
-        // clicks for first list
-        if (position != 0 && position <= files.getLocalList().size()) {
-            final LXCFile file = files.getLocalList().get(position - 1);
-            guiListener.removeFile(file);
-            updateGui();
-            return true;
-        } else if (position >= files.getLocalList().size() + 2) {
+        if (position >= files.getLocalList().size() + 2) {
             // clicks for second list, only valid for downloaded files
             final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
             if (file.isAvailable()) {
@@ -299,21 +293,26 @@ public class FileListView extends ListView {
         return false;
     }
 
-    private View createLocalListItem(LXCFile file, ViewGroup group) {
-        View item = inflater.inflate(R.layout.file_item, group, false);
+    private View createLocalListItem(final LXCFile file, ViewGroup group) {
+        View item = inflater.inflate(R.layout.file_list_item_local, group, false);
         ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
         ((TextView) item.findViewById(R.id.fileInfo)).setText(LXCFile.getFormattedSize(file.getFileSize()));
-        // set image
-        ((ImageView) item.findViewById(R.id.downloadStatus)).setImageResource(R.drawable.ic_file_upload);
         // Override all default ProgressIndicators
         for (LXCJob job : file.getJobs()) {
             job.getTrans().setProgressIndicator(noopIndicator);
         }
+        item.findViewById(R.id.removeLocal).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                guiListener.removeFile(file);
+                updateGui();
+            }
+        });
         return item;
     }
 
     private View createRemoteListItem(LXCFile file, ViewGroup group) {
-        View item = inflater.inflate(R.layout.file_item, group, false);
+        View item = inflater.inflate(R.layout.file_list_item_remote, group, false);
         ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
         // set info text
         ((TextView) item.findViewById(R.id.fileInfo)).setText(LXCFile.getFormattedSize(file.getFileSize()));
