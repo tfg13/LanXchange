@@ -45,6 +45,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
@@ -83,8 +84,12 @@ public class AndroidPlatform extends Activity {
         // Check intent first
         List<VirtualFile> quickShare = null;
         Intent launchIntent = getIntent();
-        if (launchIntent.getAction() != null) {
+        if (launchIntent.getAction() != null && !launchIntent.getAction().equals(Intent.ACTION_MAIN)) {
             quickShare = computeInputIntent(launchIntent);
+            if (quickShare == null) {
+                // unable to access file, inform user
+                handleShareError(launchIntent);
+            }
         }
 
         // load layout
@@ -227,13 +232,25 @@ public class AndroidPlatform extends Activity {
 
         ArrayList<VirtualFile> files = new ArrayList<VirtualFile>();
         // multiple files
-        if (android.os.Build.VERSION.SDK_INT >= 18 && data.getData() == null && data.getClipData() != null) {
-            files.addAll(virtualFilesFromClipData(data.getClipData()));
+        if (android.os.Build.VERSION.SDK_INT >= 18 && data.getClipData() != null) {
+            List<VirtualFile> virtualFiles = virtualFilesFromClipData(data.getClipData());
+            if (virtualFiles != null && !virtualFiles.isEmpty()) {
+                files.addAll(virtualFiles);
+            } else {
+                handleShareError(data);
+            }
         } else if (data.getData() != null) {
-            files.add(uriToVirtualFile(data.getData()));
+            VirtualFile virtualFile = uriToVirtualFile(data.getData());
+            if (virtualFile != null) {
+                files.add(virtualFile);
+            } else {
+                handleShareError(data);
+            }
         }
 
-        offerFiles(files);
+        if (!files.isEmpty()) {
+            offerFiles(files);
+        }
     }
 
     @Override
@@ -244,18 +261,29 @@ public class AndroidPlatform extends Activity {
             if (files != null && !files.isEmpty()) {
                 offerFiles(files);
             } else {
-                // cannot compute input, display error
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.error_cantoffer_title);
-                builder.setMessage(R.string.error_cantoffer_text);
-                builder.setPositiveButton(R.string.error_cantoffer_ok, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                });
-                builder.show();
+                handleShareError(intent);
             }
+        }
+    }
+
+    /**
+     * Called when importing content to share failed.
+     * Logs the Intent for debug purposes and displays a Toast.
+     *
+     */
+    private void handleShareError(Intent failedIntent) {
+        Toast.makeText(getApplicationContext(), R.string.error_cantoffer, Toast.LENGTH_LONG).show();
+        System.err.println("Sharing failed. Intent details:");
+        System.err.println("Intent object: " + failedIntent);
+        System.err.println("Intent action: " + failedIntent.getAction());
+        System.err.println("Intent dataString: " + failedIntent.getDataString());
+        System.err.println("Intent data: " + failedIntent.getData());
+        System.err.println("Intent type: " + failedIntent.getType());
+        System.err.println("Intent scheme: " + failedIntent.getScheme());
+        System.err.println("Intent package: " + failedIntent.getPackage());
+        System.err.println("Intent extras: " + failedIntent.getExtras());
+        if (android.os.Build.VERSION.SDK_INT >= 16) {
+            System.err.println("Intent clipData: " + failedIntent.getClipData());
         }
     }
 
@@ -266,7 +294,10 @@ public class AndroidPlatform extends Activity {
             ClipData.Item item = clipdata.getItemAt(i);
             // may contain Uri or String
             if (item.getUri() != null) {
-                result.add(uriToVirtualFile(item.getUri()));
+                VirtualFile file = uriToVirtualFile(item.getUri());
+                if (file != null) {
+                    result.add(file);
+                }
             } else if (item.getText() != null) {
                 // plain text
                 try {
@@ -355,17 +386,19 @@ public class AndroidPlatform extends Activity {
         if (uriString.startsWith("content://")) {
             ContentResolver resolver = getBaseContext().getContentResolver();
             // get file name
-            String[] proj = { MediaStore.Files.FileColumns.DISPLAY_NAME };
-            Cursor cursor = resolver.query(uri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME);
-            cursor.moveToFirst();
-            String name = cursor.getString(column_index);
-            try {
-                ParcelFileDescriptor desc = resolver.openFileDescriptor(uri, "r");
-                file = new NonFileContent(name, desc, uri, resolver);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            String[] projection = { MediaStore.Files.FileColumns.DISPLAY_NAME };
+            Cursor cursor = resolver.query(uri, projection, null, null, null);
+            if (cursor != null) {
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME);
+                cursor.moveToFirst();
+                String name = cursor.getString(column_index);
+                try {
+                    ParcelFileDescriptor desc = resolver.openFileDescriptor(uri, "r");
+                    file = new NonFileContent(name, desc, uri, resolver);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                cursor.close();
             }
         } else if (uriString.startsWith("file://")) {
             // seems to be useable right away

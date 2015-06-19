@@ -21,12 +21,7 @@
     <string name="error_cantopen_text">No app can open this file.\n(it was downloaded, though)</string>
     <string name="error_cantopen_ok">OK</string>
     <string name="ui_holdtoremove">Hold to remove</string>
-    <string name="error_cantoffer_title">Unknown data</string>
-    <string name="error_cantoffer_text">Sorry, you can only share local files with LanXchange.</string>
-    <string name="error_cantoffer_ok">OK</string>
-    <string name="error_cantofferkitkat_title">Unknown data</string>
-    <string name="error_cantofferkitkat_text">You used a new method to select this file which LanXchange can\'t handle (yet). Try selecting the content within another app and use \"Send\" and then select LanXchange).</string>
-    <string name="error_cantofferkitkat_ok">OK</string>
+    <string name="error_cantoffer">Sorry, LanXchange was not able to share this. If you think it should be, send me a mail!</string>
     <string name="ui_nowifi">Please enable Wi-Fi!</string>
     <string name="notification_running_title">LanXchange running</string>
     <string name="notification_running_text">Tap to return to LanXchange</string>
