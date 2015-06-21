@@ -18,7 +18,7 @@
     <string name="ui_downloading">Downloading: </string>
     <string name="ui_available">Tap to open</string>
     <string name="error_cantopen_title">Unknown filetype</string>
-    <string name="error_cantopen_text">No app can open this file.\n(it was downloaded, though)</string>
+    <string name="error_cantopen_text">No app found that can open this file (the download was successful, though). If you think this is wrong and you have a matching app, try opening the file there. If that works, send me a mail!</string>
     <string name="error_cantopen_ok">OK</string>
     <string name="ui_holdtoremove">Hold to remove</string>
     <string name="error_cantoffer">Sorry, LanXchange was not able to share this. If you think it should be, send me a mail!</string>
