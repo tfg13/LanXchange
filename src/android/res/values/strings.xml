@@ -22,6 +22,9 @@
     <string name="error_cantopen_ok">OK</string>
     <string name="error_cantopen_mail">Mail</string>
     <string name="ui_holdtoremove">Hold to remove</string>
+    <string name="error_sdcard_title">Cannot write files</string>
+    <string name="error_sdcard_text">LanXchange cannot access your internal device storage (where files are downloaded to). This means your device in its current state cannot be used to transfer files with LanXchange. This should obviously never be the case. Please write me at mail@lanxchange.com so I can fix this. LanXchange will now shut down.</string>
+    <string name="error_sdcard_ok">OK</string>
     <string name="error_cantoffer_title">Sharing failed</string>
     <string name="error_cantoffer_text">Sorry, LanXchange was not able to share this. If you think it should be, send me a mail!</string>
     <string name="error_cantoffer_ok">OK</string>

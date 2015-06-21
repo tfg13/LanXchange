@@ -472,4 +472,30 @@ public class AndroidPlatform extends AppCompatActivity {
     public void quickShare(List<VirtualFile> uris) {
         offerFiles(uris);
     }
+
+    /**
+     * Used by AndroidSingleton to copy some error codes from LXCService.
+     */
+    public void onErrorCode(int errorCode) {
+        switch (errorCode) {
+            case 1:
+                AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
+                builder.setTitle(R.string.error_sdcard_title);
+                builder.setMessage(R.string.error_sdcard_text);
+                builder.setCancelable(false);
+                builder.setPositiveButton("OK", new OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        // critical, force exit
+                        guiListener.shutdown(true, false);
+                        AndroidSingleton.onRealDestroy(AndroidPlatform.this);
+                        finish();
+                    }
+                });
+                builder.show();
+                break;
+        }
+    }
 }

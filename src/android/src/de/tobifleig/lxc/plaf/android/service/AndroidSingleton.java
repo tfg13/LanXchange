@@ -128,11 +128,14 @@ public class AndroidSingleton {
     /**
      * Called by the Service when LXC is up and running.
      */
-    public static void serviceReady(AndroidGuiListener guiListener) {
+    public static void serviceReady(AndroidGuiListener guiListener, int errorCode) {
         AndroidSingleton.guiListener = guiListener;
         if (activity != null) {
             activity.setGuiListener(guiListener);
             sendQuickShare();
+            if (errorCode != 0) {
+                activity.onErrorCode(errorCode);
+            }
         }
     }
 

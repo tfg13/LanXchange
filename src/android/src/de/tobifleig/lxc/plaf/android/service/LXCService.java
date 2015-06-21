@@ -25,13 +25,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.wifi.WifiManager;
@@ -60,7 +57,14 @@ public class LXCService extends Service implements Platform {
      * Flat to prevent multiple service instances running at a time.
      */
     private boolean running = false;
-    //private LXC lxc;
+
+    /**
+     * Set on some internal errors that need to be communicated to the user.
+     * This field is copied to the Activity by AndroidSingleton.
+     * The activity then displays a nice error message.
+     * Zero means no error.
+     */
+    private int errorCode = 0;
     /**
      * The listener, used by the user interface to send events to the core implementation.
      */
@@ -201,7 +205,7 @@ public class LXCService extends Service implements Platform {
 
             @Override
             public void display() {
-                AndroidSingleton.serviceReady(listener);
+                AndroidSingleton.serviceReady(listener, errorCode);
             }
 
             @Override
@@ -283,18 +287,8 @@ public class LXCService extends Service implements Platform {
             // the media
             return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
         } else { // Bad. Display error message and exit
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Cannot access data ");
-            builder.setCancelable(false);
-            builder.setNeutralButton("OK", new OnClickListener() {
-
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    dialog.cancel();
-                }
-            });
-            builder.create();
-            throw new RuntimeException("Cannot write to storage!");
+            errorCode = 1;
+            return ".";
         }
     }
 
