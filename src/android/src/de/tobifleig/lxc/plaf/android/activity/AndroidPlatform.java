@@ -24,9 +24,9 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -124,7 +124,7 @@ public class AndroidPlatform extends AppCompatActivity {
 
             @Override
             public boolean confirmCloseWithTransfersRunning() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(AndroidPlatform.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
                 builder.setMessage(R.string.dialog_closewithrunning_text);
                 builder.setTitle(R.string.dialog_closewithrunning_title);
                 builder.setPositiveButton(R.string.dialog_closewithrunning_yes, new OnClickListener() {
@@ -273,10 +273,7 @@ public class AndroidPlatform extends AppCompatActivity {
      * Logs the Intent for debug purposes and displays a Toast.
      *
      */
-    private void handleShareError(Intent failedIntent) {
-        //noinspection ResourceType
-        Snackbar.make(findViewById(R.id.main_layout), R.string.error_cantoffer, Snackbar.LENGTH_LONG)
-                .setDuration(5000).show();
+    private void handleShareError(final Intent failedIntent) {
         System.err.println("Sharing failed. Intent details:");
         System.err.println("Intent object: " + failedIntent);
         System.err.println("Intent action: " + failedIntent.getAction());
@@ -289,6 +286,39 @@ public class AndroidPlatform extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT >= 16) {
             System.err.println("Intent clipData: " + failedIntent.getClipData());
         }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
+        builder.setTitle(R.string.error_cantoffer_title);
+        builder.setMessage(R.string.error_cantoffer_text);
+        builder.setPositiveButton(R.string.error_cantoffer_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // do nothing
+            }
+        });
+        builder.setNeutralButton(R.string.error_cantoffer_mail, new DialogInterface.OnClickListener() {
+            @SuppressLint("NewApi")
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                 String uriText = "mailto:" + Uri.encode("mail@lanxchange.com") +
+                        "?subject=" + Uri.encode("Cannot share file") +
+                        "&body=" + Uri.encode("Hi!\n\nSharing some files failed :(\nPlease help!\n(feel free to write more)"
+                        + "\n---------------------------------------"
+                        + "\ntechnical info (do not remove this): "
+                        + "\n---------------------------------------"
+                        + "\n" + failedIntent
+                        + "\n" + failedIntent.getAction()
+                        + "\n" + failedIntent.getDataString()
+                        + "\n" + failedIntent.getData()
+                        + "\n" + failedIntent.getType()
+                        + "\n" + failedIntent.getScheme()
+                        + "\n" + failedIntent.getPackage()
+                        + "\n" + failedIntent.getExtras()
+                        + (android.os.Build.VERSION.SDK_INT >= 16 ? "\n" + failedIntent.getClipData() : ""));
+                startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(uriText)));
+            }
+        });
+        builder.show();
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
