@@ -39,6 +39,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -273,7 +274,9 @@ public class AndroidPlatform extends AppCompatActivity {
      *
      */
     private void handleShareError(Intent failedIntent) {
-        Toast.makeText(getApplicationContext(), R.string.error_cantoffer, Toast.LENGTH_LONG).show();
+        //noinspection ResourceType
+        Snackbar.make(findViewById(R.id.main_layout), R.string.error_cantoffer, Snackbar.LENGTH_LONG)
+                .setDuration(5000).show();
         System.err.println("Sharing failed. Intent details:");
         System.err.println("Intent object: " + failedIntent);
         System.err.println("Intent action: " + failedIntent.getAction());
