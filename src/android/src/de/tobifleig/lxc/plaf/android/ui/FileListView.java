@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
@@ -35,7 +34,6 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -49,6 +47,7 @@ import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.ProgressIndicator;
 import de.tobifleig.lxc.plaf.android.FileListWrapper;
+import de.tobifleig.lxc.plaf.android.MIMETypeGuesser;
 
 
 /**
@@ -256,9 +255,7 @@ public class FileListView extends ListView {
                 // Hack: Local files are RealFiles
                 RealFile realFile = (RealFile) file.getFiles().get(0);
                 Uri fileUri = Uri.fromFile(realFile.getBackingFile());
-                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                        MimeTypeMap.getFileExtensionFromUrl(realFile.getBackingFile().getAbsolutePath()));
-                openIntent.setDataAndType(fileUri, mimeType);
+                openIntent.setDataAndType(fileUri, MIMETypeGuesser.guessMIMEType(realFile, getContext()));
                 // check if intent can be processed
                 List<ResolveInfo> list = getContext().getPackageManager().queryIntentActivities(openIntent, 0);
                 if (list.isEmpty()) {
