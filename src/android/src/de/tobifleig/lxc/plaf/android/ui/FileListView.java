@@ -27,8 +27,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.net.Uri;
+import android.support.design.widget.Snackbar;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -293,7 +295,7 @@ public class FileListView extends ListView {
         return false;
     }
 
-    private View createLocalListItem(final LXCFile file, ViewGroup group) {
+    private View createLocalListItem(final LXCFile file, final ViewGroup group) {
         View item = inflater.inflate(R.layout.file_list_item_local, group, false);
         ((TextView) item.findViewById(R.id.filename)).setText(file.getShownName());
         ((TextView) item.findViewById(R.id.fileInfo)).setText(LXCFile.getFormattedSize(file.getFileSize()));
@@ -306,6 +308,17 @@ public class FileListView extends ListView {
             public void onClick(View v) {
                 guiListener.removeFile(file);
                 updateGui();
+                // offer to undo the removal
+                Snackbar.make(group, getResources().getString(R.string.ui_undo_removelocalfile)
+                            + "\n\"" + file.getShownName() + "\"", Snackbar.LENGTH_LONG)
+                        .setAction(R.string.snackbar_undoremovelocal_action, new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                // undo
+                                guiListener.offerFile(file);
+                                updateGui();
+                            }
+                        }).show();
             }
         });
         return item;

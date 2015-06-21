@@ -23,6 +23,8 @@
     <string name="ui_holdtoremove">Hold to remove</string>
     <string name="error_cantoffer">Sorry, LanXchange was not able to share this. If you think it should be, send me a mail!</string>
     <string name="ui_nowifi">Please enable Wi-Fi!</string>
+	<string name="ui_undo_removelocalfile">No longer sharing</string>
+	<string name="snackbar_undoremovelocal_action">Undo</string>
     <string name="notification_running_title">LanXchange running</string>
     <string name="notification_running_text">Tap to return to LanXchange</string>
     <string name="title_activity_help">Help</string>
