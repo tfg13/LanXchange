@@ -192,10 +192,7 @@ public class FileListView extends ListView {
             @Override
             public boolean isEnabled(int position) {
                 // cannot click on category headers
-                if (position == 0 || position == files.getLocalList().size() + (files.getLocalList().isEmpty() ? 0 : 1)) {
-                    return false;
-                }
-                return true;
+                return !(position == 0 || position == files.getLocalList().size() + (files.getLocalList().isEmpty() ? 0 : 1));
             }
 
             @Override
@@ -237,8 +234,9 @@ public class FileListView extends ListView {
      */
     public void onListItemClick(int position) {
         // only clicks to second list for now
-        if (position >= files.getLocalList().size() + 2) {
-            final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
+        List<LXCFile> localList = files.getLocalList();
+        if (position >= (localList.isEmpty() ? 1 : localList.size() + 2)) {
+            final LXCFile file = files.getRemoteList().get(position - (localList.isEmpty() ? 1 : localList.size() - 2));
             if (!file.isLocked() && !file.isLocal() && !file.isAvailable()) {
                 file.setLocked(true);
                 updateGui();
@@ -283,9 +281,10 @@ public class FileListView extends ListView {
     }
 
     private boolean onLongListItemClick(int position) {
-        if (position >= files.getLocalList().size() + 2) {
+        List<LXCFile> localList = files.getLocalList();
+        if (position >= (localList.isEmpty() ? 1 : localList.size() + 2)) {
             // clicks for second list, only valid for downloaded files
-            final LXCFile file = files.getRemoteList().get(position - files.getLocalList().size() - 2);
+            final LXCFile file = files.getRemoteList().get(position - (localList.isEmpty() ? 1 : localList.size() - 2));
             if (file.isAvailable()) {
                 guiListener.resetFile(file);
                 updateGui();
