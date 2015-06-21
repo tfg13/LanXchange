@@ -39,6 +39,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,7 +67,7 @@ import de.tobifleig.lxc.plaf.android.ui.FileListView;
  * 
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class AndroidPlatform extends Activity {
+public class AndroidPlatform extends AppCompatActivity {
 
     private static final int RETURNCODE_FILEINTENT = 12345;
     private AndroidGuiListener guiListener;

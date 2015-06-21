@@ -36,7 +36,7 @@ public class HelpActivity extends KeepServiceRunningActivity {
         super.onCreate(savedInstanceState);
         // load layout
         setContentView(R.layout.activity_help);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         LayoutInflater inflater = getLayoutInflater();
     }

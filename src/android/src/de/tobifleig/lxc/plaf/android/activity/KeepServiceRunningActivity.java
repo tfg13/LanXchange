@@ -21,9 +21,10 @@
 package de.tobifleig.lxc.plaf.android.activity;
 
 import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
 import de.tobifleig.lxc.plaf.android.service.AndroidSingleton;
 
-public class KeepServiceRunningActivity extends Activity {
+public class KeepServiceRunningActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {

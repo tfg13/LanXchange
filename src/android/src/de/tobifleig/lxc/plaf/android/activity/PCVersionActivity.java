@@ -34,7 +34,7 @@ public class PCVersionActivity extends KeepServiceRunningActivity {
         super.onCreate(savedInstanceState);
         // load layout
         setContentView(R.layout.activity_pcversion);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // handle input
         findViewById(R.id.pcversion_centerbox).setOnClickListener(new OnClickListener() {

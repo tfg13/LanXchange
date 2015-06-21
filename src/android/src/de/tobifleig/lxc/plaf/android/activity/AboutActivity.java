@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.plaf.android.ui.AboutElement;
@@ -36,7 +35,7 @@ public class AboutActivity extends KeepServiceRunningActivity {
         super.onCreate(savedInstanceState);
         // load layout
         setContentView(R.layout.activity_about);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // fill in dynamic content
         ((AboutElement) findViewById(R.id.about_version)).setText(LXC.versionString);
@@ -75,6 +74,12 @@ public class AboutActivity extends KeepServiceRunningActivity {
             }
         });
         findViewById(R.id.about_license_fab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.apache.org/licenses/LICENSE-2.0")));
+            }
+        });
+        findViewById(R.id.about_license_support).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.apache.org/licenses/LICENSE-2.0")));
