@@ -253,7 +253,7 @@ public class FileListView extends ListView {
                 Intent openIntent = new Intent();
                 openIntent.setAction(Intent.ACTION_VIEW);
                 // Hack: Local files are RealFiles
-                RealFile realFile = (RealFile) file.getFiles().get(0);
+                final RealFile realFile = (RealFile) file.getFiles().get(0);
                 Uri fileUri = Uri.fromFile(realFile.getBackingFile());
                 openIntent.setDataAndType(fileUri, MIMETypeGuesser.guessMIMEType(realFile, getContext()));
                 // check if intent can be processed
@@ -267,6 +267,20 @@ public class FileListView extends ListView {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             // do nothing
+                        }
+                    });
+                    builder.setNeutralButton(R.string.error_cantopen_mail, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String uriText = "mailto:" + Uri.encode("mail@lanxchange.com") +
+                                    "?subject=" + Uri.encode("Cannot open file") +
+                                    "&body=" + Uri.encode("Hi!\n\nOpening a file failed :(\nPlease help!\n(feel free to write more)\n"
+                                    + "\n---------------------------------------"
+                                    + "\ntechnical info (do not remove this): "
+                                    + "\n---------------------------------------"
+                                    + "\n" + realFile.getBackingFile().getAbsolutePath()
+                                    + "\n" + realFile.getName());
+                            getContext().startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(uriText)));
                         }
                     });
                     builder.show();
