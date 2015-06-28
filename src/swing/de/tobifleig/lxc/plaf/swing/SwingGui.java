@@ -297,6 +297,12 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     }
 
     @Override
+    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
+        // swing gui is not interested in all this information
+        update();
+    }
+
+    @Override
     public File getFileTarget(LXCFile file) {
         JFileChooser cf = new JFileChooser();
         cf.setApproveButtonText("Choose target");

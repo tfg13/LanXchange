@@ -34,6 +34,11 @@ public interface GuiInterfaceBridge {
     public void update();
 
     /**
+     * Forwards some notifyFileChange-calls to the gui.
+     */
+    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles);
+
+    /**
      * Forwards confirmCloseWithTransfersRunning()-calls to the gui.
      */
     public boolean confirmCloseWithTransfersRunning();

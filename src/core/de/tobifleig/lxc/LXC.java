@@ -20,6 +20,7 @@
  */
 package de.tobifleig.lxc;
 
+import de.tobifleig.lxc.data.FileListChangeSet;
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.net.LXCInstance;
@@ -115,8 +116,16 @@ public class LXC {
         network = new NetworkManager(new NetworkManagerListener() {
             @Override
             public void listReceived(TransFileList list, LXCInstance sender) {
-                files.computeFileList(list, sender);
-                gui.update();
+                FileListChangeSet changes = files.computeFileList(list, sender);
+                if (!changes.getRemovedFiles().isEmpty()) {
+                    // no way of picking multiple files in larger set, must serialize
+                    for (FileListChangeSet.FileModification modification : changes.getRemovedFiles()) {
+                        gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_REMOVE, modification.index, 1);
+                    }
+                }
+                if (!changes.getAddedFiles().isEmpty()) {
+                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_ADD, changes.getAddedFiles().get(0).index, changes.getAddedFiles().size());
+                }
             }
 
             @Override
@@ -126,8 +135,13 @@ public class LXC {
 
             @Override
             public void instanceRemoved(LXCInstance removedInstance) {
-                files.instanceRemoved(removedInstance);
-                gui.update();
+                FileListChangeSet removals = files.instanceRemoved(removedInstance);
+                if (!removals.getRemovedFiles().isEmpty()) {
+                    // no way of picking multiple files in larger set, must serialize
+                    for (FileListChangeSet.FileModification modification : removals.getRemovedFiles()) {
+                        gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_REMOVE, modification.index, 1);
+                    }
+                }
             }
 
             @Override
@@ -202,9 +216,11 @@ public class LXC {
         gui.setGuiListener(new GuiListener() {
             @Override
             public void offerFile(LXCFile newFile) {
-                files.addLocal(newFile);
-                network.broadcastList();
-                gui.update();
+                int newIndex = files.addLocal(newFile);
+                if (newIndex != -1) {
+                    network.broadcastList();
+                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_LOCAL, GuiInterface.UPDATE_OPERATION_ADD, newIndex, 1);
+                }
             }
 
             @Override

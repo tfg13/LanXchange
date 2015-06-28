@@ -147,6 +147,11 @@ public class LXCService extends Service implements Platform {
             }
 
             @Override
+            public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
+                AndroidSingleton.getInterfaceBridge().notifyFileChange(fileOrigin, operation, firstIndex, numberOfFiles);
+            }
+
+            @Override
             public void showError(String error) {
                 System.err.println(error);
             }

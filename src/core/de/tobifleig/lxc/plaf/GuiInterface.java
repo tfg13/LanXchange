@@ -32,6 +32,11 @@ import java.io.File;
  */
 public interface GuiInterface {
 
+    int UPDATE_ORIGIN_LOCAL = 1;
+    int UPDATE_ORIGIN_REMOTE = 2;
+    int UPDATE_OPERATION_ADD = 3;
+    int UPDATE_OPERATION_REMOVE = 4;
+
     /**
      * Initialize the user-inferface.
      *
@@ -61,11 +66,25 @@ public interface GuiInterface {
     public void setGuiListener(GuiListener guiListener);
 
     /**
-     * updates the gui.
+     * Updates the gui.
      * must be called after changes (modification of own/av/alllist, file-transfers etc)
      * may use interal scheduling to limit framerate/cpu usage
+     *
+     * If more specific info is available, one can also call notifyFileChange().
      */
     public void update();
+
+    /**
+     * More specific way of updating the gui.
+     * Gives the gui the opportunity to selectively update the view and/or animate the changes.
+     * This can be called instead of update()
+     *
+     * @param fileOrigin one of UPDATE_ORIGIN_LOCAL, UPDATE_ORIGIN_REMOTE
+     * @param operation one of UPDATE_OPERATION_ADD, UPDATE_OPERATION_REMOVE
+     * @param firstIndex index of first modified file (index of first removed or future index of first new)
+     * @param numberOfFiles number of files that were added/removed in this batch
+     */
+    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles);
 
     /**
      * Finds out where to save the given file.

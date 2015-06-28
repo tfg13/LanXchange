@@ -15,8 +15,9 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile project(':core')
-    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:design:22.2.0'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
 }
 
 android {

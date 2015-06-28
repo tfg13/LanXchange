@@ -44,6 +44,11 @@ public class AndroidSingleton {
         }
 
         @Override
+        public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
+            // do nothing
+        }
+
+        @Override
         public boolean confirmCloseWithTransfersRunning() {
             // no gui = no one to ask = no not close
             return false;

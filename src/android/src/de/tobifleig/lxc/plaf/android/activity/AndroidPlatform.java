@@ -39,20 +39,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.TextView;
-import android.widget.Toast;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.InMemoryFile;
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
 import de.tobifleig.lxc.plaf.android.ConnectivityChangeListener;
 import de.tobifleig.lxc.plaf.android.ConnectivityChangeReceiver;
@@ -104,7 +99,6 @@ public class AndroidPlatform extends AppCompatActivity {
         ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
         root.addView(emptyText);
 
-
         ConnectivityChangeReceiver.setConnectivityListener(new ConnectivityChangeListener() {
 
             @Override
@@ -120,6 +114,24 @@ public class AndroidPlatform extends AppCompatActivity {
             @Override
             public void update() {
                 fileListView.updateGui();
+            }
+
+            @Override
+            public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
+                if (fileOrigin == GuiInterface.UPDATE_ORIGIN_LOCAL) {
+                    // local implies: only 1 file at a time
+                    if (operation == GuiInterface.UPDATE_OPERATION_ADD) {
+                        fileListView.notifyLocalFileAdded();
+                    } else if (operation == GuiInterface.UPDATE_OPERATION_REMOVE) {
+                        fileListView.notifyLocalFileRemoved(firstIndex);
+                    }
+                } else if (fileOrigin == GuiInterface.UPDATE_ORIGIN_REMOTE) {
+                    if (operation == GuiInterface.UPDATE_OPERATION_ADD) {
+                        fileListView.notifyRemoteFilesAdded(numberOfFiles);
+                    } else if (operation == GuiInterface.UPDATE_OPERATION_REMOVE) {
+                        fileListView.notifyRemoteFilesRemoved(firstIndex, numberOfFiles);
+                    }
+                }
             }
 
             @Override

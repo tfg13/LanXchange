@@ -59,32 +59,43 @@ public class FileManager {
      * @param receivedList the received list
      * @param sender the origin of this list
      */
-    public void computeFileList(TransFileList receivedList, LXCInstance sender) {
-        List<LXCFile> rawList = receivedList.getAll();
-        recentFileLists.put(sender, new ArrayList<LXCFile>(rawList)); // store a copy!
+    public FileListChangeSet computeFileList(TransFileList receivedList, LXCInstance sender) {
+        FileListChangeSet changeSet = new FileListChangeSet();
+        List<LXCFile> addList = receivedList.getAll();
+        recentFileLists.put(sender, new ArrayList<LXCFile>(addList)); // store a copy!
         Iterator<LXCFile> iter = files.iterator();
-        // Remove all files no longer offerd by this instance
+        // Remove all files no longer offered by this instance
+        int remoteRemoveIndex = -1;//need old indices for gui
         while (iter.hasNext()) {
             LXCFile file = iter.next();
+            if (!file.isLocal()) {
+                remoteRemoveIndex++;
+            }
             if (sender.equals(file.getInstance())) {
-                if (!rawList.contains(file)) {
+                if (!addList.contains(file)) {
                     // no longer offered, remove it, if not download{ing,ed}
                     if (file.getJobs().isEmpty() && !file.isAvailable()) {
                         iter.remove();
+                        System.out.println("REM!");
+                        changeSet.pushRemovedFile(file, remoteRemoveIndex);
                     } else {
                         // keep, ignore in next step:
-                        rawList.remove(file);
+                        addList.remove(file);
                     }
                 } else {
                     // already known, ignore in next step
-                    rawList.remove(file);
+                    addList.remove(file);
                 }
             }
         }
 
         receivedList.setInstance(sender);
         receivedList.limitTransVersions();
-        files.addAll(rawList);
+        for (int i = 0; i < addList.size(); i++) {
+            changeSet.pushAddedFile(addList.get(i), files.size() + i);
+        }
+        files.addAll(addList);
+        return changeSet;
     }
 
     /**
@@ -92,18 +103,25 @@ public class FileManager {
      *
      * @param instance the instance which files should be no longer available
      */
-    public void instanceRemoved(LXCInstance instance) {
+    public FileListChangeSet instanceRemoved(LXCInstance instance) {
+        FileListChangeSet removals = new FileListChangeSet();
         recentFileLists.remove(instance);
         Iterator<LXCFile> iter = files.iterator();
+        int remoteRemoveIndex = -1;
         while (iter.hasNext()) {
             LXCFile file = iter.next();
+            if (!file.isLocal()) {
+                remoteRemoveIndex++;
+            }
             if (file.getInstance().equals(instance)) {
                 // only delete if not download{ing,ed}
                 if (file.getJobs().isEmpty() && !file.isAvailable()) {
                     iter.remove();
+                    removals.pushRemovedFile(file, remoteRemoveIndex);
                 }
             }
         }
+        return removals;
     }
 
     /**
@@ -151,15 +169,17 @@ public class FileManager {
      * Adds a file offered by the local instance.
      *
      * @param newfile the new file
+     * @return index of new file
      */
-    public void addLocal(LXCFile newfile) {
+    public int addLocal(LXCFile newfile) {
         // do not allow duplicates
         for (LXCFile file : files) {
             if (file.equals(newfile)) {
-                return;
+                return -1;
             }
         }
         files.add(newfile);
+        return files.size() - 1;
     }
 
     /**
