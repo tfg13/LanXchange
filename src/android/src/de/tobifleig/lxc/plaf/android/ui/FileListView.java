@@ -272,17 +272,18 @@ public class FileListView extends RecyclerView {
                     // downloading
                     cachedProgressBar.setVisibility(View.VISIBLE);
                     cachedProgressBar.setIndeterminate(false);
-                    int progress = (file.getJobs().get(0).getTrans().getProgress());
+                    final LXCJob job = file.getJobs().get(0);
+                    int progress = job.getTrans().getProgress();
                     cachedProgressBar.setProgress(progress);
                     cachedFileInfo.setText(getResources().getString(R.string.ui_downloading) + " " + progress + "%");
                     // override default ProgressIndicator
-                    file.getJobs().get(0).getTrans().setProgressIndicator(new FilterProgressIndicator(progress) {
+                    job.getTrans().setProgressIndicator(new FilterProgressIndicator(progress) {
                         @Override
                         protected void updateGui() {
                             post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    int progress = (file.getJobs().get(0).getTrans().getProgress());
+                                    int progress = job.getTrans().getProgress();
                                     cachedProgressBar.setProgress(progress);
                                     cachedFileInfo.setText(getResources().getString(R.string.ui_downloading) + " " + progress + "%");
                                 }
