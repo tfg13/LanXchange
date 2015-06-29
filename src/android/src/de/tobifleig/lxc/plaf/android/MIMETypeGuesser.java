@@ -20,15 +20,15 @@
  */
 package de.tobifleig.lxc.plaf.android;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
 import de.tobifleig.lxc.data.impl.RealFile;
 
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Tries to figure out the MIMEType of received files, so they can be opened.
@@ -37,18 +37,28 @@ public class MIMETypeGuesser {
 
     private final static String GENERIC_RESULT = "application/octet-stream";
 
+    private static final Map<String, String> hardcodedMIMETypes = new HashMap<String, String>();
+
     private MIMETypeGuesser() {
+    }
+
+    static {
+        // put in some well known values (that android cannot guess correctly)
+        hardcodedMIMETypes.put(".tar.gz", "application/x-gzip");
+        hardcodedMIMETypes.put(".tar.bz2", "application/x-bzip2");
+        hardcodedMIMETypes.put(".tar.xz", "application/x-xz");
+        hardcodedMIMETypes.put(".log", "text/plain");// a bit of a wild guess, bit I use this quite often :)
     }
 
     /**
      * Try to guess the MIMEType for the given file.
-     * This method tries up to three (increasingly hacky) ways to get the MIMEType.
+     * This method tries up to four (increasingly hacky) ways to get the MIMEType.
      * The first meaningful result is returned.
      * These methods are:
+     * 0. Check some hardcoded extensions
      * 1. Believe the extension (if any) and ask MimeTypeMap
      * 2. Look at magic numbers via URLConnection.guessContentTypeFromStream
      * 3. Ask the ContentResolver
-     * 4. Ask the MediaStore
      * If everything fails, the result is "application/octet-stream"
      *
      * @param file the file to guess the type from
@@ -58,6 +68,14 @@ public class MIMETypeGuesser {
     public static String guessMIMEType(RealFile file, Context context) {
         Uri fileUri = Uri.fromFile(file.getBackingFile());
         String name = file.getName();
+
+        // METHOD 0: Manually check against some well-known extensions
+        for (String extension : hardcodedMIMETypes.keySet()) {
+            if (name.toLowerCase().endsWith(extension)) {
+                return hardcodedMIMETypes.get(extension);
+            }
+        }
+
         // hack #0, MimeTypeMap.getFileExtensionFromUrl fails if the name contains '#'
         String extension = MimeTypeMap.getFileExtensionFromUrl(file.getBackingFile().getAbsolutePath().replaceAll("#", ""));
 
