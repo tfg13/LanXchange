@@ -132,7 +132,10 @@ public class LXCInstance {
     /**
      * Call this to indicate a heartbeat was received.
      */
-    void heartBeat() {
+    void heartBeat(InetAddress address) {
+        if (!addresses.contains(address)) {
+            addresses.add(address);
+        }
         heartbeatTime = System.currentTimeMillis();
     }
 

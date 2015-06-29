@@ -49,9 +49,8 @@ class InstanceManager {
     public static final String SOURCE_UNICAST_HEARTBEAT = "unicast heartbeat";
     /**
      * Contains all known instances.
-     * Enables access to them by addresses
      */
-    private HashMap<InetAddress, LXCInstance> instances;
+    private HashMap<Integer, LXCInstance> instances;
     /**
      * Seems to contain all remote instances, without any duplicates.
      * Backed by the instances HashMap
@@ -72,7 +71,7 @@ class InstanceManager {
      * @param listener the listener to pass events to
      */
     InstanceManager(InstanceManagerListener listener) {
-        this.instances = new HashMap<InetAddress, LXCInstance>();
+        this.instances = new HashMap<Integer, LXCInstance>();
         this.listener = listener;
         this.timer = new Timer("lxc_heartbeat_helper", true);
         remoteView = new Iterable<LXCInstance>() {
@@ -81,7 +80,6 @@ class InstanceManager {
             public Iterator<LXCInstance> iterator() {
                 return new Iterator<LXCInstance>() {
                     private final Iterator<LXCInstance> baseIter = instances.values().iterator();
-                    private final HashMap<LXCInstance, Object> seenInstances = new HashMap<LXCInstance, Object>();
                     private LXCInstance next = computeNext();
 
                     @Override
@@ -106,8 +104,7 @@ class InstanceManager {
                     private LXCInstance computeNext() {
                         while (baseIter.hasNext()) {
                             LXCInstance candidate = baseIter.next();
-                            if (!candidate.isLocal() && !seenInstances.containsKey(candidate)) {
-                                seenInstances.put(candidate, null);
+                            if (!candidate.isLocal()) {
                                 return candidate;
                             }
                         }
@@ -191,17 +188,6 @@ class InstanceManager {
     }
 
     /**
-     * Gets a known LXCInstance by its address.
-     * Returns null, if there is no known LXCInstance for this address.
-     *
-     * @param address the address
-     * @return the requested LXCInstance, or null
-     */
-    synchronized LXCInstance getByAddress(InetAddress address) {
-        return instances.get(address);
-    }
-
-    /**
      * Gets a LXCInstance for the given id and address
      * If the id is known, the corresponding LXCInstance is returned.
      * Otherwise, a new LXCInstance will be created and returned.
@@ -210,8 +196,10 @@ class InstanceManager {
      * @return the LXCInstance for this id
      */
     synchronized LXCInstance getOrCreateInstance(InetAddress address, int id) {
-        if (instances.containsKey(address) && id == instances.get(address).id) {
-            return instances.get(address);
+        if (instances.containsKey(id)) {
+            LXCInstance instance = instances.get(id);
+            instance.heartBeat(address);//saves address if unknown
+            return instances.get(id);
         }
         // create new (list detection)
         return addInstance(address, id, SOURCE_RECEIVED_LIST);
@@ -229,66 +217,37 @@ class InstanceManager {
             // ping from self, ignore
             return;
         }
-        if (instances.containsKey(address) && id == instances.get(address).id) {
-            instances.get(address).heartBeat();
+        if (instances.containsKey(id)) {
+            instances.get(id).heartBeat(address);//also adds the address if unknown
         } else {
             addInstance(address, id, receivedByMulticast ? SOURCE_MULTICAST_HEARTBEAT : SOURCE_UNICAST_HEARTBEAT);
         }
     }
 
-    synchronized private LXCInstance addInstance(InetAddress address, int id, String source) {
-        // try to merge with existing:
-        for (LXCInstance inst : instances.values()) {
-            if (inst.id == id) {
-                inst.addAddress(address);
-                instances.put(address, inst);
-                return inst;
-            }
+    synchronized private LXCInstance addInstance(final InetAddress address, final int id, String source) {
+        if (instances.containsKey(id)) {
+            LXCInstance instance = instances.get(id);
+            instance.heartBeat(address);
+            return instance;
         }
         // create new:
-        LXCInstance newremote = new LXCInstance(address, id);
-        // check for override:
-        if (instances.containsKey(address)) {
-            // delete first
-            System.out.println("Overriding old instance at " + address + " " + id + " (detected via: " + source + ")");
-            removeAddress(address);
-        }
-        instances.put(address, newremote);
+        LXCInstance newRemote = new LXCInstance(address, id);
+        instances.put(id, newRemote);
         System.out.println("New Instance at " + address + " id: " + id + " (detected via: " + source + ")");
         // Send a file list to this new instance
-        listener.instanceAdded(newremote);
-        return newremote;
-    }
-
-    /**
-     * Removes the instance known by the given address, but preserves the instance itself, if it is still known under other valid addresses.
-     *
-     * @param adr the overridden address
-     */
-    private void removeAddress(InetAddress adr) {
-        LXCInstance instance = instances.get(adr);
-        int instCount = 0;
-        for (LXCInstance other : instances.values()) {
-            if (other.equals(instance)) {
-                // Still present!
-                instCount++;
-            }
-        }
-        if (instCount <= 1) {
-            // the only known address was removed - kill it
-            removeInstance(instance.id);
-        }
+        listener.instanceAdded(newRemote);
+        return newRemote;
     }
 
     /**
      * Removes the instance with the given id.
      */
     synchronized private void removeInstance(int id) {
-        System.out.println("Instance " + id + " removed");
         Iterator<LXCInstance> iter = instances.values().iterator();
         while (iter.hasNext()) {
             LXCInstance inst = iter.next();
             if (inst.id == id) {
+                System.out.println("Instance " + id + " removed");
                 iter.remove();
                 listener.instanceRemoved(inst);
                 break;
