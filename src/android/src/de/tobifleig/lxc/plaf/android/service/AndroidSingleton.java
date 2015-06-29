@@ -119,7 +119,6 @@ public class AndroidSingleton {
         if (running) {
             running = false;
             guiListener = null;
-            activity.stopService(new Intent(activity, de.tobifleig.lxc.plaf.android.service.LXCService.class));
         }
     }
 

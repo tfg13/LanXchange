@@ -84,8 +84,10 @@ public interface GuiListener {
      * Otherwise, the parameter askUserOnTransfer configures the behaviour when there are still transfers running.
      * If true, the gui is called to display a dialog with abort and quit anyway.
      * If false the user will not be asked and LXC will never shut down with transfers running.
+     *
+     * @param block if true, method blocks until core shutdown is complete
      */
-    public boolean shutdown(boolean force, boolean askUserOnTransfer);
+    public boolean shutdown(boolean force, boolean askUserOnTransfer, boolean block);
 
     /**
      * The user changed important settings.

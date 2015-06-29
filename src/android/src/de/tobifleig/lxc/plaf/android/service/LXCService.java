@@ -173,12 +173,13 @@ public class LXCService extends Service implements Platform {
                     }
 
                     @Override
-                    public boolean shutdown(boolean force, boolean askUserOnTransfer) {
-                        boolean superResult = super.shutdown(force, askUserOnTransfer);
+                    public boolean shutdown(boolean force, boolean askUserOnTransfer, boolean block) {
+                        boolean superResult = super.shutdown(force, askUserOnTransfer, block);
                         // need to catch this and stop our threads
                         if (superResult) {
                             stopTimer();
                             timer.cancel();
+                            stopSelf();
                         }
                         return superResult;
                     }
@@ -243,7 +244,7 @@ public class LXCService extends Service implements Platform {
 
             @Override
             public void run() {
-                if (listener.shutdown(false, false)) {
+                if (listener.shutdown(false, false, true)) {
                     AndroidSingleton.serviceStopping();
                     timer.cancel();
                     stopSelf();

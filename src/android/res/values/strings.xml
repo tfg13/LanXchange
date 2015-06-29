@@ -34,6 +34,8 @@
 	<string name="snackbar_undoremovelocal_action">Undo</string>
     <string name="notification_running_title">LanXchange running</string>
     <string name="notification_running_text">Tap to return to LanXchange</string>
+	<string name="notification_quitting_title">LanXchange quitting</string>
+	<string name="notification_quitting_text">Just a sec...</string>
     <string name="title_activity_help">Help</string>
     <string name="title_activity_about">About</string>
     <string name="title_activity_pcversion">PC version</string>

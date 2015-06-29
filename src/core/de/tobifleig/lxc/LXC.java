@@ -224,14 +224,25 @@ public class LXC {
             }
 
             @Override
-            public boolean shutdown(boolean force, boolean askUserOnTransfer) {
+            public boolean shutdown(boolean force, boolean askUserOnTransfer, boolean block) {
                 if (!force && files.transferRunning()) {
                     // always abort when askUser is false
                     if (!askUserOnTransfer || !gui.confirmCloseWithTransfersRunning()) {
                         return false;
                     }
                 }
-                LXC.this.shutdown();
+                if (block) {
+                    // synchronous
+                    LXC.this.shutdown();
+                } else {
+                    // asynchronous
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            LXC.this.shutdown();
+                        }
+                    }, "t_shutdown_helper").start();
+                }
                 return true;
             }
 
