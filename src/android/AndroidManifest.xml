@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="de.tobifleig.lxc"
-          android:versionCode="158"
-          android:versionName="v1.3">
+          android:versionCode="159"
+          android:versionName="v1.31">
 
     <uses-sdk
             android:minSdkVersion="14"
