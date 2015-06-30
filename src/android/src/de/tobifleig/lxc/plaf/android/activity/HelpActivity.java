@@ -21,13 +21,7 @@
 package de.tobifleig.lxc.plaf.android.activity;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import de.tobifleig.lxc.R;
-import de.tobifleig.lxc.plaf.android.ui.HelpElement;
 
 public class HelpActivity extends KeepServiceRunningActivity {
 
@@ -37,8 +31,6 @@ public class HelpActivity extends KeepServiceRunningActivity {
         // load layout
         setContentView(R.layout.activity_help);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        LayoutInflater inflater = getLayoutInflater();
     }
 
 }

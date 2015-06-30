@@ -22,9 +22,7 @@ package de.tobifleig.lxc.plaf.android.service;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.plaf.android.activity.AndroidPlatform;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
@@ -34,7 +32,6 @@ public class AndroidSingleton {
 
     private static boolean running = false;
     private static AndroidPlatform activity;
-    private static AndroidSingleton singleton;
     private static AndroidGuiListener guiListener;
     private static GuiInterfaceBridge genericBridge = new GuiInterfaceBridge() {
 
@@ -58,13 +55,6 @@ public class AndroidSingleton {
     private static List<VirtualFile> quickShare;
 
     private AndroidSingleton() {
-    }
-
-    public AndroidSingleton getSingleton() {
-        if (singleton == null) {
-            singleton = new AndroidSingleton();
-        }
-        return singleton;
     }
 
     /**
@@ -111,11 +101,9 @@ public class AndroidSingleton {
 
     /**
      * Call this to stop the LXC service.
-     * 
-     * @param activity
-     *            the main activity
+     *
      */
-    public static void onRealDestroy(Activity activity) {
+    public static void onRealDestroy() {
         if (running) {
             running = false;
             guiListener = null;

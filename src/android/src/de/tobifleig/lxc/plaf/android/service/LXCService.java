@@ -225,7 +225,7 @@ public class LXCService extends Service implements Platform {
      * Call this after componentsVisible has changed
      */
     private void triggerTimer() {
-        if (componentsVisible[0] == false && componentsVisible[1] == false) {
+        if (!componentsVisible[0] && !componentsVisible[1]) {
             reScheduleTimer();
         } else {
             stopTimer();

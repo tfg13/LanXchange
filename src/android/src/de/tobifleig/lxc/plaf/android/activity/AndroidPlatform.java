@@ -144,7 +144,7 @@ public class AndroidPlatform extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         guiListener.shutdown(true, true, false);
-                        AndroidSingleton.onRealDestroy(AndroidPlatform.this);
+                        AndroidSingleton.onRealDestroy();
                         finish();
                     }
                 });
@@ -209,7 +209,7 @@ public class AndroidPlatform extends AppCompatActivity {
         switch (item.getItemId()) {
         case R.id.quit:
             if (guiListener.shutdown(false, true, false)) {
-                AndroidSingleton.onRealDestroy(AndroidPlatform.this);
+                AndroidSingleton.onRealDestroy();
                 finish();
             }
             return true;
@@ -502,7 +502,7 @@ public class AndroidPlatform extends AppCompatActivity {
                         dialog.cancel();
                         // critical, force exit
                         guiListener.shutdown(true, false, false);
-                        AndroidSingleton.onRealDestroy(AndroidPlatform.this);
+                        AndroidSingleton.onRealDestroy();
                         finish();
                     }
                 });
