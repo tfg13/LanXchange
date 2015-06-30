@@ -64,7 +64,7 @@ public final class LXCUpdater {
     /**
      * Files, that should no longer be found in the users installation and therefore must be deleted.
      */
-    private static final String[] oldFiles = new String[]{"lxc_debug.exe", "LXC.ico", "Ubuntu-R.ttf", "lxc_updates.pub"};
+    private static final String[] oldFiles = new String[]{"lxc_debug.exe", "LXC.ico", "Ubuntu-R.ttf", "lxc_updates.pub", "font_license.txt"};
 
     /**
      * Checks for updates, promts the user and installs them.

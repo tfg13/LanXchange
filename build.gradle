@@ -108,7 +108,7 @@ task packDesktop(type: Zip) {
     from (".")
     include ("img/*.png")
     include ("COPYING")
-    include ("font_license.txt")
+    include ("3rd_party_licenses/font_license.txt")
     include ("lxc")
     include ("lxc.exe")
     
