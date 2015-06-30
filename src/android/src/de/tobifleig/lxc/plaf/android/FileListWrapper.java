@@ -53,7 +53,6 @@ public class FileListWrapper {
 
     /**
      * Creates a new wrapper for the given list.
-     * @param list
      */
     public FileListWrapper(List<LXCFile> list) {
         this.list = list;
@@ -67,6 +66,7 @@ public class FileListWrapper {
      */
     public void listChanged() {
         if (lastHashCode != list.hashCode()) {
+            lastHashCode = list.hashCode();
             recompute();
         }
     }
@@ -101,5 +101,4 @@ public class FileListWrapper {
             }
         }
     }
-
 }
