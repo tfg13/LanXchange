@@ -2,11 +2,6 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/quit"
-        app:showAsAction="never"
-        android:title="@string/menu_stop"/>
-
-    <item
         android:id="@+id/help"
         app:showAsAction="never"
         android:title="@string/menu_help"/>
@@ -21,4 +16,8 @@
         app:showAsAction="never"
         android:title="@string/menu_pcversion"/>
 
+    <item
+        android:id="@+id/quit"
+        app:showAsAction="never"
+        android:title="@string/menu_stop"/>
 </menu>
