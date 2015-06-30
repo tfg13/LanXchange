@@ -30,16 +30,26 @@ import de.tobifleig.lxc.plaf.ProgressIndicator;
 public abstract class FilterProgressIndicator implements ProgressIndicator {
 
     /**
+     * After how much ms the view is updated.
+     */
+    public static final int UPDATE_MS = 1000;
+
+    /**
      * Holds the last progress value received via update().
      */
     protected int lastProgress = -1;
 
     /**
+     * The last time the view was updated.
+     */
+    protected long lastUpdateTime;
+
+    /**
      * Creates a new FilterProgressIndicator with the given initial value.
-     * @param lastProgress
      */
     public FilterProgressIndicator(int lastProgress) {
         this.lastProgress = lastProgress;
+        lastUpdateTime = System.currentTimeMillis();
     }
 
 
@@ -48,6 +58,12 @@ public abstract class FilterProgressIndicator implements ProgressIndicator {
         if (lastProgress != percentage) {
             lastProgress = percentage;
             updateGui();
+            lastUpdateTime = System.currentTimeMillis();
+        } else {
+            if (System.currentTimeMillis() - lastUpdateTime > UPDATE_MS) {
+                updateGui();
+                lastUpdateTime = System.currentTimeMillis();
+            }
         }
     }
 

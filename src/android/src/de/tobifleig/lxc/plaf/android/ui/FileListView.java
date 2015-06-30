@@ -285,7 +285,7 @@ public class FileListView extends RecyclerView {
                                 public void run() {
                                     int progress = job.getTrans().getProgress();
                                     cachedProgressBar.setProgress(progress);
-                                    cachedFileInfo.setText(getResources().getString(R.string.ui_downloading) + " " + progress + "%");
+                                    cachedFileInfo.setText(getResources().getString(R.string.ui_downloading) + " " + progress + "%" + " - " + LXCFile.getFormattedSize(job.getTrans().getCurrentSpeed()) + "/s");
                                 }
                             });
                         }
