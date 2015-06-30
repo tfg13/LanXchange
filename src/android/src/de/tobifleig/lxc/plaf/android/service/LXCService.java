@@ -245,6 +245,7 @@ public class LXCService extends Service implements Platform {
             @Override
             public void run() {
                 if (listener.shutdown(false, false, true)) {
+                    System.out.println("LanXchange auto-quits now to preserve your battery");
                     AndroidSingleton.serviceStopping();
                     timer.cancel();
                     stopSelf();
