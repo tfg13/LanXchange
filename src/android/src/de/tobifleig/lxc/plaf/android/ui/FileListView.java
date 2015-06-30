@@ -294,6 +294,9 @@ public class FileListView extends RecyclerView {
                     // done
                     cachedFileInfo.setText(R.string.ui_available);
                     cachedProgressBar.setVisibility(View.INVISIBLE);
+                } else {
+                    // file status normal
+                    cachedProgressBar.setVisibility(View.INVISIBLE);
                 }
             }
         }
