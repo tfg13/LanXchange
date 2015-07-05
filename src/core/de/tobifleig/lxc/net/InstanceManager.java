@@ -198,7 +198,7 @@ class InstanceManager {
     synchronized LXCInstance getOrCreateInstance(InetAddress address, int id) {
         if (instances.containsKey(id)) {
             LXCInstance instance = instances.get(id);
-            instance.heartBeat(address);//saves address if unknown
+            instance.heartBeat(address, SOURCE_RECEIVED_LIST);//saves address if unknown
             return instances.get(id);
         }
         // create new (list detection)
@@ -212,22 +212,23 @@ class InstanceManager {
      * @param address the address from which the signal was received
      * @param id the id of the remote instance
      */
-    synchronized private void gotHeartbeat(InetAddress address, int id, boolean receivedByMulticast) {
+    synchronized private void gotHeartbeat(InetAddress address, int id, boolean receivedViaMulticast) {
         if (id == LXCInstance.local.id) {
             // ping from self, ignore
             return;
         }
+        String source = receivedViaMulticast ? SOURCE_MULTICAST_HEARTBEAT : SOURCE_UNICAST_HEARTBEAT;
         if (instances.containsKey(id)) {
-            instances.get(id).heartBeat(address);//also adds the address if unknown
+            instances.get(id).heartBeat(address, source);//also adds the address if unknown
         } else {
-            addInstance(address, id, receivedByMulticast ? SOURCE_MULTICAST_HEARTBEAT : SOURCE_UNICAST_HEARTBEAT);
+            addInstance(address, id, source);
         }
     }
 
     synchronized private LXCInstance addInstance(final InetAddress address, final int id, String source) {
         if (instances.containsKey(id)) {
             LXCInstance instance = instances.get(id);
-            instance.heartBeat(address);
+            instance.heartBeat(address, source);
             return instance;
         }
         // create new:
