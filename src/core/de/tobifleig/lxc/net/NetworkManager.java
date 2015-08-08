@@ -48,6 +48,8 @@ import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Manages networking.
@@ -226,7 +228,11 @@ public class NetworkManager {
             server.setPerformancePreferences(0, 0, 1);
             server.setSendBufferSize(212992);
             server.setReceiveBufferSize(212992);
-            server.connect(new InetSocketAddress(file.getInstance().getDownloadAddress(), 27719));
+            if (!connectToInstance(server, file.getInstance(), 27719)) {
+                System.out.println("Download aborted. (See exceptions above)");
+                file.setLocked(false);
+                return false;
+            }
             ObjectOutputStream output = new ObjectOutputStream(new BufferedOutputStream(server.getOutputStream()));
             output.flush();
             ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(server.getInputStream()));
@@ -329,14 +335,53 @@ public class NetworkManager {
         try {
             Socket sock = new Socket();
             sock.setSoTimeout(2000);
-            sock.connect(new InetSocketAddress(dest.getDownloadAddress(), 27717));
-            ObjectOutputStream outp = new ObjectOutputStream(sock.getOutputStream());
-            outp.writeObject(list);
-            outp.flush();
-            outp.close();
-            sock.close();
+            if (connectToInstance(sock, dest, 27717)) {
+                ObjectOutputStream outp = new ObjectOutputStream(sock.getOutputStream());
+                outp.writeObject(list);
+                outp.flush();
+                outp.close();
+                sock.close();
+            } // no else, errors are reported by connectToInstance
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    /**
+     * Tries connecting the socket to the given instance, using all known addresses.
+     *
+     * @param socket the socket to connect
+     * @param instance the instance to connect to
+     * @param port the port to connect to
+     * @return true iff successful
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    private boolean connectToInstance(Socket socket, LXCInstance instance, int port) {
+        // holds the exceptions encountered during the connection attempt.
+        // only printed to logfile if *all* attempts fail
+        Map<InetAddress, Exception> exceptions = new HashMap<InetAddress, Exception>();
+        Iterator<InetAddress> iter = instance.getAddresses();
+        boolean connected = false;
+        while (!connected && iter.hasNext()) {
+            InetAddress address = iter.next();
+            try {
+                socket.connect(new InetSocketAddress(address, port));
+                connected = true;
+            } catch (IOException ex) {
+                System.out.println("Attempt to connect to " + address + " failed.");
+                exceptions.put(address, ex);
+            }
+        }
+
+        // print debug if not successful
+        if (!connected) {
+            System.out.println("All connection attempts to " + instance + "failed. Detailed errors for all addresses:");
+            for (InetAddress address : exceptions.keySet()) {
+                System.out.println("CON to " + address + " resulted in:");
+                exceptions.get(address).printStackTrace();
+            }
+        }
+
+        return connected;
     }
 }

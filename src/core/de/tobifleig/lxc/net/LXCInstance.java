@@ -22,6 +22,7 @@ package de.tobifleig.lxc.net;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -88,16 +89,15 @@ public class LXCInstance {
     }
 
     /**
-     * Returns an address of this LXCInstance useable for downloads.
+     * Returns an Iterator over all known addresses of this instance.
      *
-     * @return an address of this LXCInstance
+     * @return all addresses of this instance
      */
-    InetAddress getDownloadAddress() {
+    Iterator<InetAddress> getAddresses() {
         /*
-         * It may be a GoodIdea(tm) to add some code here that picks the best address, not just the first.
-         * Example: If a remote instance is reachable by WLAN and LAN, you want the download to happen over LAN.
+         * It would be nice if we could somehow sort the interfaces here (like: prefer LAN over WiFi)
          */
-        return addresses.get(0);
+        return addresses.iterator();
     }
 
     /**

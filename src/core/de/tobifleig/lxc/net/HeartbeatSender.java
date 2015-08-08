@@ -232,7 +232,7 @@ class HeartbeatSender {
         }
         // prevent timeouts on android
         for (LXCInstance instance : remoteInstances) {
-            direct(data, instance.getDownloadAddress());
+            direct(data, instance.getAddresses().next());
         }
     }
 
