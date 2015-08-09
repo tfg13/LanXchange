@@ -101,17 +101,6 @@ public class LXCInstance {
     }
 
     /**
-     * Adds the given address to the list of known addresses.
-     *
-     * @param address the new address
-     */
-    void addAddress(InetAddress address) {
-        if (!addresses.contains(address)) {
-            addresses.add(address);
-        }
-    }
-
-    /**
      * Returns true, if this LXCInstance represents the local instance.
      *
      * @return true, if local
