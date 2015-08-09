@@ -34,17 +34,17 @@ import java.net.Socket;
 public abstract class Transceiver implements Runnable {
 
     /**
-     * The LXCFile that is to be transfered.
+     * The LXCFile that is to be transferred.
      */
     protected LXCFile file;
     /**
-     * The total number of bytes to be transfered.
+     * The total number of bytes to be transferred.
      */
     protected long totalBytes;
     /**
-     * The current number of transfered bytes.
+     * The current number of transferred bytes.
      */
-    protected long transferedBytes = 0;
+    protected long transferredBytes = 0;
     /**
      * Which protocol version to use.
      */
@@ -102,7 +102,7 @@ public abstract class Transceiver implements Runnable {
      * @return the current progress of this filetransfer in percent
      */
     public int getProgress() {
-        return (int) (100f * transferedBytes / totalBytes);
+        return (int) (100f * transferredBytes / totalBytes);
     }
 
     /**
@@ -147,7 +147,7 @@ public abstract class Transceiver implements Runnable {
         long since = System.currentTimeMillis() - begin;
         // calc bytes/sec
         if (since / 1000 != 0) {
-            lastSpeeds[nextArrayPos] = (int) (transferedBytes / (since / 1000));
+            lastSpeeds[nextArrayPos] = (int) (transferredBytes / (since / 1000));
         } else {
             lastSpeeds[nextArrayPos] = 0;
         }
