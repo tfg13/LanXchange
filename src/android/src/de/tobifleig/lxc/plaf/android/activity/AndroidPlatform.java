@@ -87,6 +87,8 @@ public class AndroidPlatform extends AppCompatActivity {
                 // unable to access file, inform user
                 handleShareError(launchIntent);
             }
+            // disarm intent to prevent sharing the same file twice on screen rotate
+            launchIntent.setAction(null);
         }
 
         // load layout
