@@ -48,6 +48,7 @@ public class MIMETypeGuesser {
         hardcodedMIMETypes.put(".tar.bz2", "application/x-bzip2");
         hardcodedMIMETypes.put(".tar.xz", "application/x-xz");
         hardcodedMIMETypes.put(".log", "text/plain");// a bit of a wild guess, bit I use this quite often :)
+        hardcodedMIMETypes.put(".mkv", "video/x-matroska");
     }
 
     /**
