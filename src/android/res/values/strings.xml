@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">LanXchange</string>
-    <string name="hello_world">Android-Version coming soon!</string>
     <string name="title_activity_lxc">LanXchange</string>
     <string name="nofiles">Files shared by LanXchange on other devices automatically appear here.\nTap + to start sharing</string>
     <string name="menu_stop">Stop LanXchange</string>
@@ -90,7 +89,7 @@
 	<string name="pcversion_header">Get the PC version at</string>
 	<string name="pcversion_text">lanxchange.com</string>
 	<string name="pcversion_url">http://lanxchange.com/</string>
-	<string name="dialog_closewithrunning_title">Tranfers running in backgroud!</string>
+	<string name="dialog_closewithrunning_title">Tranfers running in background!</string>
 	<string name="dialog_closewithrunning_text">Stopping now will abort them. Continue anyway?</string>
 	<string name="dialog_closewithrunning_yes">Yes</string>
 	<string name="dialog_closewithrunning_no">No</string>

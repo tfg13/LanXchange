@@ -440,7 +440,7 @@ public class LXCPanel extends JPanel {
                 String versionText = LXC.versionString + "   (" + LXC.versionId + ")";
                 g2.drawString(versionText, this.getWidth() - mer2.stringWidth(versionText) - 5, this.getHeight() - 18);
                 // legal
-                String legalText = "Copyright  2009-2014  Tobias Fleig  -  All rights reserved";
+                String legalText = "Copyright  2009-2015  Tobias Fleig  -  All rights reserved";
                 g2.drawString(legalText, this.getWidth() - mer2.stringWidth(legalText) - 5, this.getHeight() - 6);
             }
 
