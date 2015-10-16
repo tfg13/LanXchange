@@ -24,8 +24,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -65,9 +71,24 @@ import de.tobifleig.lxc.plaf.android.ui.FileListView;
  */
 public class AndroidPlatform extends AppCompatActivity {
 
-    private static final int RETURNCODE_FILEINTENT = 12345;
+    private static final int RETURNCODE_FILEINTENT = 42;
+    private static final int RETURNCODE_PERMISSION_PROMPT_STORAGE = 43;
     private AndroidGuiListener guiListener;
     private GuiInterfaceBridge guiBridge;
+
+    /**
+     * Holds the quickshare-List until the user answered the storage permission prompt.
+     */
+    private List<VirtualFile> permissionPromptQuickshare;
+    /**
+     * Holds the requested file to download until the user answered the storage permission prompt.
+     */
+    private LXCFile permissionPromptDownloadFile;
+    /**
+     * True, if the user tried to share a file when the storate permission prompt fired.
+     */
+    private boolean permissionPromptShareFile;
+
 
     /**
      * The view that displays all shared and available files
@@ -169,18 +190,26 @@ public class AndroidPlatform extends AppCompatActivity {
         findViewById(R.id.fab_add).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent testIntent = new Intent();
-                testIntent.setAction(Intent.ACTION_GET_CONTENT);
-                testIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                if (android.os.Build.VERSION.SDK_INT >= 18) {
-                    testIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                permissionPromptShareFile = true;
+                if (verifyStoragePermission()) {
+                    permissionPromptShareFile = false;
+                    shareFile();
                 }
-                testIntent.setType("*/*");
-                startActivityForResult(testIntent, RETURNCODE_FILEINTENT);
             }
         });
 
         AndroidSingleton.onCreateMainActivity(this, guiBridge, quickShare);
+    }
+
+    private void shareFile() {
+        Intent chooseFile = new Intent();
+        chooseFile.setAction(Intent.ACTION_GET_CONTENT);
+        chooseFile.addCategory(Intent.CATEGORY_OPENABLE);
+        if (android.os.Build.VERSION.SDK_INT >= 18) {
+            chooseFile.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
+        chooseFile.setType("*/*");
+        startActivityForResult(chooseFile, RETURNCODE_FILEINTENT);
     }
 
     @Override
@@ -275,10 +304,102 @@ public class AndroidPlatform extends AppCompatActivity {
         if (intent.getAction() != null && !intent.getAction().equals(Intent.ACTION_MAIN)) {
             List<VirtualFile> files = computeInputIntent(intent);
             if (files != null && !files.isEmpty()) {
-                offerFiles(files);
+                permissionPromptQuickshare = files;
+                if (verifyStoragePermission()) {
+                    offerFiles(files);
+                    permissionPromptQuickshare = null;
+                }// otherwise prompt is going up, flow continues in callback
             } else {
                 handleShareError(intent);
             }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == RETURNCODE_PERMISSION_PROMPT_STORAGE) {
+            if (grantResults.length == 0) {
+                // cancelled, try again
+                verifyStoragePermission();
+                return;
+            }
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // continue what the user tried to do when the permission dialog fired
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (permissionPromptQuickshare != null) {
+                            offerFiles(permissionPromptQuickshare);
+                            permissionPromptQuickshare = null;
+                        } else if (permissionPromptDownloadFile != null) {
+                            guiListener.downloadFile(permissionPromptDownloadFile, false);
+                            permissionPromptDownloadFile = null;
+                        } else if (permissionPromptShareFile) {
+                            shareFile();
+                            permissionPromptShareFile = false;
+                        }
+                    }
+                });
+                t.setName("lxc_helper_useraction");
+                t.setDaemon(true);
+                t.start();
+            } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                cancelPermissionPromptAction();
+            }
+        }
+    }
+
+    /**
+     * Cancels the action that resulted in a permission prompt going up
+     */
+    private void cancelPermissionPromptAction() {
+        // cancel action and tell user
+        if (permissionPromptDownloadFile != null) {
+            permissionPromptDownloadFile.setLocked(false);
+            fileListView.updateGui();
+        }
+        permissionPromptDownloadFile = null;
+        permissionPromptQuickshare = null;
+        permissionPromptShareFile = false;
+        Snackbar.make(findViewById(android.R.id.content), R.string.snackbar_action_cancelled_permission_storage_missing, Snackbar.LENGTH_LONG).show();
+    }
+
+    private boolean verifyStoragePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // user denied this before, explain it
+                final AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
+                builder.setMessage(R.string.permissions_explain_storage_text);
+                builder.setPositiveButton(R.string.permissions_explain_storage_permdeny, new OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        cancelPermissionPromptAction();
+                    }
+                });
+                builder.setNegativeButton(R.string.permissions_explain_storage_retry, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // re-request the permission
+                        ActivityCompat.requestPermissions(AndroidPlatform.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RETURNCODE_PERMISSION_PROMPT_STORAGE);
+                    }
+                });
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+            } else {
+                // request it
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RETURNCODE_PERMISSION_PROMPT_STORAGE);
+                return false;
+            }
+            // permission not available now, but may be in the future
+            return false;
         }
     }
 
@@ -452,14 +573,6 @@ public class AndroidPlatform extends AppCompatActivity {
             // seems to be useable right away
             file = new RealFile(new File(uri.getPath()));
         }
-
-        // one last trick
-        if (file == null) {
-            File resolvedFile = new File(uri.getPath());
-            if (resolvedFile.exists()) {
-                file = new RealFile(resolvedFile);
-            }
-        }
         return file;
     }
 
@@ -471,9 +584,29 @@ public class AndroidPlatform extends AppCompatActivity {
      * @param guiListener
      *            out future GuiListener
      */
-    public void setGuiListener(AndroidGuiListener guiListener) {
-        fileListView.setGuiListener(guiListener);
+    public void setGuiListener(final AndroidGuiListener guiListener) {
         this.guiListener = guiListener;
+        // special gui listener for filelistview, catches download call to check permissions first
+        fileListView.setGuiListener(new AndroidGuiListener(guiListener) {
+            @Override
+            public void guiHidden(int depth) {
+                guiListener.guiHidden(depth);
+            }
+
+            @Override
+            public void guiVisible(int depth) {
+                guiListener.guiVisible(depth);
+            }
+
+            @Override
+            public void downloadFile(LXCFile file, boolean chooseTarget) {
+                permissionPromptDownloadFile = file;
+                if (verifyStoragePermission()) {
+                    guiListener.downloadFile(file, chooseTarget);
+                    permissionPromptDownloadFile = null;
+                } // otherwise prompt is going up, flow continues in callback
+            }
+        });
         fileListView.updateGui();
     }
 
@@ -484,7 +617,11 @@ public class AndroidPlatform extends AppCompatActivity {
      * @param uris a list of Uris to share
      */
     public void quickShare(List<VirtualFile> uris) {
-        offerFiles(uris);
+        permissionPromptQuickshare = uris;
+        if (verifyStoragePermission()) {
+            offerFiles(uris);
+            permissionPromptQuickshare = null;
+        } // otherwise prompt is going up, flow continues in callback
     }
 
     /**

@@ -92,4 +92,9 @@
 	<string name="accessibility_removeLocal">remove this file</string>
 	<string name="help_android_selector_nofolder">I cannot select directories!</string>
     <string name="help_android_selector_nofolder_text">If you tap + but cannot select directories, try the other way around: Use a file-browser to select the folder and choose \"Share with\". LanXchange should be one of the options.</string>
+	<string name="permissions_explain_storage">Storage access denied</string>
+	<string name="permissions_explain_storage_text">To share and download files, you must allow LanXchange to access the file storage. Otherwise LanXchange will not work properly. Are you sure you want to deny storage access?</string>
+	<string name="permissions_explain_storage_retry">re-try</string>
+    <string name="permissions_explain_storage_permdeny">I\'m sure</string>
+    <string name="snackbar_action_cancelled_permission_storage_missing">LanXchange was denied access to file storage</string>
 </resources>
