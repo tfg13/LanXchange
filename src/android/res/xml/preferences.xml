@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Downloads">
+        <CheckBoxPreference
+            android:key="pref_registerDownload"
+            android:title="@string/pref_registerdownloads_title"
+            android:summary="@string/pref_registerdownloads_text"
+            android:defaultValue="true"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
@@ -53,6 +54,16 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name="de.tobifleig.lxc.plaf.android.activity.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"/>
+        </activity>
 
         <activity
                 android:name="de.tobifleig.lxc.plaf.android.activity.HelpActivity"

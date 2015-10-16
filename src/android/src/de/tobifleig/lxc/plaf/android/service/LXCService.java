@@ -21,10 +21,12 @@
 package de.tobifleig.lxc.plaf.android.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.DownloadManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -37,13 +39,16 @@ import android.net.wifi.WifiManager.WifiLock;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
+import de.tobifleig.lxc.plaf.android.MIMETypeGuesser;
 import de.tobifleig.lxc.plaf.android.activity.AndroidPlatform;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
 
@@ -262,24 +267,10 @@ public class LXCService extends Service implements Platform {
 
     @Override
     public void readConfiguration(String[] args) {
-        /*SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-		Map<String, ?> stored = prefs.getAll();
-		for (String key : stored.keySet()) {
-			Object value = stored.get(key);
-			Configuration.putStringSetting(key, value.toString());
-		}*/
     }
 
     @Override
     public void writeConfiguration() {
-        /*SharedPreferences.Editor prefs = getPreferences(MODE_PRIVATE).edit();
-		prefs.clear();
-		Iterator<String> keyIter = Configuration.getKeyIterator();
-		while (keyIter.hasNext()) {
-			String key = keyIter.next();
-			prefs.putString(key, Configuration.getStringSetting(key));
-		}
-		prefs.commit();*/
     }
 
     @Override
@@ -301,15 +292,30 @@ public class LXCService extends Service implements Platform {
 
     @Override
     public void downloadComplete(LXCFile file, File targetFolder) {
-        // Tell the media scanner about the new file so that it is
-        // immediately available to the user.
+        // Notify system download manager about new files (if user requested this via settings).
+        // This also triggers the media scanner.
+        // Since the download manager does not support dirs, those are
+        // sent to the media scanner manually.
         List<VirtualFile> baseFiles = file.getFiles();
-        String[] paths = new String[baseFiles.size()];
-        for (int i = 0; i < paths.length; i++) {
-            paths[i] = new File(targetFolder, baseFiles.get(i).getTransferPath()).getAbsolutePath();
+        ArrayList<String> directoryPaths = new ArrayList<String>();
+        DownloadManager downloadManager = (DownloadManager) getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
+        boolean registerInDownloadManager = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("pref_registerDownload", true);
+        for (VirtualFile virtualFile : baseFiles) {
+            if (registerInDownloadManager && !virtualFile.isDirectory()) {
+                downloadManager.addCompletedDownload(virtualFile.getName(),
+                        getResources().getString(R.string.ext_registerdownload_comment), true,
+                        MIMETypeGuesser.guessMIMEType((RealFile) virtualFile, getApplicationContext()),
+                        new File(targetFolder, virtualFile.getTransferPath()).getAbsolutePath(),
+                        virtualFile.size(), false);
+            } else {
+                directoryPaths.add(new File(targetFolder, virtualFile.getTransferPath()).getAbsolutePath());
+            }
         }
 
-        MediaScannerConnection.scanFile(this, paths, null, null);
+        // manually scan everything that was not registered with the download manager
+        if (!directoryPaths.isEmpty()) {
+            MediaScannerConnection.scanFile(this, directoryPaths.toArray(new String[directoryPaths.size()]), null, null);
+        }
     }
 
     @Override

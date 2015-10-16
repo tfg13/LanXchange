@@ -3,7 +3,6 @@
 
     <string name="app_name">LanXchange</string>
     <string name="hello_world">Android-Version coming soon!</string>
-    <string name="menu_settings">Settings</string>
     <string name="title_activity_lxc">LanXchange</string>
     <string name="nofiles">Files shared by LanXchange on other devices automatically appear here.\nTap + to start sharing</string>
     <string name="menu_stop">Stop LanXchange</string>
@@ -11,6 +10,7 @@
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
     <string name="menu_pcversion">PC version</string>
+	<string name="menu_settings">Settings</string>
     <string name="ui_yourfiles">Your files</string>
     <string name="ui_sharedwithyou">Shared with you</string>
     <string name="ui_taptoload">Tap to download</string>
@@ -34,6 +34,7 @@
 	<string name="snackbar_undoremovelocal_action">Undo</string>
     <string name="notification_running_title">LanXchange running</string>
     <string name="notification_running_text">Tap to return to LanXchange</string>
+    <string name="title_activity_settings">Settings</string>
     <string name="title_activity_help">Help</string>
     <string name="title_activity_about">About</string>
     <string name="title_activity_pcversion">PC version</string>
@@ -97,4 +98,7 @@
 	<string name="permissions_explain_storage_retry">re-try</string>
     <string name="permissions_explain_storage_permdeny">I\'m sure</string>
     <string name="snackbar_action_cancelled_permission_storage_missing">LanXchange was denied access to file storage</string>
+    <string name="pref_registerdownloads_title">Show received files in Downloads app</string>
+    <string name="pref_registerdownloads_text">Tell Android about completed downloads, so the files appear in the Downloads app. Does not work with incoming directories.</string>
+    <string name="ext_registerdownload_comment">Downloaded by LanXchange</string>
 </resources>

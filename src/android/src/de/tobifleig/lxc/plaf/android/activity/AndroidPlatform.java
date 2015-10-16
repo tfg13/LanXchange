@@ -244,6 +244,12 @@ public class AndroidPlatform extends AppCompatActivity {
                 finish();
             }
             return true;
+        case R.id.settings:
+            // display settings
+            Intent showSettings = new Intent();
+            showSettings.setClass(getBaseContext(), SettingsActivity.class);
+            startActivity(showSettings);
+            return true;
         case R.id.help:
             // display help
             Intent showHelp = new Intent();

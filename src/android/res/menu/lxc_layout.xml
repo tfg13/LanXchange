@@ -2,6 +2,11 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/settings"
+        app:showAsAction="never"
+        android:title="@string/menu_settings"/>
+
+    <item
         android:id="@+id/help"
         app:showAsAction="never"
         android:title="@string/menu_help"/>
