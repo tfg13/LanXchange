@@ -17,10 +17,15 @@
     <string name="ui_connecting">Connecting</string>
     <string name="ui_downloading">Downloading: </string>
     <string name="ui_available">Tap to open</string>
-    <string name="error_cantopen_title">Unknown filetype</string>
-    <string name="error_cantopen_text">No app found that can open this file (the download was successful, though). If you think this is wrong and you have a matching app, try opening the file there. If that works, send me a mail!</string>
+    <string name="error_cantopen_title_listempty">No matching app found</string>
+    <string name="error_cantopen_text_listempty">No app was found that can open this file. If you think this is wrong and you have a matching app, try opening the file there. If that works, send me a mail!</string>
+    <string name="error_cantopen_title_unknowntype">Unknown filetype</string>
+    <string name="error_cantopen_text_unknowntype">This file cannot be opened directly from LanXchange, because the filetype is unknown. Do you want to choose the correct app yourself?</string>
     <string name="error_cantopen_ok">OK</string>
+    <string name="error_cantopen_cancel">Cancel</string>
+    <string name="error_cantopen_choose">Choose</string>
     <string name="error_cantopen_mail">Mail</string>
+    <string name="error_cantopen_complain">Complain</string>
     <string name="ui_holdtoremove">Hold to remove</string>
     <string name="error_sdcard_title">Cannot write files</string>
     <string name="error_sdcard_text">LanXchange cannot access your internal device storage (where files are downloaded to). This means your device in its current state cannot be used to transfer files with LanXchange. This should obviously never be the case. Please write me at mail@lanxchange.com so I can fix this. LanXchange will now shut down.</string>

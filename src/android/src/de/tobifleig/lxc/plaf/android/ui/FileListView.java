@@ -150,7 +150,7 @@ public class FileListView extends RecyclerView {
                             t.start();
                         } else if (!currentFile.isLocal() && currentFile.isAvailable()) {
                             // open currentFile
-                            Intent openIntent = new Intent();
+                            final Intent openIntent = new Intent();
                             openIntent.setAction(Intent.ACTION_VIEW);
                             // Hack: Local files are RealFiles
                             final RealFile realFile = (RealFile) currentFile.getFiles().get(0);
@@ -158,11 +158,52 @@ public class FileListView extends RecyclerView {
                             openIntent.setDataAndType(fileUri, MIMETypeGuesser.guessMIMEType(realFile, getContext()));
                             // check if intent can be processed
                             List<ResolveInfo> list = getContext().getPackageManager().queryIntentActivities(openIntent, 0);
-                            if (list.isEmpty()) {
-                                // cannot be opened
+
+                            if (!list.isEmpty() && openIntent.getType().equals(MIMETypeGuesser.GENERIC_RESULT) && !realFile.isDirectory()) {
+                                // mimetype could not be determined
+                                // inform user, offer to choose an app anyway, cancel or complain about this
                                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                builder.setTitle(R.string.error_cantopen_title);
-                                builder.setMessage(R.string.error_cantopen_text);
+                                builder.setTitle(R.string.error_cantopen_title_unknowntype);
+                                builder.setMessage(R.string.error_cantopen_text_unknowntype);
+                                builder.setPositiveButton(R.string.error_cantopen_choose, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // still choose app to open this
+                                        getContext().startActivity(openIntent);
+                                    }
+                                });
+                                builder.setNeutralButton(R.string.error_cantopen_complain, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        String uriText = "mailto:" + Uri.encode("mail@lanxchange.com") +
+                                                "?subject=" + Uri.encode("Cannot determine filetype") +
+                                                "&body=" + Uri.encode("This is an automatic mail to the developer of LanXchange.\n" +
+                                                "Feel free to write a bit more and explain what you were doing, or just press send.\n" +
+                                                "\n" +
+                                                "\n" +
+                                                "---------------------------------------\n" +
+                                                "technical info (do not remove this!):\n" +
+                                                "---------------------------------------\n" +
+                                                "unknown mimetype: (" + MIMETypeGuesser.GENERIC_RESULT + ")\n" +
+                                                "path: " + realFile.getBackingFile().getAbsolutePath() + "\n" +
+                                                "name:" + realFile.getName());
+                                        getContext().startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(uriText)));
+                                    }
+                                });
+                                builder.setNegativeButton(R.string.error_cantopen_cancel, new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // do nothing
+                                    }
+                                });
+                                builder.show();
+                            } else if (list.isEmpty()) {
+                                // mimetype was determined, but no suitable app was found
+                                // inform user, offer to complain about this
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                builder.setTitle(R.string.error_cantopen_title_listempty);
+                                builder.setMessage(R.string.error_cantopen_text_listempty);
                                 builder.setPositiveButton(R.string.error_cantopen_ok, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -173,18 +214,23 @@ public class FileListView extends RecyclerView {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         String uriText = "mailto:" + Uri.encode("mail@lanxchange.com") +
-                                                "?subject=" + Uri.encode("Cannot open file") +
-                                                "&body=" + Uri.encode("Hi!\n\nOpening a file failed :(\nPlease help!\n(feel free to write more)\n"
-                                                + "\n---------------------------------------"
-                                                + "\ntechnical info (do not remove this): "
-                                                + "\n---------------------------------------"
-                                                + "\n" + realFile.getBackingFile().getAbsolutePath()
-                                                + "\n" + realFile.getName());
+                                                "?subject=" + Uri.encode("No suitable app found to open file") +
+                                                "&body=" + Uri.encode("This is an automatic mail to the developer of LanXchange.\n" +
+                                                "Feel free to write a bit more and explain what you were doing, or just press send.\n" +
+                                                "\n" +
+                                                "\n" +
+                                                "---------------------------------------\n" +
+                                                "technical info (do not remove this!):\n" +
+                                                "---------------------------------------\n" +
+                                                "no app for: (" + MIMETypeGuesser.GENERIC_RESULT + ")\n" +
+                                                "path: " + realFile.getBackingFile().getAbsolutePath() + "\n" +
+                                                "name:" + realFile.getName());
                                         getContext().startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(uriText)));
                                     }
                                 });
                                 builder.show();
                             } else {
+                                // mime type was either known or this is a directory
                                 getContext().startActivity(openIntent);
                             }
                         }

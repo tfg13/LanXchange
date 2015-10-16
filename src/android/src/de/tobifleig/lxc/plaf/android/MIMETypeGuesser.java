@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class MIMETypeGuesser {
 
-    private final static String GENERIC_RESULT = "application/octet-stream";
+    public final static String GENERIC_RESULT = "*/*";
 
     private static final Map<String, String> hardcodedMIMETypes = new HashMap<String, String>();
 
@@ -67,6 +67,9 @@ public class MIMETypeGuesser {
      * @return a valid MIMEType, "application/octet-stream" if everything fails
      */
     public static String guessMIMEType(RealFile file, Context context) {
+        if (file.isDirectory()) {
+            return GENERIC_RESULT;
+        }
         Uri fileUri = Uri.fromFile(file.getBackingFile());
         String name = file.getName();
 
