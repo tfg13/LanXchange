@@ -480,7 +480,7 @@ public class AndroidPlatform extends AppCompatActivity {
                     OutputStreamWriter writer = new OutputStreamWriter(arrayOutput);
                     writer.write(item.getText().toString());
                     writer.close();
-                    result.add(new InMemoryFile("test.txt", arrayOutput.toByteArray()));
+                    result.add(new InMemoryFile("text.txt", arrayOutput.toByteArray()));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
