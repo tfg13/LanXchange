@@ -69,7 +69,7 @@ import de.tobifleig.lxc.plaf.android.ui.FileListView;
  * 
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class AndroidPlatform extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static final int RETURNCODE_FILEINTENT = 42;
     private static final int RETURNCODE_PERMISSION_PROMPT_STORAGE = 43;
@@ -389,7 +389,7 @@ public class AndroidPlatform extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // re-request the permission
-                        ActivityCompat.requestPermissions(AndroidPlatform.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RETURNCODE_PERMISSION_PROMPT_STORAGE);
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RETURNCODE_PERMISSION_PROMPT_STORAGE);
                     }
                 });
                 runOnUiThread(new Runnable() {

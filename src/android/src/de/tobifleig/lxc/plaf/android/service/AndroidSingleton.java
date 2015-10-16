@@ -24,14 +24,14 @@ import java.util.List;
 
 import android.content.Intent;
 import de.tobifleig.lxc.data.VirtualFile;
-import de.tobifleig.lxc.plaf.android.activity.AndroidPlatform;
+import de.tobifleig.lxc.plaf.android.activity.MainActivity;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
 import de.tobifleig.lxc.plaf.android.GuiInterfaceBridge;
 
 public class AndroidSingleton {
 
     private static boolean running = false;
-    private static AndroidPlatform activity;
+    private static MainActivity activity;
     private static AndroidGuiListener guiListener;
     private static GuiInterfaceBridge genericBridge = new GuiInterfaceBridge() {
 
@@ -61,7 +61,7 @@ public class AndroidSingleton {
      * Call this when the main activity is created. Handles initialization in a
      * way that it is only run if needed.
      */
-    public static void onCreateMainActivity(AndroidPlatform activity, GuiInterfaceBridge bridge, List<VirtualFile> quickShare) {
+    public static void onCreateMainActivity(MainActivity activity, GuiInterfaceBridge bridge, List<VirtualFile> quickShare) {
         if (quickShare != null) {
             AndroidSingleton.quickShare = quickShare;
         }

@@ -49,7 +49,7 @@ import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 import de.tobifleig.lxc.plaf.android.MIMETypeGuesser;
-import de.tobifleig.lxc.plaf.android.activity.AndroidPlatform;
+import de.tobifleig.lxc.plaf.android.activity.MainActivity;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
 
 public class LXCService extends Service implements Platform {
@@ -111,7 +111,7 @@ public class LXCService extends Service implements Platform {
             builder.setContentText(getResources().getString(R.string.notification_running_text));
 
             // configure intent
-            Intent notificationIntent = new Intent(this, AndroidPlatform.class);
+            Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
             builder.setContentIntent(contentIntent);
 

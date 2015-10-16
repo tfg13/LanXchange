@@ -25,7 +25,7 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
         <activity
-                android:name="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"
+                android:name=".plaf.android.activity.MainActivity"
                 android:label="@string/title_activity_lxc"
                 android:launchMode="singleTask">
             <intent-filter>
@@ -58,41 +58,41 @@
         <activity
             android:name="de.tobifleig.lxc.plaf.android.activity.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"
+            android:parentActivityName=".plaf.android.activity.MainActivity"
             android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"/>
+                android:value=".plaf.android.activity.MainActivity"/>
         </activity>
 
         <activity
                 android:name="de.tobifleig.lxc.plaf.android.activity.HelpActivity"
                 android:label="@string/title_activity_help"
-                android:parentActivityName="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"
+                android:parentActivityName=".plaf.android.activity.MainActivity"
                 android:exported="false">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"/>
+                    android:value=".plaf.android.activity.MainActivity"/>
         </activity>
 
         <activity
                 android:name="de.tobifleig.lxc.plaf.android.activity.AboutActivity"
                 android:label="@string/title_activity_about"
-                android:parentActivityName="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"
+                android:parentActivityName=".plaf.android.activity.MainActivity"
                 android:exported="false">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"/>
+                    android:value=".plaf.android.activity.MainActivity"/>
         </activity>
 
         <activity
                 android:name="de.tobifleig.lxc.plaf.android.activity.PCVersionActivity"
                 android:label="@string/title_activity_pcversion"
-                android:parentActivityName="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"
+                android:parentActivityName=".plaf.android.activity.MainActivity"
                 android:exported="false">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="de.tobifleig.lxc.plaf.android.activity.AndroidPlatform"/>
+                    android:value=".plaf.android.activity.MainActivity"/>
         </activity>
     </application>
 
