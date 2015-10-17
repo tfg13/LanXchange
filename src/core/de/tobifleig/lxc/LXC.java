@@ -186,11 +186,16 @@ public class LXC {
      */
     private void quickShare(String[] args) {
         String quickShare = "";
+        boolean quickShareRequested = false;
         for (String s : args) {
             if (s.startsWith("-share=")) {
                 quickShare = s.substring(7);
+                quickShareRequested = true;
                 break;
             }
+        }
+        if (!quickShareRequested) {
+            return;
         }
         if (quickShare.isEmpty()) {
             System.out.println("Quickshare: No files found, sharing nothing");
