@@ -87,11 +87,12 @@ public final class SelfDistributor {
         "img/screw.png",
         "img/selfdist.png",
         "img/selfdist_small.png",
+        "img/small.png",
         "img/stop.png",
         "img/txt.png",
         "img/update.png",
         "COPYING",
-        "font_license.txt",
+        "3rd_party_licenses/font_license.txt",
         "lanxchange.jar",
         "lxc",
         "lxc.exe",};
