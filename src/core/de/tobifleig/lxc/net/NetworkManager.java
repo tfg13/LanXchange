@@ -148,7 +148,7 @@ public class NetworkManager {
                     }
                 });
 
-                LXCJob job = new LXCJob(seed, file.getInstance());
+                LXCJob job = new LXCJob(seed, instances.searchByAddress(address));
                 jobs.put(seed, job);
                 file.addJob(job);
 
