@@ -40,6 +40,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -518,31 +519,39 @@ public class LXCPanel extends JPanel {
         options = new OptionsDialog((JFrame) SwingUtilities.getRoot(LXCPanel.this), true);
     }
 
+    private Image loadImg(String path) {
+        try {
+            return ImageIO.read(new File(path));
+        } catch (IOException ex) {
+            System.out.println("ERROR loading image \"" + path + "\". Re-Download LanXchange to fix.");
+            // create 1x1 transparent image as replacement
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+            image.setRGB(0, 0, new java.awt.Color(0, 0, 0, 0).getRGB());
+            return image;
+        }
+    }
+
     /**
      * "Starts" the Panel.
      * Must be called only once.
      */
     public void start() {
-        try {
-            logo = ImageIO.read(new File("img/logo.png"));
-            mini = ImageIO.read(new File("img/mini.png"));
-            small = ImageIO.read(new File("img/small.png"));
-            harddisk = ImageIO.read(new File("img/harddisk.png"));
-            txt = ImageIO.read(new File("img/txt.png"));
-            fileImg = ImageIO.read(new File("img/file.png"));
-            folder = ImageIO.read(new File("img/folder.png"));
-            multi = ImageIO.read(new File("img/multiple.png"));
-            delete = ImageIO.read(new File("img/del.png"));
-            busy = ImageIO.read(new File("img/busy.png"));
-            done = ImageIO.read(new File("img/done.png"));
-            help = ImageIO.read(new File("img/help.png"));
-            screw = ImageIO.read(new File("img/screw.png"));
-            download = ImageIO.read(new File("img/download.png"));
-            cancel = ImageIO.read(new File("img/cancel.png"));
-            selfdist_small = ImageIO.read(new File("img/selfdist_small.png"));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        logo = loadImg("img/logo.png");
+        mini = loadImg("img/mini.png");
+        small = loadImg("img/small.png");
+        harddisk = loadImg("img/harddisk.png");
+        txt = loadImg("img/txt.png");
+        fileImg = loadImg("img/file.png");
+        folder = loadImg("img/folder.png");
+        multi = loadImg("img/multiple.png");
+        delete = loadImg("img/del.png");
+        busy = loadImg("img/busy.png");
+        done = loadImg("img/done.png");
+        help = loadImg("img/help.png");
+        screw = loadImg("img/screw.png");
+        download = loadImg("img/download.png");
+        cancel = loadImg("img/cancel.png");
+        selfdist_small = loadImg("img/selfdist_small.png");
         mer0 = this.getGraphics().getFontMetrics(f0);
         mer1 = this.getGraphics().getFontMetrics(f1);
         mer1b = this.getGraphics().getFontMetrics(f1b);
