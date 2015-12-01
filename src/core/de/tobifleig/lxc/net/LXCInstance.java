@@ -82,7 +82,7 @@ public class LXCInstance {
      */
     private LXCInstance() {
         Random r = new Random();
-        r.setSeed(System.currentTimeMillis());
+        r.setSeed(System.nanoTime());
         this.id = r.nextInt();
         name = "localhost";
         isLocal = true;
