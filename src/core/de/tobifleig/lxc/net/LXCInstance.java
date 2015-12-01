@@ -65,7 +65,7 @@ public class LXCInstance {
      * Creates a new remote LXCInstance with the given parameters.
      *
      * @param initialAddress the first known address of this instance
-     * @param id the unique id, as transfered by the instance itself
+     * @param id the unique id, as transferred by the instance itself
      */
     LXCInstance(final InetAddress initialAddress, final int id) {
         this.id = id;

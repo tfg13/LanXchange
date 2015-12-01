@@ -375,7 +375,7 @@ public class NetworkManager {
 
         // print debug if not successful
         if (!connected) {
-            System.out.println("All connection attempts to " + instance + "failed. Detailed errors for all addresses:");
+            System.out.println("All connection attempts to " + instance + " failed. Detailed errors for all addresses:");
             for (InetAddress address : exceptions.keySet()) {
                 System.out.println("CON to " + address + " resulted in:");
                 exceptions.get(address).printStackTrace();
