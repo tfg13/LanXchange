@@ -49,12 +49,11 @@ public class ListServer implements Runnable {
     public void run() {
         try {
             while (true) {
-                Socket client = null;
+                Socket client;
                 try {
                     client = servSock.accept();
                 } catch (SocketException ex) {
                     // servSock was closed, ignore
-                    closeSocket(client);
                     break;
                 }
 
