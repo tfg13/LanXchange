@@ -20,6 +20,7 @@
  */
 package de.tobifleig.lxc.net.serv;
 
+import de.tobifleig.lxc.net.LookaheadObjectInputStream;
 import de.tobifleig.lxc.net.TransFileList;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -59,7 +60,7 @@ public class ListServer implements Runnable {
 
                 // Wait for next list, blocks
                 try {
-                    ObjectInputStream input = new ObjectInputStream(client.getInputStream());
+                    ObjectInputStream input = new LookaheadObjectInputStream(client.getInputStream());
                     TransFileList list = (TransFileList) input.readObject();
                     if (list != null) {
                         listener.listReceived(list, client.getInetAddress());
