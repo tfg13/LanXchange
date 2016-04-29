@@ -91,8 +91,10 @@ public class LXCPanel extends JPanel {
     private Font f1;
     private Font f1b;
     private Font f2;
+    private Font f1Fallback;// if filename contains glyphs not supported by the default ubuntu font
     private FontMetrics mer0;
     private FontMetrics mer1;
+    private FontMetrics mer1Fallback;
     private FontMetrics mer1b;
     private FontMetrics mer2;
     private int selectedIndex = -1;
@@ -212,11 +214,22 @@ public class LXCPanel extends JPanel {
                 }
                 // name
                 g2.setColor(Color.BLACK);
-                g2.setFont(f1);
-                if (selectedIndex == i && file.isLocal()) {
-                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (mer1.getAscent() / 2), mer1);
+                FontMetrics nameMetrics = mer1;
+                if (f1.canDisplayUpTo(file.getShownName()) == -1) {
+                    g2.setFont(f1);
                 } else {
-                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (mer1.getAscent() / 2), mer1);
+                    // contains chars not included in the default ubuntu font file, try to get from OS
+                    g2.setFont(f1Fallback);
+                    nameMetrics = mer1Fallback;
+                }
+                if (selectedIndex == i && file.isLocal()) {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (nameMetrics.getAscent() / 2), nameMetrics);
+                } else {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (nameMetrics.getAscent() / 2), nameMetrics);
+                }
+                if (!g2.getFont().equals(f1)) {
+                    g2.setFont(f1);
+                    nameMetrics = mer1;
                 }
                 // size
                 if (detailSelected && selectedIndex == i && file.isLocal()) {
@@ -554,6 +567,7 @@ public class LXCPanel extends JPanel {
         selfdist_small = loadImg("img/selfdist_small.png");
         mer0 = this.getGraphics().getFontMetrics(f0);
         mer1 = this.getGraphics().getFontMetrics(f1);
+        mer1Fallback = this.getGraphics().getFontMetrics(f1Fallback);
         mer1b = this.getGraphics().getFontMetrics(f1b);
         mer2 = this.getGraphics().getFontMetrics(f2);
         running = true;
@@ -826,12 +840,16 @@ public class LXCPanel extends JPanel {
 
     /**
      * Sets the font to be used for displaying text.
+     * Will fall back to system provided "sans serif" font
+     * for filenames with unsupported characters.
+     * (unsupported = default ubuntu font file does not include them)
      *
-     * @param font
+     * @param font font to use to display text
      */
     void setUsedFont(Font font) {
         f0 = font.deriveFont(Font.BOLD, 20f);
         f1 = font.deriveFont(15f);
+        f1Fallback = Font.decode(Font.SANS_SERIF); // OS-supplied font with support for more chars
         f1b = f1.deriveFont(Font.BOLD);
         f2 = font.deriveFont(10f);
     }
