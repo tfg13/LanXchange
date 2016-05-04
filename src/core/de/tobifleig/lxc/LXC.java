@@ -48,11 +48,11 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 163;
+    public static final int versionId = 164;
     /**
      * The external version id.
      */
-    public static final String versionString = "v1.34";
+    public static final String versionString = "v1.35";
     /**
      * The Platform we are running on.
      */
