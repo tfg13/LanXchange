@@ -87,6 +87,17 @@ public interface GuiInterface {
     public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles);
 
     /**
+     * Fired to notify the gui of new/removed jobs.
+     * Gives the gui the opportunity ot selectively update the view and/or animate the changes.
+     * This can be called instead of update()
+     *
+     * @param operation one of UPDATE_OPERATION_ADD, UPDATE_OPERATION_REMOVE
+     * @param file the transferred LXCFile
+     * @param index the index of the modified job (withing the file) - (index of removed or index of new)
+     */
+    public void notifyJobChange(int operation, LXCFile file, int index);
+
+    /**
      * Finds out where to save the given file.
      * optional, only required if the corresponding guiListener ever calls downloadFile with chooseTarget=true
      *

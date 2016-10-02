@@ -135,6 +135,16 @@ public class LXC {
             }
 
             @Override
+            public void notifyJobAdded(LXCFile file, int jobIndex) {
+                gui.notifyJobChange(GuiInterface.UPDATE_OPERATION_ADD, file, jobIndex);
+            }
+
+            @Override
+            public void notifyRemoveJob(LXCFile file, int jobIndex) {
+                gui.notifyJobChange(GuiInterface.UPDATE_OPERATION_REMOVE, file, jobIndex);
+            }
+
+            @Override
             public void instanceRemoved(LXCInstance removedInstance) {
                 FileListChangeSet removals = files.instanceRemoved(removedInstance);
                 if (!removals.getRemovedFiles().isEmpty()) {

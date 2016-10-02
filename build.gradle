@@ -11,9 +11,15 @@ configure(desktopProjects()) {
     compileJava.options.encoding = "UTF-8"
 }
 
+configure([project('swing')]) {
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
 // configure paths
 def signPath = "/mnt/truecrypt1"
 def buildPath = "/tmp/lxcbuild"
+def jnaPath = "lib/swing/jna-4.2.1-win64-stripped.jar"
 
 
 
@@ -27,6 +33,8 @@ def buildPath = "/tmp/lxcbuild"
 task releaseDesktop() {
     description "Builds the desktop release with the swing gui."
     dependsOn desktopProjects().build
+    dependsOn "prepareJar"
+    dependsOn "prepareJar2"
     dependsOn "desktopJar"
     dependsOn "packDesktop"
     doLast {
@@ -79,17 +87,35 @@ task packUpdate(dependsOn: desktopProjects().build) {
 //
 ///////////////////////////////////
 
+task prepareJar(type: Copy) {
+    mustRunAfter desktopProjects().build
+
+    def jna_file = file(jnaPath)
+    def outputDir = file("${buildDir}/unpacked/dist")
+
+    from zipTree(jna_file)
+    into buildPath + "/jar"
+    exclude "META-INF/*"
+}
+
+task prepareJar2(type: Copy) {
+    mustRunAfter "prepareJar"
+
+    from "lib/swing/lxcwin.dll"
+    into buildPath + "/jar/win32-x86-64"
+}
+
 // create main jar
 task desktopJar(type: Zip) {
-    mustRunAfter desktopProjects().build
+    mustRunAfter "prepareJar2"
     
     archiveName "lanxchange.jar"
     destinationDir file(buildPath)
     
     // create manifest on the fly
     def manifest = project('swing').jar.manifest
-    manifest.attributes("Main-Class": "de.tobifleig.lxc.plaf.swing.GenericPCPlatform")
-    manifest.writeTo("/tmp/lxcbuild/jar/META-INF/MANIFEST.MF")
+    manifest.attributes("Main-Class": "de.tobifleig.lxc.plaf.swing.Main")
+    manifest.writeTo(buildPath + "/jar/META-INF/MANIFEST.MF")
     
     from buildPath + "/jar"
     from "Ubuntu-R.ttf"

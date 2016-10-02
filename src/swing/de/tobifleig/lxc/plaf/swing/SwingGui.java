@@ -75,6 +75,10 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
      * The listener.
      */
     private GuiListener listener;
+    /**
+     * Overall progress manager, manages global progress displays like windows taskbar.
+     */
+    private OverallProgressManager progressManager;
 
     /**
      * Creates new form LXCGui3
@@ -120,6 +124,17 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
         } catch (InvocationTargetException ex) {
             ex.printStackTrace();
         }
+        progressManager = new OverallProgressManager() {
+            @Override
+            public void notifyOverallProgressChanged(int percentage) {
+                // ignored
+            }
+
+            @Override
+            public void notifySingleProgressChanged() {
+                schedTrigger = true;
+            }
+        };
     }
 
     private void start() {
@@ -303,6 +318,15 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     }
 
     @Override
+    public void notifyJobChange(int operation, LXCFile file, int index) {
+        if (operation == GuiInterface.UPDATE_OPERATION_ADD) {
+            progressManager.handleNewJob(file.getJobs().get(index));
+        } else if (operation == GuiInterface.UPDATE_OPERATION_REMOVE) {
+            progressManager.removeJob(file.getJobs().get(index));
+        }
+    }
+
+    @Override
     public File getFileTarget(LXCFile file) {
         JFileChooser cf = new JFileChooser();
         cf.setApproveButtonText("Choose target");
@@ -331,5 +355,9 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     @Override
     public boolean confirmCloseWithTransfersRunning() {
         return (JOptionPane.showConfirmDialog(rootPane, "Exiting now will kill all running transfers. Quit anyway?", "Transfers running", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION);
+    }
+
+    public void setOverallProgressManager(OverallProgressManager progressManager) {
+        this.progressManager = progressManager;
     }
 }

@@ -157,6 +157,12 @@ public class LXCService extends Service implements Platform {
             }
 
             @Override
+            public void notifyJobChange(int operation, LXCFile file, int index) {
+                // no job animations for now
+                update();
+            }
+
+            @Override
             public void showError(String error) {
                 System.err.println(error);
             }

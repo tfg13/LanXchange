@@ -104,7 +104,7 @@ public class NetworkManager {
      * @param fileManager the filemanager who must be informed about received filelists etc.
      * @param platform the platform we are running on
      */
-    public NetworkManager(NetworkManagerListener listener, FileManager fileManager, Platform platform) {
+    public NetworkManager(final NetworkManagerListener listener, FileManager fileManager, Platform platform) {
         this.listener = listener;
         this.fileManager = fileManager;
         jobs = new HashMap<Transceiver, LXCJob>();
@@ -128,6 +128,8 @@ public class NetworkManager {
                 TransceiverListener seedListener = new TransceiverListener() {
                     @Override
                     public void finished(boolean success, boolean removeFile) {
+                        int removeIndex = file.getJobs().indexOf(jobs.get(seed));
+                        listener.notifyRemoveJob(file, removeIndex);
                         file.removeJob(jobs.get(seed), success);
                         if (removeFile) {
                             // File no longer available --> remove
@@ -151,6 +153,7 @@ public class NetworkManager {
                 LXCJob job = new LXCJob(seed, file.getInstance());
                 jobs.put(seed, job);
                 file.addJob(job);
+                listener.notifyJobAdded(file, file.getJobs().size() - 1);
 
                 seed.start();
             }
@@ -259,6 +262,8 @@ public class NetworkManager {
                             file.setAvailable(true);
                             listener.downloadComplete(file, targetFolder);
                         }
+                        int removeIndex = file.getJobs().indexOf(jobs.get(leech));
+                        listener.notifyRemoveJob(file, removeIndex);
                         file.removeJob(jobs.get(leech), success);
                         if (removeFile) {
                             listener.downloadFailedFileMissing();
@@ -278,6 +283,7 @@ public class NetworkManager {
                 LXCJob job = new LXCJob(leech, file.getInstance());
                 jobs.put(leech, job);
                 file.addJob(job);
+                listener.notifyJobAdded(file, file.getJobs().size() - 1);
                 leech.start();
             }
         } catch (NoRouteToHostException ex) {

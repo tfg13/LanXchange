@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -38,8 +38,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
- * A generic Platform for all OS prividing Swing and write access to the
- * LXC-directory. Offers a main-method to start LanXchange.
+ * A generic Platform for all OSes providing Swing and direct write access to the LXC directory.
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
@@ -52,7 +51,7 @@ public class GenericPCPlatform implements Platform {
     /**
      * the swing-gui.
      */
-    private static final SwingGui gui = new SwingGui();
+    protected static final SwingGui gui = new SwingGui();
 
     @Override
     public boolean hasAutoUpdates() {
@@ -211,28 +210,6 @@ public class GenericPCPlatform implements Platform {
             }
         }
         return null; // invalid path = ask
-    }
-
-    /**
-     * Starts LanXchange on PC plaforms.
-     *
-     * @param args
-     * any arguments you want to pass to LanXchange
-     */
-    public static void main(String[] args) {
-        // check permission for own folder
-        try {
-            File.createTempFile("testacl", null, new File(".")).delete();
-            // Can write
-        } catch (IOException ex) {
-            // Cannot write
-            System.out.println("ERROR: Cannot write to my directory ("
-                    + new File(".").getAbsolutePath()
-                    + "). Try running LXC in your home directory.");
-            gui.showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
-            System.exit(1);
-        }
-        LXC lxc = new LXC(new GenericPCPlatform(), args);
     }
 
     @Override

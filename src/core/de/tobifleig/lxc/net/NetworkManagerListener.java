@@ -45,6 +45,20 @@ public interface NetworkManagerListener {
     public void refreshGui();
 
     /**
+     * Called after a new Job was added to the given file, important for gui updates.
+     * @param file the file the job was added to
+     * @param jobIndex index of the new job in the job list
+     */
+    public void notifyJobAdded(LXCFile file, int jobIndex);
+
+    /**
+     * Called before a Job is removed from the given file, important for gui updates.
+     * @param file the transferred file
+     * @param jobIndex index of the job
+     */
+    public void notifyRemoveJob(LXCFile file, int jobIndex);
+
+    /**
      * Gets called when the networksystem removes an LXCInstance.
      *
      * @param removedInstance the removed instance
