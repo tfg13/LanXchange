@@ -41,7 +41,7 @@ Q: *But why Java?*
 A: Historical reasons, I was in school when I started this and only knew Java. Plus, years later it made porting LanXchange to Android much easier.
 
 Q: *What about those automatic updates?*  
-A: Those are recommended because updates frequently break compatibility with older versions. You can disable them, but there should be no need: On every launch, LanXchange *checks* for updates (by reading [this file](http://updates.lanxchange.com/v)), but **never** downloads or installs anything automatically. Also, all updates are signed.
+A: Auto updates are recommended because updates frequently break compatibility with older versions. You can disable them, but there should be no need: On every launch, LanXchange *checks* for updates (by reading [this file](http://updates.lanxchange.com/v)), but **never** downloads or installs anything automatically. Also, all updates are signed.
 
 License
 -------
@@ -60,4 +60,4 @@ You should have received a copy of the GNU General Public License
 along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
 
 
-Copyright (c) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig - All rights reserved
+Copyright (c) 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig - All rights reserved

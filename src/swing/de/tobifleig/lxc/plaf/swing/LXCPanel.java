@@ -40,6 +40,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -90,8 +91,10 @@ public class LXCPanel extends JPanel {
     private Font f1;
     private Font f1b;
     private Font f2;
+    private Font f1Fallback;// if filename contains glyphs not supported by the default ubuntu font
     private FontMetrics mer0;
     private FontMetrics mer1;
+    private FontMetrics mer1Fallback;
     private FontMetrics mer1b;
     private FontMetrics mer2;
     private int selectedIndex = -1;
@@ -211,11 +214,22 @@ public class LXCPanel extends JPanel {
                 }
                 // name
                 g2.setColor(Color.BLACK);
-                g2.setFont(f1);
-                if (selectedIndex == i && file.isLocal()) {
-                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (mer1.getAscent() / 2), mer1);
+                FontMetrics nameMetrics = mer1;
+                if (f1.canDisplayUpTo(file.getShownName()) == -1) {
+                    g2.setFont(f1);
                 } else {
-                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (mer1.getAscent() / 2), mer1);
+                    // contains chars not included in the default ubuntu font file, try to get from OS
+                    g2.setFont(f1Fallback);
+                    nameMetrics = mer1Fallback;
+                }
+                if (selectedIndex == i && file.isLocal()) {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (nameMetrics.getAscent() / 2), nameMetrics);
+                } else {
+                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (nameMetrics.getAscent() / 2), nameMetrics);
+                }
+                if (!g2.getFont().equals(f1)) {
+                    g2.setFont(f1);
+                    nameMetrics = mer1;
                 }
                 // size
                 if (detailSelected && selectedIndex == i && file.isLocal()) {
@@ -440,7 +454,7 @@ public class LXCPanel extends JPanel {
                 String versionText = LXC.versionString + "   (" + LXC.versionId + ")";
                 g2.drawString(versionText, this.getWidth() - mer2.stringWidth(versionText) - 5, this.getHeight() - 18);
                 // legal
-                String legalText = "Copyright  2009-2015  Tobias Fleig  -  All rights reserved";
+                String legalText = "Copyright  2009-2016  Tobias Fleig  -  All rights reserved";
                 g2.drawString(legalText, this.getWidth() - mer2.stringWidth(legalText) - 5, this.getHeight() - 6);
             }
 
@@ -518,33 +532,42 @@ public class LXCPanel extends JPanel {
         options = new OptionsDialog((JFrame) SwingUtilities.getRoot(LXCPanel.this), true);
     }
 
+    private Image loadImg(String path) {
+        try {
+            return ImageIO.read(new File(path));
+        } catch (IOException ex) {
+            System.out.println("ERROR loading image \"" + path + "\". Re-Download LanXchange to fix.");
+            // create 1x1 transparent image as replacement
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+            image.setRGB(0, 0, new java.awt.Color(0, 0, 0, 0).getRGB());
+            return image;
+        }
+    }
+
     /**
      * "Starts" the Panel.
      * Must be called only once.
      */
     public void start() {
-        try {
-            logo = ImageIO.read(new File("img/logo.png"));
-            mini = ImageIO.read(new File("img/mini.png"));
-            small = ImageIO.read(new File("img/small.png"));
-            harddisk = ImageIO.read(new File("img/harddisk.png"));
-            txt = ImageIO.read(new File("img/txt.png"));
-            fileImg = ImageIO.read(new File("img/file.png"));
-            folder = ImageIO.read(new File("img/folder.png"));
-            multi = ImageIO.read(new File("img/multiple.png"));
-            delete = ImageIO.read(new File("img/del.png"));
-            busy = ImageIO.read(new File("img/busy.png"));
-            done = ImageIO.read(new File("img/done.png"));
-            help = ImageIO.read(new File("img/help.png"));
-            screw = ImageIO.read(new File("img/screw.png"));
-            download = ImageIO.read(new File("img/download.png"));
-            cancel = ImageIO.read(new File("img/cancel.png"));
-            selfdist_small = ImageIO.read(new File("img/selfdist_small.png"));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        logo = loadImg("img/logo.png");
+        mini = loadImg("img/mini.png");
+        small = loadImg("img/small.png");
+        harddisk = loadImg("img/harddisk.png");
+        txt = loadImg("img/txt.png");
+        fileImg = loadImg("img/file.png");
+        folder = loadImg("img/folder.png");
+        multi = loadImg("img/multiple.png");
+        delete = loadImg("img/del.png");
+        busy = loadImg("img/busy.png");
+        done = loadImg("img/done.png");
+        help = loadImg("img/help.png");
+        screw = loadImg("img/screw.png");
+        download = loadImg("img/download.png");
+        cancel = loadImg("img/cancel.png");
+        selfdist_small = loadImg("img/selfdist_small.png");
         mer0 = this.getGraphics().getFontMetrics(f0);
         mer1 = this.getGraphics().getFontMetrics(f1);
+        mer1Fallback = this.getGraphics().getFontMetrics(f1Fallback);
         mer1b = this.getGraphics().getFontMetrics(f1b);
         mer2 = this.getGraphics().getFontMetrics(f2);
         running = true;
@@ -817,12 +840,16 @@ public class LXCPanel extends JPanel {
 
     /**
      * Sets the font to be used for displaying text.
+     * Will fall back to system provided "sans serif" font
+     * for filenames with unsupported characters.
+     * (unsupported = default ubuntu font file does not include them)
      *
-     * @param font
+     * @param font font to use to display text
      */
     void setUsedFont(Font font) {
         f0 = font.deriveFont(Font.BOLD, 20f);
         f1 = font.deriveFont(15f);
+        f1Fallback = Font.decode(Font.SANS_SERIF); // OS-supplied font with support for more chars
         f1b = f1.deriveFont(Font.BOLD);
         f2 = font.deriveFont(10f);
     }

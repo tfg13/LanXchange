@@ -111,6 +111,16 @@ public class AndroidSingleton {
     }
 
     /**
+     * Called by the main activity if a share-intent was received,
+     * but the service is not ready yet (no guilistener available).
+     * Effectively a setter for quickShare
+     * @param quickShare the files to share once the service becomes available
+     */
+    public static void onEarlyShareIntent(List<VirtualFile> quickShare) {
+        AndroidSingleton.quickShare = quickShare;
+    }
+
+    /**
      * Called by the Service on self-stop.
      */
     public static void serviceStopping() {

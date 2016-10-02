@@ -310,11 +310,16 @@ public class MainActivity extends AppCompatActivity {
         if (intent.getAction() != null && !intent.getAction().equals(Intent.ACTION_MAIN)) {
             List<VirtualFile> files = computeInputIntent(intent);
             if (files != null && !files.isEmpty()) {
-                permissionPromptQuickshare = files;
-                if (verifyStoragePermission()) {
-                    offerFiles(files);
-                    permissionPromptQuickshare = null;
-                }// otherwise prompt is going up, flow continues in callback
+                if (guiListener == null) {
+                    // service not ready yet, cache
+                    AndroidSingleton.onEarlyShareIntent(files);
+                } else {
+                    permissionPromptQuickshare = files;
+                    if (verifyStoragePermission()) {
+                        offerFiles(files);
+                        permissionPromptQuickshare = null;
+                    }// otherwise prompt is going up, flow continues in callback
+                }
             } else {
                 handleShareError(intent);
             }

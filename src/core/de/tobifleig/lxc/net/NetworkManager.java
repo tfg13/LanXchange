@@ -150,7 +150,7 @@ public class NetworkManager {
                     }
                 });
 
-                LXCJob job = new LXCJob(seed, file.getInstance());
+                LXCJob job = new LXCJob(seed, instances.searchByAddress(address));
                 jobs.put(seed, job);
                 file.addJob(job);
                 listener.notifyJobAdded(file, file.getJobs().size() - 1);
@@ -381,7 +381,7 @@ public class NetworkManager {
 
         // print debug if not successful
         if (!connected) {
-            System.out.println("All connection attempts to " + instance + "failed. Detailed errors for all addresses:");
+            System.out.println("All connection attempts to " + instance + " failed. Detailed errors for all addresses:");
             for (InetAddress address : exceptions.keySet()) {
                 System.out.println("CON to " + address + " resulted in:");
                 exceptions.get(address).printStackTrace();

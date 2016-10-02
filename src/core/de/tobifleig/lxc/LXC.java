@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -48,11 +48,11 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 163;
+    public static final int versionId = 164;
     /**
      * The external version id.
      */
-    public static final String versionString = "v1.34";
+    public static final String versionString = "v1.35";
     /**
      * The Platform we are running on.
      */
@@ -90,7 +90,7 @@ public class LXC {
 
         initLogging(args);
 
-        System.out.println("This is LanXchange " + versionString + " (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015 Tobias Fleig - License GPLv3 or later");
+        System.out.println("This is LanXchange " + versionString + " (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig - License GPLv3 or later");
 
         platform.readConfiguration(args);
 

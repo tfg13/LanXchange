@@ -22,6 +22,8 @@ package de.tobifleig.lxc.net.serv;
 
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.net.LookaheadObjectInputStream;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -86,7 +88,7 @@ public class FileServer implements Runnable {
                 try {
                     output = new ObjectOutputStream(new BufferedOutputStream(client.getOutputStream()));
                     output.flush();
-                    input = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
+                    input = new LookaheadObjectInputStream(new BufferedInputStream(client.getInputStream()));
                     try {
                         LXCFile file = (LXCFile) input.readObject();
                         if (file != null) {

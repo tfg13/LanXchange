@@ -255,4 +255,25 @@ class InstanceManager {
             }
         }
     }
+
+    /**
+     * Attempts to find a known Instance for the given address.
+     * This also counts as heartbeat.
+     * Returns the instance or null.
+     * Linear complexity in number of known addresses
+     * @param address the address
+     * @return instance with this address (if known), null otherwise
+     */
+    synchronized LXCInstance searchByAddress(final InetAddress address) {
+        for (LXCInstance instance : instances.values()) {
+            Iterator<InetAddress> adrIter = instance.getAddresses();
+            while (adrIter.hasNext()) {
+                InetAddress instanceAddress = adrIter.next();
+                if (instanceAddress.equals(address)) {
+                    return instance;
+                }
+            }
+        }
+        return null;
+    }
 }
