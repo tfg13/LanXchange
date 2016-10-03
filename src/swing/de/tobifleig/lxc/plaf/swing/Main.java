@@ -39,7 +39,7 @@ public class Main {
         Platform platform;
         // figure out platform
         if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-            platform = new WinPlatform();
+            platform = new WinPlatform(args);
         } else {
             platform = new GenericPCPlatform();
         }

@@ -22,9 +22,15 @@ package de.tobifleig.lxc.plaf.swing.win;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.WString;
 import com.sun.jna.platform.win32.*;
+import com.sun.jna.ptr.PointerByReference;
+import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.swing.GenericPCPlatform;
 import de.tobifleig.lxc.plaf.swing.OverallProgressManager;
+
+import java.io.File;
+import java.util.Arrays;
 
 /**
  * Windows-specific behaviors/settings.
@@ -33,13 +39,43 @@ import de.tobifleig.lxc.plaf.swing.OverallProgressManager;
  */
 public class WinPlatform extends GenericPCPlatform {
 
+    private boolean nativeSupportEnabled = false;
+    private boolean taskbarProgressSupported = true;
+    private boolean nativeFileDialogsSupported = true;
     private Pointer taskbar;
     private WinDef.HWND hwnd;
-    private boolean taskbarProgressSupported = false;
+
     private Thread initThread;
 
 
-    public WinPlatform() {
+    public WinPlatform(String[] args) {
+        // enable native support on 64bit windows
+        if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch").equals("x86_64")) {
+            nativeSupportEnabled = true;
+        }
+        // native support can be suppressed with a launch option
+        if (Arrays.asList(args).contains("-nonative")) {
+            nativeSupportEnabled = false;
+        }
+        // load dll async
+        initThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (nativeSupportEnabled) {
+                    try {
+                        Lxcwin.INSTANCE.nop(); // does nothing, but loads dll
+                        System.out.println("Detected win64, enabled advanced windows features");
+                    } catch (Throwable ex) {// alloc in native code may throw all sorts of interesting errors
+                        ex.printStackTrace();
+                        nativeSupportEnabled = false;
+                    }
+                }
+            }
+        });
+        initThread.setName("lxcwin async load helper");
+        initThread.setDaemon(true);
+        initThread.start();
+        // forward progress changes to taskbar
         gui.setOverallProgressManager(new OverallProgressManager() {
             @Override
             public void notifyOverallProgressChanged(int percentage) {
@@ -49,11 +85,12 @@ public class WinPlatform extends GenericPCPlatform {
                 } catch (InterruptedException e) {
                     // ignore
                 }
-                if (taskbarProgressSupported) {
+                if (nativeSupportEnabled && taskbarProgressSupported) {
                     try {
                         // init on first use
-                        if (hwnd == null) {
+                        if (taskbar == null) {
                             try {
+                                taskbar = Lxcwin.INSTANCE.allocTaskbarObject();
                                 hwnd = new WinDef.HWND(Native.getWindowPointer(gui));
                             } catch (Error ex) {
                                 ex.printStackTrace();
@@ -61,6 +98,11 @@ public class WinPlatform extends GenericPCPlatform {
                                 System.out.println("Unable to get window handle, disabling taskbar support.");
                                 return;
                             }
+                        }
+                        // check init worked
+                        if (taskbar == null) {
+                            System.out.println("Failed to init taskbar");
+                            taskbarProgressSupported = false;
                         }
                         if (percentage > 0 && percentage < 100) {
                             Lxcwin.INSTANCE.setProgressValue(taskbar, hwnd, percentage);
@@ -80,30 +122,51 @@ public class WinPlatform extends GenericPCPlatform {
                 gui.update();
             }
         });
-        if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch").equals("x86_64")) {
-            taskbarProgressSupported = true;
+    }
         }
-        // load dll async
-        initThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (taskbarProgressSupported) {
-                    try {
-                        taskbar = Lxcwin.INSTANCE.allocTaskbarObject();
-                        System.out.println("Detected win64, enabled advanced windows features");
-                    } catch (Throwable ex) {// alloc in native code may throw all sorts of interesting errors
-                        ex.printStackTrace();
-                    }
-                    // check init worked
-                    if (taskbar == null) {
-                        System.out.println("Failed to init taskbar");
-                        taskbarProgressSupported = false;
-                    }
                 }
             }
-        });
-        initThread.setName("lxcwin async load helper");
-        initThread.setDaemon(true);
-        initThread.start();
+
+    @Override
+    public File getFileTarget(LXCFile file) {
+        if (!nativeSupportEnabled || !nativeFileDialogsSupported) {
+            return super.getFileTarget(file);
+        }
+        String path = null;
+        WinNT.HRESULT hr = W32Errors.S_OK;
+        try {
+            WinDef.HWND hwnd = new WinDef.HWND(Native.getWindowPointer(gui));
+            PointerByReference result = new PointerByReference();
+            hr = Lxcwin.INSTANCE.fileSaveDialog(hwnd, new WString("Target directory for \"" + file.getShownName() + "\""), result);
+
+            if (W32Errors.SUCCEEDED(hr) && result.getValue() != null) {
+                path = result.getValue().getWideString(0);
+                Lxcwin.INSTANCE.cleanupSaveDialogResult(result.getValue());
+                // result is now invalid
+                result = null;
+            }
+        } catch (Error ex) {
+            ex.printStackTrace();
+            System.out.println("Error communicating with native file dialog, hr: " + hr.toString());
+            nativeFileDialogsSupported = false;
+        }
+
+        if (path != null) {
+            // windows dialog returned something
+            File resultFile = new File(path);
+            if (resultFile.canWrite()) {
+                return resultFile;
+            } else {
+                // inform user
+                gui.showError("Cannot write there, please selected another target or start LXC as Administrator");
+                // cancel
+                System.out.println("Canceled, cannot write (permission denied)");
+                return null;
+            }
+        } else {
+            // cancel
+            System.out.println("Canceled by user.");
+            return null;
+        }
     }
 }

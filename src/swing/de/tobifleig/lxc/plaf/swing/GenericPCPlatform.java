@@ -51,7 +51,7 @@ public class GenericPCPlatform implements Platform {
     /**
      * the swing-gui.
      */
-    protected static final SwingGui gui = new SwingGui();
+    protected final SwingGui gui = new SwingGui(this);
 
     @Override
     public boolean hasAutoUpdates() {
@@ -220,5 +220,36 @@ public class GenericPCPlatform implements Platform {
     @Override
     public String[] getRequiredMulticastHelpers() {
         return new String[0];
+    }
+
+    /**
+     * Prompts the user for a download target.
+     * See same method GuiInterface.
+     */
+    public File getFileTarget(LXCFile file) {
+        // default implementation with swing
+        // subclasses may override this to use a native system dialog
+        JFileChooser cf = new JFileChooser();
+        cf.setApproveButtonText("Choose target");
+        cf.setApproveButtonToolTipText("Download files into selected directory");
+        cf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        cf.setMultiSelectionEnabled(false);
+        cf.setDialogTitle("Target directory for \"" + file.getShownName() + "\"");
+        int chooseResult = cf.showDialog(gui, null);
+        if (chooseResult == JFileChooser.APPROVE_OPTION) {
+            if (cf.getSelectedFile().canWrite()) {
+                return cf.getSelectedFile();
+            } else {
+                // inform user
+                gui.showError("Cannot write there, please selected another target or start LXC as Administrator");
+                // cancel
+                System.out.println("Canceled, cannot write (permission denied)");
+                return null;
+            }
+        } else {
+            // cancel
+            System.out.println("Canceled by user.");
+            return null;
+        }
     }
 }

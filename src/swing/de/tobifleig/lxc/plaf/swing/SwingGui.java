@@ -79,11 +79,16 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
      * Overall progress manager, manages global progress displays like windows taskbar.
      */
     private OverallProgressManager progressManager;
+    /**
+     * The platform we are running on.
+     */
+    private final GenericPCPlatform platform;
 
     /**
      * Creates new form LXCGui3
      */
-    public SwingGui() {
+    public SwingGui(GenericPCPlatform platform) {
+        this.platform = platform;
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
 
@@ -328,28 +333,8 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
 
     @Override
     public File getFileTarget(LXCFile file) {
-        JFileChooser cf = new JFileChooser();
-        cf.setApproveButtonText("Choose target");
-        cf.setApproveButtonToolTipText("Download files into selected directory");
-        cf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        cf.setMultiSelectionEnabled(false);
-        cf.setDialogTitle("Target directory for \"" + file.getShownName() + "\"");
-        int chooseResult = cf.showDialog(this, null);
-        if (chooseResult == JFileChooser.APPROVE_OPTION) {
-            if (cf.getSelectedFile().canWrite()) {
-                return cf.getSelectedFile();
-            } else {
-                // inform user
-                showError("Cannot write there, please selected another target or start LXC as Administrator");
-                // cancel
-                System.out.println("Canceled, cannot write (permission denied)");
-                return null;
-            }
-        } else {
-            // cancel
-            System.out.println("Canceled by user.");
-            return null;
-        }
+        // platform handles this
+        return platform.getFileTarget(file);
     }
 
     @Override
