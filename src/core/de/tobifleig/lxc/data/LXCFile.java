@@ -254,7 +254,7 @@ public class LXCFile implements Serializable {
     /**
      * Returns the type.
      *
-     * @return
+     * @return the type
      */
     public int getType() {
         return type;
@@ -318,7 +318,7 @@ public class LXCFile implements Serializable {
      * Sets the list of base files.
      * This is required after downloads.
      *
-     * @param baseFiles
+     * @param baseFiles the base file list
      */
     public void setBaseFiles(List<VirtualFile> baseFiles) {
         this.files = baseFiles;
@@ -432,10 +432,10 @@ public class LXCFile implements Serializable {
         } else if (fSize < 1073741824) {
             String size = form.format(fSize / 1048576d);
             return size + " MiB";
-        } else if (fSize < 1099511627776l) {
+        } else if (fSize < 1099511627776L) {
             String size = form.format(fSize / 1073741824d);
             return size + " GiB";
-        } else if (fSize < 1125899906842625l) {
+        } else if (fSize < 1125899906842625L) {
             String size = form.format(fSize / 1099511627776d);
             return size + " TiB";
         } else {

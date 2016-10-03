@@ -76,7 +76,6 @@ public class FileManager {
                     // no longer offered, remove it, if not download{ing,ed}
                     if (file.getJobs().isEmpty() && !file.isAvailable()) {
                         iter.remove();
-                        System.out.println("REM!");
                         changeSet.pushRemovedFile(file, remoteRemoveIndex);
                     } else {
                         // keep, ignore in next step:

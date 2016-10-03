@@ -34,8 +34,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 /**
  * A generic Platform for all OSes providing Swing and direct write access to the LXC directory.
@@ -98,7 +97,7 @@ public class GenericPCPlatform implements Platform {
             final boolean force = forceUpdate;
             final boolean noVerification = overrideVerification;
             final boolean managed = restartable;
-            // check in seperate thread
+            // check in separate thread
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
@@ -112,7 +111,7 @@ public class GenericPCPlatform implements Platform {
             };
 
             Thread t = new Thread(r);
-            t.setName("updatecheck");
+            t.setName("update checker");
             t.setDaemon(true);
             t.start();
         } else {
@@ -135,15 +134,15 @@ public class GenericPCPlatform implements Platform {
                 cfgFile.createNewFile();
             }
             reader = new BufferedReader(new FileReader(cfgFile));
-            String zeile;
+            String line;
             int i = 0; // line number
-            while ((zeile = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 // read line after line, add content to Configuration
-                int indexgleich = zeile.indexOf('='); // search for "="
-                if (indexgleich == -1) {
+                int equalSignIndex = line.indexOf('='); // search for "="
+                if (equalSignIndex == -1) {
                 } else {
-                    String v1 = zeile.substring(0, indexgleich); // prefix (before=)
-                    String v2 = zeile.substring(indexgleich + 1); // suffix (after =)
+                    String v1 = line.substring(0, equalSignIndex); // prefix (before "=")
+                    String v2 = line.substring(equalSignIndex + 1); // suffix (after "=")
                     Configuration.putStringSetting(v1, v2);
                 }
             }
@@ -180,7 +179,7 @@ public class GenericPCPlatform implements Platform {
                         + Configuration.getStringSetting(s) + '\n');
             }
         } catch (IOException ex) {
-            System.out.println("CRITICAL: FEHLER BEIM SCHREIBEN DES LOGFILES!");
+            System.out.println("CRITICAL: ERROR WRITING TO LOGFILE!");
         } finally {
             try {
                 if (writer != null) {

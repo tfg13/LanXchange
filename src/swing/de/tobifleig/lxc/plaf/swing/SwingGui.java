@@ -23,6 +23,7 @@ package de.tobifleig.lxc.plaf.swing;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
+
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.event.WindowAdapter;
