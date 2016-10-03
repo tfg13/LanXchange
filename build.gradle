@@ -32,6 +32,7 @@ def jnaPath = "lib/swing/jna-4.2.1-win64-stripped.jar"
 // Builds the desktop (swing) release
 task releaseDesktop() {
     description "Builds the desktop release with the swing gui."
+    dependsOn "cleanBuildEnv"
     dependsOn desktopProjects().build
     dependsOn "prepareJar"
     dependsOn "prepareJar2"
@@ -54,7 +55,10 @@ task packUpdate(dependsOn: desktopProjects().build) {
     dependsOn "prepareUpdate"
     
     // interactive setup & checks complete, normal build
+    dependsOn "cleanBuildEnv"
     dependsOn desktopProjects().build
+    dependsOn "prepareJar"
+    dependsOn "prepareJar2"
     dependsOn "desktopJar"
     dependsOn "packDesktop"
     dependsOn "signUpdate"
@@ -87,8 +91,13 @@ task packUpdate(dependsOn: desktopProjects().build) {
 //
 ///////////////////////////////////
 
+task cleanBuildEnv() {
+    deleteRecursive(buildPath)
+}
+
 task prepareJar(type: Copy) {
     mustRunAfter desktopProjects().build
+    mustRunAfter "cleanBuildEnv"
 
     def jna_file = file(jnaPath)
     def outputDir = file("${buildDir}/unpacked/dist")
@@ -102,7 +111,7 @@ task prepareJar2(type: Copy) {
     mustRunAfter "prepareJar"
 
     from "lib/swing/lxcwin.dll"
-    into buildPath + "/jar/win32-x86-64"
+    into buildPath + "/jar"
 }
 
 // create main jar
@@ -233,4 +242,14 @@ void deleteIfExists(String path) {
     if (file.exists()) {
         file.delete()
     }
+}
+
+void deleteRecursive(String path) {
+    def file = file(path)
+    if (file.isDirectory()) {
+        file.list().each{ f ->
+            deleteRecursive(path + "/" + f)
+        }
+    }
+    assert file.delete()
 }
