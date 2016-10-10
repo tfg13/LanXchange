@@ -251,5 +251,5 @@ void deleteRecursive(String path) {
             deleteRecursive(path + "/" + f)
         }
     }
-    assert file.delete()
+    assert !file.exists() || file.delete()
 }
