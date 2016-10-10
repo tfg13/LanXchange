@@ -589,7 +589,7 @@ public class LXCPanel extends JPanel {
                     // display settings
                     options.showAndWait();
                     guiListener.reloadConfiguration();
-                } else if (e.getButton() == 1 && detailSelected && selectedIndex != -1) { // delete?
+                } else if (e.getButton() == 1 && detailSelected && selectedIndex != -1 && selectedIndex < allFiles.size() && allFiles.get(selectedIndex).isLocal()) { // delete?
                     try {
                         LXCFile file = allFiles.get(selectedIndex);
                         if (file.isLocal()) {
