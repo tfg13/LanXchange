@@ -155,9 +155,6 @@ public class WinPlatform extends GenericPCPlatform {
             }
         });
     }
-        }
-                }
-            }
 
     @Override
     public File getFileTarget(LXCFile file) {
