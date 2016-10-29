@@ -26,6 +26,7 @@ import de.tobifleig.lxc.plaf.GuiListener;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
@@ -33,16 +34,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.imageio.ImageIO;
-import javax.swing.Action;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
-import javax.swing.UIManager;
+import javax.swing.*;
 
 /**
  * The GUI
@@ -256,6 +253,39 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                                 // swing sometimes refuses to shutdown correctly
                                 System.exit(0);
                             }
+                        }
+                    });
+                    // setup ctrl-a, ctrl-o shortcut for file sharing
+                    panel.getInputMap().put(KeyStroke.getKeyStroke("ctrl A"), "selectShare");
+                    panel.getInputMap().put(KeyStroke.getKeyStroke("ctrl O"), "selectShare");
+                    panel.getActionMap().put("selectShare", new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            final File[] files = platform.openFileForSharing();
+                            if (files != null && files.length > 0) {
+                                for (File file : files) {
+                                    if (!file.canRead()) {
+                                        System.out.println("Aborting preparation for new files to share, cannot read file \"" + file.getAbsolutePath() + "\"");
+                                        // showError() cannot must not called from event dispatcher thread
+                                        JOptionPane.showMessageDialog(SwingGui.this, "Cannot read at least one of the selected files:\n\"" + file.getAbsolutePath() + "\"", "LXC - Error", JOptionPane.ERROR_MESSAGE);
+                                        return;
+                                    }
+                                }
+                                // create LXCFile in new thread, constructor blocks until size-calcing is finished!
+                                final File first = files[0];
+                                Thread thread = new Thread(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        panel.setCalcing(true);
+                                        LXCFile newFile = new LXCFile(LXCFile.convertToVirtual(Arrays.asList(files)), first.getName());
+                                        panel.setCalcing(false);
+                                        listener.offerFile(newFile);
+                                    }
+                                }, "lxc_helper_sizecalcer");
+                                thread.setPriority(Thread.NORM_PRIORITY - 1);
+                                thread.start();
+                            } // adding files aborted, just ignore
                         }
                     });
                 }

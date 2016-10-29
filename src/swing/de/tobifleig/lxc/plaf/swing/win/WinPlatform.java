@@ -204,4 +204,48 @@ public class WinPlatform extends GenericPCPlatform {
             return null;
         }
     }
+
+    @Override
+    public File[] openFileForSharing() {
+        try {
+            // prevent race
+            initThread.join();
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        if (!nativeSupportEnabled || !nativeFileDialogsSupported) {
+            return super.openFileForSharing();
+        }
+        String[] paths = null;
+        WinNT.HRESULT hr = W32Errors.S_OK;
+        try {
+            WinDef.HWND hwnd = new WinDef.HWND(Native.getWindowPointer(gui));
+            PointerByReference result = new PointerByReference();
+            WinDef.DWORDByReference countRef = new WinDef.DWORDByReference();
+            hr = Lxcwin.INSTANCE.fileOpenDialog(hwnd, countRef, result);
+
+            if (W32Errors.SUCCEEDED(hr) && result.getValue()!= null) {
+                paths = result.getValue().getWideStringArray(0);
+                Lxcwin.INSTANCE.cleanupOpenDialogResults(countRef.getValue(), result.getValue());
+                // result is now invalid
+                result = null;
+            }
+        } catch (Error ex) {
+            ex.printStackTrace();
+            System.out.println("Error communicating with native file dialog, hr: " + hr.toString());
+            nativeFileDialogsSupported = false;
+        }
+
+        if (paths != null) {
+            // windows dialog returned something
+            File[] files = new File[paths.length];
+            for (int i = 0; i < paths.length; i++) {
+                files[i] = new File(paths[i]);
+            }
+            return files;
+        } else {
+            // cancel
+            return null;
+        }
+    }
 }

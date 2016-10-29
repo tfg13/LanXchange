@@ -34,6 +34,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.*;
 
 /**
@@ -248,6 +249,27 @@ public class GenericPCPlatform implements Platform {
         } else {
             // cancel
             System.out.println("Canceled by user.");
+            return null;
+        }
+    }
+
+    /**
+     * Prompts the user for files to share.
+     */
+    public File[] openFileForSharing() {
+        // default implementation with swing
+        // subclasses may override this to use a native system dialog
+        JFileChooser cf = new JFileChooser();
+        cf.setApproveButtonText("Share");
+        cf.setApproveButtonToolTipText("Share the selected files with LanXchange");
+        cf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        cf.setMultiSelectionEnabled(true);
+        cf.setDialogTitle("Select file(s) to share");
+        int chooseResult = cf.showDialog(gui, null);
+        if (chooseResult == JFileChooser.APPROVE_OPTION) {
+            return cf.getSelectedFiles();
+        } else {
+            // cancel
             return null;
         }
     }
