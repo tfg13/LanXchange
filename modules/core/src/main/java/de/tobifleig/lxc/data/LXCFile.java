@@ -375,7 +375,7 @@ public class LXCFile implements Serializable {
         for (File file : files) {
             // Check if this file is below any toplevel node
             for (File topLevelNode : topLevelNodes) {
-                if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
+                if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath() + File.separator)) {
                     // below - this means file is not a toplevel node
                     continue outer;
                 }
@@ -383,7 +383,7 @@ public class LXCFile implements Serializable {
             // This file is a toplevel node - check if this makes other toplevel nodes obsolete
             for (int i = 0; i < topLevelNodes.size(); i++) {
                 File topLevelNode = topLevelNodes.get(i);
-                if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath())) {
+                if (topLevelNode.getAbsolutePath().startsWith(file.getAbsolutePath() + File.separator)) {
                     // the new file is a parent of this toplevel node
                     topLevelNodes.remove(i);
                 }
@@ -401,7 +401,7 @@ public class LXCFile implements Serializable {
             } else {
                 // search topLevelNode
                 for (File topLevelNode : topLevelNodes) {
-                    if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath())) {
+                    if (file.getAbsolutePath().startsWith(topLevelNode.getAbsolutePath() + File.separator)) {
                         // found toplevel node
                         result.add(new RealFile(file, topLevelNode));
                         break;

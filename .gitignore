@@ -12,7 +12,4 @@ lxc.log
 /.idea/
 /.navigation/
 /.gradle/
-/src/android/build/
-/src/core/build/
-/src/swing/build/
 local.properties
