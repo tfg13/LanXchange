@@ -1,13 +1,16 @@
 apply plugin: 'java'
-sourceSets {
-    main {
-        java {
-            srcDir '.'
-        }
-//        resources {
-//            srcDir 'src/resources'
-//        }
+
+buildscript {
+    repositories {
+        mavenCentral()
     }
 }
+
+repositories {
+    mavenCentral()
+}
+
+
 dependencies {
+    testCompile 'junit:junit:4.12'
 }

@@ -13,14 +13,3 @@ dependencies {
     compile 'net.java.dev.jna:jna:4.2.1'
     compile 'net.java.dev.jna:jna-platform:4.2.1'
 }
-
-sourceSets {
-    main {
-        java {
-            srcDir '.'
-        }
-//        resources {
-//            srcDir 'src/resources'
-//        }
-    }
-}
