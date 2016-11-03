@@ -23,6 +23,8 @@ package de.tobifleig.lxc.plaf.swing;
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
+import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import java.awt.Color;
 import java.awt.Font;
@@ -67,6 +69,9 @@ public class LXCPanel extends JPanel {
     private static final int HOVER_SELFDIST = 0;
     private static final int HOVER_SETTINGS = 1;
     private static final int HOVER_HELP = 2;
+    private static final int DRAWMODE_INIT = 3;
+    private static final int DRAWMODE_MAIN = 4;
+    private static final int DRAWMODE_HELP = 5;
     @Deprecated
     private List<LXCFile> allFiles;
     private transient Image logo;
@@ -100,8 +105,8 @@ public class LXCPanel extends JPanel {
     private int selectedIndex = -1;
     private int subJobDeleteSelected = -1;
     private int traySelected = HOVER_NONE;
-    boolean detailSelected = false;
-    boolean running = false;
+    private boolean detailSelected = false;
+    private int masterDrawMode = DRAWMODE_INIT;
     private GuiListener guiListener;
     private final OptionsDialog options;
     private boolean calcing;
@@ -112,264 +117,30 @@ public class LXCPanel extends JPanel {
 
     @Override
     public void paintComponent(Graphics g) {
-        if (running) {
-            GradientPaint grad = new GradientPaint(new Point(0, 0), new Color(192, 192, 192, 0), new Point(this.getWidth() / 2, 0), Color.LIGHT_GRAY, true);
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setBackground(Color.WHITE);
-            g2.clearRect(0, 0, this.getWidth(), this.getHeight());
-            // center LXC-Logo
-            g2.drawImage(logo, (this.getWidth() / 2) - (logo.getWidth(this) / 2), (this.getHeight() / 2) - (logo.getHeight(this) / 2), this);
-            if (traySelected != HOVER_HELP) {
-                g2.setColor(background);
-                g2.fillRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
-                g2.setPaint(grad);
-                g2.drawRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
-                g2.setPaint(null);
-                if (traySelected == HOVER_NONE) {
-                    // Text "LanXchange" (bottom, center)
-                    g2.drawImage(txt, (this.getWidth() / 2) - (txt.getWidth(this) / 2), this.getHeight() - txt.getHeight(this) - 2, this);
-                }
-                g2.drawImage(help, 5, this.getHeight() - 25, this);
-                // selfdist button
-                // hover?
-                if (traySelected == HOVER_SELFDIST) {
-                    g2.setColor(selBackground);
-                    g2.fillRect(this.getWidth() - 59, this.getHeight() - 30, 29, 30);
-                    g2.setColor(Color.GRAY);
-                    g2.drawString("self distribution", this.getWidth() / 2 - (mer1.stringWidth("self distribution") / 2), this.getHeight() - 10);
-                }
-                g2.drawImage(selfdist_small, this.getWidth() - 55, this.getHeight() - 25, this);
-                // settings button
-                // hover?
-                if (traySelected == HOVER_SETTINGS) {
-                    g2.setColor(selBackground);
-                    g2.fillRect(this.getWidth() - 30, this.getHeight() - 30, 30, 30);
-                    g2.setColor(Color.GRAY);
-                    g2.drawString("settings", this.getWidth() / 2 - (mer1.stringWidth("settings") / 2), this.getHeight() - 10);
-                }
-                g2.drawImage(screw, this.getWidth() - 25, this.getHeight() - 25, this);
-            }
-
-            // header
-            if (!allFiles.isEmpty()) {
-                g2.setColor(background);
-                g2.fillRect(-1, 0, this.getWidth() + 1, 19);
-                g2.setPaint(grad);
-                g2.drawRect(-1, -1, this.getWidth() + 1, 20);
-                g2.setPaint(null);
-                g2.setFont(f2);
-                g2.setColor(Color.BLACK);
-                g2.drawString("Type", 6, 8 + (mer2.getAscent() / 2));
-                g2.drawString("Name", 47, 8 + (mer2.getAscent() / 2));
-                g2.drawString("Size", (int) (1.0 * this.getWidth() * 0.7), 8 + (mer2.getAscent() / 2));
-            } else if (traySelected != HOVER_HELP) {
-                g2.setColor(background);
-                g2.fillRect(-1, 40, this.getWidth() + 1, 30);
-                g2.setPaint(grad);
-                g2.drawRect(-1, 40, this.getWidth() + 1, 30);
-                g2.setPaint(null);
-                g2.setFont(f2);
-                g2.setColor(Color.BLACK);
-                String noFilesText1 = "files shared by other devices appear in this window";
-                g2.drawString(noFilesText1, this.getWidth() / 2 - mer2.stringWidth(noFilesText1) / 2, 40 + mer2.getAscent() + 4);
-                String noFilesText2 = "drop or paste files here to start sharing";
-                g2.drawString(noFilesText2, this.getWidth() / 2 - mer2.stringWidth(noFilesText2) / 2, 40 + mer2.getAscent() + 15);
-            }
-            int y = 20; // y-coordinate
-            // set up clipping
-            Shape clip = g2.getClip();
-            g2.clip(new Rectangle(0, 20, this.getWidth(), this.getHeight() - 20 - 30));
-            // file list may have changed, make sure scrollY is still within bounds
-            int maxVisibleFiles = getMaxVisibleFiles();
-            scrollY = Math.min(scrollY, Math.max(0, allFiles.size() - maxVisibleFiles));
-            // files
-            maxVisibleFiles++;
-            for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles); i++) {
-                LXCFile file = allFiles.get(i);
-                // number of jobs?
-                int jobYPxl = 0;
-                if (file.getJobs() != null) {
-                    jobYPxl += file.getJobs().size() * 20;
-                }
-                // selected (=hovered)
-                if (selectedIndex != i) {
-                    g2.setColor(background);
-                } else {
-                    g2.setColor(selBackground);
-                }
-                if (jobYPxl == 0 && !file.isLocal()) {
-                    g2.fillRect(-1, y, this.getWidth() + 1, selectedIndex == i ? 40 : 30);
-                } else {
-                    g2.fillRect(-1, y, this.getWidth() + 1, 30 + jobYPxl);
-                }
-                // type
-                g2.drawImage(file.isLocal() ? harddisk : mini, 4, y + 5, this);
-                if (file.getType() == LXCFile.TYPE_FILE) {
-                    g2.drawImage(fileImg, 25, y + 5, this);
-                } else if (file.getType() == LXCFile.TYPE_FOLDER) {
-                    g2.drawImage(folder, 25, y + 5, this);
-                } else if (file.getType() == LXCFile.TYPE_MULTI) {
-                    g2.drawImage(multi, 25, y + 5, this);
-                }
-                // name
-                g2.setColor(Color.BLACK);
-                FontMetrics nameMetrics = mer1;
-                if (f1.canDisplayUpTo(file.getShownName()) == -1) {
-                    g2.setFont(f1);
-                } else {
-                    // contains chars not included in the default ubuntu font file, try to get from OS
-                    g2.setFont(f1Fallback);
-                    nameMetrics = mer1Fallback;
-                }
-                if (selectedIndex == i && file.isLocal()) {
-                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (nameMetrics.getAscent() / 2), nameMetrics);
-                } else {
-                    renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (nameMetrics.getAscent() / 2), nameMetrics);
-                }
-                if (!g2.getFont().equals(f1)) {
-                    g2.setFont(f1);
-                    nameMetrics = mer1;
-                }
-                // size
-                if (detailSelected && selectedIndex == i && file.isLocal()) {
-                    g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 8 + (mer1.getAscent() / 2));
-                    g2.setFont(f2);
-                    g2.drawString("Click to remove", (int) (1.0 * this.getWidth() * 0.7), y + 27);
-                } else {
-                    g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 14 + (mer1.getAscent() / 2));
-                }
-                if (file.isLocal()) {
-                    if (detailSelected && selectedIndex == i) {
-                        g2.setColor(background);
-                        g2.fillRect(this.getWidth() - 23, y + 6, 17, 19);
-                    }
-                    // trash
-                    g2.drawImage(delete, this.getWidth() - 25, y + 5, this);
-                } else {
-                    g2.drawImage(file.isAvailable() ? done : download, this.getWidth() - 25, y + 5, this);
-                }
-                if (selectedIndex == i) {
-                    if (file.isLocal()) {
-                        g2.setFont(f2);
-                        g2.setColor(Color.BLACK);
-                        String downloads;
-                        if (file.getNumberOfTransfers() != 1) {
-                            downloads = file.getNumberOfTransfers() + " downloads";
-                        } else {
-                            downloads = "1 download";
-                        }
-                        g2.drawString(downloads, 47, y + 27);
-                    }
-                    if (jobYPxl == 0 && !file.isLocal()) {
-                        g2.setFont(f2);
-                        String status = "Available - Click to download";
-                        if (file.isAvailable()) {
-                            status = "Download completed - Right-click to remove/redownload";
-                        }
-                        if (!file.isLocked()) {
-                            g2.drawString(status, this.getWidth() / 2 - mer2.stringWidth(status) / 2, y + 36); // center
-                        }
-                    }
-                }
-                if (file.isLocked() && jobYPxl == 0) {
-                    g2.setColor(selBackground);
-                    g2.fillRect(2, y, this.getWidth() - 4, selectedIndex == i ? 40 : 30);
-                    // busy
-                    g2.drawImage(busy, this.getWidth() / 2 - busy.getWidth(this) / 2, selectedIndex == i ? y + 12 : y + 7, this);
-                }
-                // jobs
-                List<LXCJob> jobs = file.getJobs();
-                if (jobs != null) {
-                    for (int o = 0; o < jobs.size(); o++) {
-                        LXCJob job = jobs.get(o);
-                        String to = "from";
-                        if (job.isIsSeeder()) {
-                            to = "to";
-                        }
-                        g2.setFont(f2);
-                        g2.setColor(Color.BLACK);
-                        renderCutString(to + " " + job.getRemote().getName(), (int) (this.getWidth() * 0.3), g2, 10, y + 30 + o * 20 + 14, mer2);
-                        // progress bar
-                        g2.drawRect((int) (this.getWidth() * 0.65), y + 30 + o * 20 + 5, (int) (this.getWidth() * 0.35) - 25, 10);
-                        // progress in percent
-                        int progress = job.getTrans().getProgress();
-                        String sProg = progress + "%";
-                        if (progress < 0 || progress > 100) {
-                            sProg = "N/A";
-                        } else {
-                            // core of progress bar
-                            g2.fillRect((int) (this.getWidth() * 0.65) + 2, y + 30 + o * 20 + 7, (int) (((int) (this.getWidth() * 0.3) - 9) * (progress / 100f)), 7);
-                        }
-                        renderCutString(sProg, (int) (this.getWidth() * 0.1), g2, (int) (this.getWidth() * 0.55), y + 30 + o * 20 + 14, mer2);
-                        // speed:
-                        renderCutString(LXCFile.getFormattedSize(job.getTrans().getCurrentSpeed()) + "/s", (int) (this.getWidth() * 0.15), g2, (int) (this.getWidth() * 0.35), y + 30 + o * 20 + 14, mer2);
-                        // cancel-button + hover
-                        if (subJobDeleteSelected == o) {
-                            g2.setColor(background);
-                            g2.fillRect(this.getWidth() - 22, y + 30 + o * 20 + 3, 15, 15);
-                        }
-                        g2.drawImage(cancel, this.getWidth() - 22, y + 30 + o * 20 + 3, this);
-                    }
-                }
-                if (selectedIndex == i) {
-                    if (jobYPxl == 0 && !file.isLocal()) {
-                        y += 40;
-                    } else {
-                        y += 30 + jobYPxl;
-                    }
-                } else {
-                    y += 30 + jobYPxl;
-                }
-            }
-
-            // calcing
-            if (calcing) {
-                g2.setColor(background);
-                g2.fillRect(-1, y, this.getWidth() + 1, 20);
-                g2.setPaint(grad);
-                g2.drawLine(0, y + 20, this.getWidth() + 1, y + 20);
-                g2.setPaint(null);
-                // busy
-                g2.drawImage(busy, 4, y, this);
-                g2.drawImage(busy, this.getWidth() - 25, y, this);
-                // text
-                g2.setColor(Color.BLACK);
-                g2.setFont(f1);
-                String calcText = "calculating file size...";
-                g2.drawString(calcText, this.getWidth() / 2 - mer1.stringWidth(calcText) / 2, y + 9 + (mer1.getAscent() / 2));
-            }
-            // seperator line
-            if (!allFiles.isEmpty()) {
-                g2.setPaint(grad);
-                g2.drawLine(0, y, this.getWidth(), y);
-                g2.setPaint(null);
-            }
-            // scrollbar
-            if (allFiles.size() > maxVisibleFiles - 1) {
-                // length of scrollbar
-                double visibleFraction = ((double) maxVisibleFiles - 1) / allFiles.size();
-                // position of scrollbar
-                double visibleRangeStart = ((double) scrollY) / allFiles.size();
-                // draw
-                int visAreaHeight = (this.getHeight() - 20 - 30);
-                int scrollbarStart = (int) (visAreaHeight * visibleRangeStart + 20);
-                int scrollbarLength = (int) (visAreaHeight * visibleFraction);
-                g2.setColor(Color.BLACK);
-                g2.drawLine(this.getWidth() - 2, scrollbarStart, this.getWidth() - 2, scrollbarStart + scrollbarLength);
-                g2.drawLine(this.getWidth() - 3, scrollbarStart, this.getWidth() - 3, scrollbarStart + scrollbarLength);
-            }
-            // reset clip
-            g2.setClip(clip);
-
-            // help screen
-            if (traySelected == HOVER_HELP) {
+        Graphics2D g2 = (Graphics2D) g;
+        GradientPaint grad = new GradientPaint(new Point(0, 0), new Color(192, 192, 192, 0), new Point(this.getWidth() / 2, 0), Color.LIGHT_GRAY, true);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setBackground(Color.WHITE);
+        g2.clearRect(0, 0, this.getWidth(), this.getHeight());
+        switch (masterDrawMode) {
+            case DRAWMODE_INIT:
+                g.setColor(Color.BLACK);
+                g.fillRect(0, 0, this.getWidth(), this.getHeight());
+                g.setColor(Color.WHITE);
+                g.setFont(Font.decode("Sans-30"));
+                g.drawString("...", getWidth() / 4 * 3, getHeight() / 4 * 3);
+                break;
+            case DRAWMODE_HELP:
                 // background
                 g2.setColor(background);
                 g2.fillRect(-1, -1, this.getWidth() + 1, this.getHeight() + 2);
                 g2.fillRect(-1, -1, this.getWidth() + 1, this.getHeight() + 2);
                 // help symbol + hover
-                g2.setColor(selBackground);
+                if (traySelected == HOVER_HELP) {
+                    g2.setColor(Color.GRAY);
+                } else {
+                    g2.setColor(selBackground);
+                }
                 g2.fillRect(0, this.getHeight() - 30, 29, 30);
                 g2.drawImage(help, 5, this.getHeight() - 25, this);
                 // header - LanXchange
@@ -456,16 +227,262 @@ public class LXCPanel extends JPanel {
                 // legal
                 String legalText = "Copyright  2009-2016  Tobias Fleig  -  All rights reserved";
                 g2.drawString(legalText, this.getWidth() - mer2.stringWidth(legalText) - 5, this.getHeight() - 6);
-            }
+                break;
+            case DRAWMODE_MAIN:
+            default:
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setBackground(Color.WHITE);
+                g2.clearRect(0, 0, this.getWidth(), this.getHeight());
+                // center LXC-Logo
+                g2.drawImage(logo, (this.getWidth() / 2) - (logo.getWidth(this) / 2), (this.getHeight() / 2) - (logo.getHeight(this) / 2), this);
+                g2.setColor(background);
+                g2.fillRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
+                g2.setPaint(grad);
+                g2.drawRect(-1, this.getHeight() - 30, this.getWidth() + 2, 30);
+                g2.setPaint(null);
+                if (traySelected == HOVER_NONE) {
+                    // Text "LanXchange" (bottom, center)
+                    g2.drawImage(txt, (this.getWidth() / 2) - (txt.getWidth(this) / 2), this.getHeight() - txt.getHeight(this) - 2, this);
+                }
+                // selfdist button
+                // hover?
+                if (traySelected == HOVER_SELFDIST) {
+                    g2.setColor(selBackground);
+                    g2.fillRect(this.getWidth() - 59, this.getHeight() - 30, 29, 30);
+                    g2.setColor(Color.GRAY);
+                    g2.drawString("self distribution", this.getWidth() / 2 - (mer1.stringWidth("self distribution") / 2), this.getHeight() - 10);
+                }
+                g2.drawImage(selfdist_small, this.getWidth() - 55, this.getHeight() - 25, this);
+                // settings button
+                // hover?
+                if (traySelected == HOVER_SETTINGS) {
+                    g2.setColor(selBackground);
+                    g2.fillRect(this.getWidth() - 30, this.getHeight() - 30, 30, 30);
+                    g2.setColor(Color.GRAY);
+                    g2.drawString("settings", this.getWidth() / 2 - (mer1.stringWidth("settings") / 2), this.getHeight() - 10);
+                }
+                g2.drawImage(screw, this.getWidth() - 25, this.getHeight() - 25, this);
+                // help button
+                if (traySelected == HOVER_HELP) {
+                    g2.setColor(selBackground);
+                    g2.fillRect(0, this.getHeight() - 30, 29, 30);
+                    g2.setColor(Color.GRAY);
+                    g2.drawString("help / about", this.getWidth() / 2 - (mer1.stringWidth("help / about") / 2), this.getHeight() - 10);
+                }
+                g2.drawImage(help, 5, this.getHeight() - 25, this);
 
-        } else {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, this.getWidth(), this.getHeight());
-            g.setColor(Color.WHITE);
-            g.setFont(Font.decode("Sans-30"));
-            g.drawString("...", getWidth() / 4 * 3, getHeight() / 4 * 3);
+                // header
+                if (!allFiles.isEmpty()) {
+                    g2.setColor(background);
+                    g2.fillRect(-1, 0, this.getWidth() + 1, 19);
+                    g2.setPaint(grad);
+                    g2.drawRect(-1, -1, this.getWidth() + 1, 20);
+                    g2.setPaint(null);
+                    g2.setFont(f2);
+                    g2.setColor(Color.BLACK);
+                    g2.drawString("Type", 6, 8 + (mer2.getAscent() / 2));
+                    g2.drawString("Name", 47, 8 + (mer2.getAscent() / 2));
+                    g2.drawString("Size", (int) (1.0 * this.getWidth() * 0.7), 8 + (mer2.getAscent() / 2));
+                } else {
+                    g2.setColor(background);
+                    g2.fillRect(-1, 40, this.getWidth() + 1, 30);
+                    g2.setPaint(grad);
+                    g2.drawRect(-1, 40, this.getWidth() + 1, 30);
+                    g2.setPaint(null);
+                    g2.setFont(f2);
+                    g2.setColor(Color.BLACK);
+                    String noFilesText1 = "files shared by other devices appear in this window";
+                    g2.drawString(noFilesText1, this.getWidth() / 2 - mer2.stringWidth(noFilesText1) / 2, 40 + mer2.getAscent() + 4);
+                    String noFilesText2 = "drop or paste files here to start sharing";
+                    g2.drawString(noFilesText2, this.getWidth() / 2 - mer2.stringWidth(noFilesText2) / 2, 40 + mer2.getAscent() + 15);
+                }
+                int y = 20; // y-coordinate
+                // set up clipping
+                Shape clip = g2.getClip();
+                g2.clip(new Rectangle(0, 20, this.getWidth(), this.getHeight() - 20 - 30));
+                // file list may have changed, make sure scrollY is still within bounds
+                int maxVisibleFiles = getMaxVisibleFiles();
+                scrollY = Math.min(scrollY, Math.max(0, allFiles.size() - maxVisibleFiles));
+                // files
+                maxVisibleFiles++;
+                for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles); i++) {
+                    LXCFile file = allFiles.get(i);
+                    // number of jobs?
+                    int jobYPxl = 0;
+                    if (file.getJobs() != null) {
+                        jobYPxl += file.getJobs().size() * 20;
+                    }
+                    // selected (=hovered)
+                    if (selectedIndex != i) {
+                        g2.setColor(background);
+                    } else {
+                        g2.setColor(selBackground);
+                    }
+                    if (jobYPxl == 0 && !file.isLocal()) {
+                        g2.fillRect(-1, y, this.getWidth() + 1, selectedIndex == i ? 40 : 30);
+                    } else {
+                        g2.fillRect(-1, y, this.getWidth() + 1, 30 + jobYPxl);
+                    }
+                    // type
+                    g2.drawImage(file.isLocal() ? harddisk : mini, 4, y + 5, this);
+                    if (file.getType() == LXCFile.TYPE_FILE) {
+                        g2.drawImage(fileImg, 25, y + 5, this);
+                    } else if (file.getType() == LXCFile.TYPE_FOLDER) {
+                        g2.drawImage(folder, 25, y + 5, this);
+                    } else if (file.getType() == LXCFile.TYPE_MULTI) {
+                        g2.drawImage(multi, 25, y + 5, this);
+                    }
+                    // name
+                    g2.setColor(Color.BLACK);
+                    FontMetrics nameMetrics = mer1;
+                    if (f1.canDisplayUpTo(file.getShownName()) == -1) {
+                        g2.setFont(f1);
+                    } else {
+                        // contains chars not included in the default ubuntu font file, try to get from OS
+                        g2.setFont(f1Fallback);
+                        nameMetrics = mer1Fallback;
+                    }
+                    if (selectedIndex == i && file.isLocal()) {
+                        renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 8 + (nameMetrics.getAscent() / 2), nameMetrics);
+                    } else {
+                        renderCutString(file.getShownName(), (int) (1.0 * this.getWidth() * 0.7) - 49, g2, 47, y + 14 + (nameMetrics.getAscent() / 2), nameMetrics);
+                    }
+                    if (!g2.getFont().equals(f1)) {
+                        g2.setFont(f1);
+                        nameMetrics = mer1;
+                    }
+                    // size
+                    if (detailSelected && selectedIndex == i && file.isLocal()) {
+                        g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 8 + (mer1.getAscent() / 2));
+                        g2.setFont(f2);
+                        g2.drawString("Click to remove", (int) (1.0 * this.getWidth() * 0.7), y + 27);
+                    } else {
+                        g2.drawString(LXCFile.getFormattedSize(file.getFileSize()), (int) (1.0 * this.getWidth() * 0.7), y + 14 + (mer1.getAscent() / 2));
+                    }
+                    if (file.isLocal()) {
+                        if (detailSelected && selectedIndex == i) {
+                            g2.setColor(background);
+                            g2.fillRect(this.getWidth() - 23, y + 6, 17, 19);
+                        }
+                        // trash
+                        g2.drawImage(delete, this.getWidth() - 25, y + 5, this);
+                    } else {
+                        g2.drawImage(file.isAvailable() ? done : download, this.getWidth() - 25, y + 5, this);
+                    }
+                    if (selectedIndex == i) {
+                        if (file.isLocal()) {
+                            g2.setFont(f2);
+                            g2.setColor(Color.BLACK);
+                            String downloads;
+                            if (file.getNumberOfTransfers() != 1) {
+                                downloads = file.getNumberOfTransfers() + " downloads";
+                            } else {
+                                downloads = "1 download";
+                            }
+                            g2.drawString(downloads, 47, y + 27);
+                        }
+                        if (jobYPxl == 0 && !file.isLocal()) {
+                            g2.setFont(f2);
+                            String status = "Available - Click to download";
+                            if (file.isAvailable()) {
+                                status = "Download completed - Right-click to remove/redownload";
+                            }
+                            if (!file.isLocked()) {
+                                g2.drawString(status, this.getWidth() / 2 - mer2.stringWidth(status) / 2, y + 36); // center
+                            }
+                        }
+                    }
+                    if (file.isLocked() && jobYPxl == 0) {
+                        g2.setColor(selBackground);
+                        g2.fillRect(2, y, this.getWidth() - 4, selectedIndex == i ? 40 : 30);
+                        // busy
+                        g2.drawImage(busy, this.getWidth() / 2 - busy.getWidth(this) / 2, selectedIndex == i ? y + 12 : y + 7, this);
+                    }
+                    // jobs
+                    List<LXCJob> jobs = file.getJobs();
+                    if (jobs != null) {
+                        for (int o = 0; o < jobs.size(); o++) {
+                            LXCJob job = jobs.get(o);
+                            String to = "from";
+                            if (job.isIsSeeder()) {
+                                to = "to";
+                            }
+                            g2.setFont(f2);
+                            g2.setColor(Color.BLACK);
+                            renderCutString(to + " " + job.getRemote().getName(), (int) (this.getWidth() * 0.3), g2, 10, y + 30 + o * 20 + 14, mer2);
+                            // progress bar
+                            g2.drawRect((int) (this.getWidth() * 0.65), y + 30 + o * 20 + 5, (int) (this.getWidth() * 0.35) - 25, 10);
+                            // progress in percent
+                            int progress = job.getTrans().getProgress();
+                            String sProg = progress + "%";
+                            if (progress < 0 || progress > 100) {
+                                sProg = "N/A";
+                            } else {
+                                // core of progress bar
+                                g2.fillRect((int) (this.getWidth() * 0.65) + 2, y + 30 + o * 20 + 7, (int) (((int) (this.getWidth() * 0.3) - 9) * (progress / 100f)), 7);
+                            }
+                            renderCutString(sProg, (int) (this.getWidth() * 0.1), g2, (int) (this.getWidth() * 0.55), y + 30 + o * 20 + 14, mer2);
+                            // speed:
+                            renderCutString(LXCFile.getFormattedSize(job.getTrans().getCurrentSpeed()) + "/s", (int) (this.getWidth() * 0.15), g2, (int) (this.getWidth() * 0.35), y + 30 + o * 20 + 14, mer2);
+                            // cancel-button + hover
+                            if (subJobDeleteSelected == o) {
+                                g2.setColor(background);
+                                g2.fillRect(this.getWidth() - 22, y + 30 + o * 20 + 3, 15, 15);
+                            }
+                            g2.drawImage(cancel, this.getWidth() - 22, y + 30 + o * 20 + 3, this);
+                        }
+                    }
+                    if (selectedIndex == i) {
+                        if (jobYPxl == 0 && !file.isLocal()) {
+                            y += 40;
+                        } else {
+                            y += 30 + jobYPxl;
+                        }
+                    } else {
+                        y += 30 + jobYPxl;
+                    }
+                }
+
+                // calcing
+                if (calcing) {
+                    g2.setColor(background);
+                    g2.fillRect(-1, y, this.getWidth() + 1, 20);
+                    g2.setPaint(grad);
+                    g2.drawLine(0, y + 20, this.getWidth() + 1, y + 20);
+                    g2.setPaint(null);
+                    // busy
+                    g2.drawImage(busy, 4, y, this);
+                    g2.drawImage(busy, this.getWidth() - 25, y, this);
+                    // text
+                    g2.setColor(Color.BLACK);
+                    g2.setFont(f1);
+                    String calcText = "calculating file size...";
+                    g2.drawString(calcText, this.getWidth() / 2 - mer1.stringWidth(calcText) / 2, y + 9 + (mer1.getAscent() / 2));
+                }
+                // separator line
+                if (!allFiles.isEmpty()) {
+                    g2.setPaint(grad);
+                    g2.drawLine(0, y, this.getWidth(), y);
+                    g2.setPaint(null);
+                }
+                // scrollbar
+                if (allFiles.size() > maxVisibleFiles - 1) {
+                    // length of scrollbar
+                    double visibleFraction = ((double) maxVisibleFiles - 1) / allFiles.size();
+                    // position of scrollbar
+                    double visibleRangeStart = ((double) scrollY) / allFiles.size();
+                    // draw
+                    int visAreaHeight = (this.getHeight() - 20 - 30);
+                    int scrollbarStart = (int) (visAreaHeight * visibleRangeStart + 20);
+                    int scrollbarLength = (int) (visAreaHeight * visibleFraction);
+                    g2.setColor(Color.BLACK);
+                    g2.drawLine(this.getWidth() - 2, scrollbarStart, this.getWidth() - 2, scrollbarStart + scrollbarLength);
+                    g2.drawLine(this.getWidth() - 3, scrollbarStart, this.getWidth() - 3, scrollbarStart + scrollbarLength);
+                }
+                // reset clip
+                g2.setClip(clip);
+                break;
         }
-
     }
 
     private int getMaxVisibleFiles() {
@@ -570,7 +587,7 @@ public class LXCPanel extends JPanel {
         mer1Fallback = this.getGraphics().getFontMetrics(f1Fallback);
         mer1b = this.getGraphics().getFontMetrics(f1b);
         mer2 = this.getGraphics().getFontMetrics(f2);
-        running = true;
+        masterDrawMode = DRAWMODE_MAIN;
         this.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -582,44 +599,85 @@ public class LXCPanel extends JPanel {
 
             @Override
             public void mouseReleased(final MouseEvent e) {
-                if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                    // display selfdist
-                    SelfDistributor.showGui((JFrame) SwingUtilities.getRoot(LXCPanel.this));
-                } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                    // display settings
-                    options.showAndWait();
-                    guiListener.reloadConfiguration();
-                } else if (e.getButton() == 1 && detailSelected && selectedIndex != -1 && selectedIndex < allFiles.size() && allFiles.get(selectedIndex).isLocal()) { // delete?
-                    try {
-                        LXCFile file = allFiles.get(selectedIndex);
-                        if (file.isLocal()) {
-                            guiListener.removeFile(file);
-                        }
-                    } catch (Exception ex) {
-                    }
-                } else if (e.getButton() == 1 && subJobDeleteSelected != -1 && selectedIndex != -1) { // cancel download
-                    // Search job and cancel it
-                    allFiles.get(selectedIndex).getJobs().get(subJobDeleteSelected).abortTransfer();
-                } else if (selectedIndex > -1 && selectedIndex < allFiles.size()) {
-                    // simple click
-                    final LXCFile file = allFiles.get(selectedIndex);
-                    if (e.getButton() == 1 && !file.isLocked() && !file.isLocal() && !file.isAvailable()) {
-                        // init dl (threaded)
-                        file.setLocked(true);
-                        Thread t = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                guiListener.downloadFile(file, e.isShiftDown());
-                                selfTrigger();
+                switch (masterDrawMode) {
+                    case DRAWMODE_INIT:
+                        // ignore input in this mode
+                        break;
+                    case DRAWMODE_HELP:
+                        // right click exits
+                        if (e.getButton() == 3) {
+                            masterDrawMode = DRAWMODE_MAIN;
+                        } else {
+                            // close window?
+                            if (e.getX() < 30 && e.getY() > LXCPanel.this.getHeight() - 30) {
+                                masterDrawMode = DRAWMODE_MAIN;
                             }
-                        });
-                        t.setName("lxc_helper_initdl_" + file.getShownName());
-                        t.setDaemon(true);
-                        t.start();
-                    } else if (e.getButton() == 3 && !file.isLocked() && !file.isLocal() && file.isAvailable()) {
-                        // reset file. (disappears or allows re-download)
-                        guiListener.resetFile(file);
-                    }
+                            // click mail, github, license?
+                            if (e.getY() >= 260 && e.getY() < 295) {
+                                // mail
+                                DesktopInteractionHelper.sendMail("mailto:mail@lanxchange.com");
+                            } else if (e.getY() >= 295 && e.getY() < 330) {
+                                // github
+                                DesktopInteractionHelper.openURL("https://github.com/tfg13/LanXchange");
+                            } else if (e.getY() >= 330 && e.getY() < LXCPanel.this.getHeight() - 30) {
+                                // gpl
+                                DesktopInteractionHelper.openURL("https://www.gnu.org/licenses/gpl-3.0.en.html");
+                            }
+                        }
+                        break;
+                    case DRAWMODE_MAIN:
+                    default:
+                        if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                            // display selfdist
+                            SelfDistributor.showGui((JFrame) SwingUtilities.getRoot(LXCPanel.this));
+                        } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                            // display settings
+                            options.showAndWait();
+                            guiListener.reloadConfiguration();
+                        } else if (e.getX() < 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                            // open help
+                            masterDrawMode = DRAWMODE_HELP;
+                        } else if (e.getButton() == 1 && detailSelected && selectedIndex != -1 && selectedIndex < allFiles.size() && allFiles.get(selectedIndex).isLocal()) { // delete?
+                            try {
+                                LXCFile file = allFiles.get(selectedIndex);
+                                if (file.isLocal()) {
+                                    guiListener.removeFile(file);
+                                }
+                            } catch (Exception ex) {
+                            }
+                        } else if (e.getButton() == 1 && subJobDeleteSelected != -1 && selectedIndex != -1) { // cancel download
+                            // Search job and cancel it
+                            allFiles.get(selectedIndex).getJobs().get(subJobDeleteSelected).abortTransfer();
+                        } else if (selectedIndex > -1 && selectedIndex < allFiles.size()) {
+                            // simple click
+                            final LXCFile file = allFiles.get(selectedIndex);
+                            if (e.getButton() == 1 && !file.isLocked() && !file.isLocal() && !file.isAvailable()) {
+                                // init dl (threaded)
+                                file.setLocked(true);
+                                Thread t = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        guiListener.downloadFile(file, e.isShiftDown());
+                                        selfTrigger();
+                                    }
+                                });
+                                t.setName("lxc_helper_initdl_" + file.getShownName());
+                                t.setDaemon(true);
+                                t.start();
+                            } else if (!file.isLocked() && !file.isLocal() && file.isAvailable()) {
+                                if (e.getButton() == 1) {
+                                    // try to open the file
+                                    VirtualFile vFile = file.getFiles().get(0);
+                                    if (vFile instanceof RealFile) {
+                                        RealFile rFile = (RealFile) vFile;
+                                        DesktopInteractionHelper.openFile(rFile.getBackingFile());
+                                    }
+                                } else if (e.getButton() == 3) {
+                                    // reset file. (disappears or allows re-download)
+                                    guiListener.resetFile(file);
+                                }
+                            }
+                        }
                 }
                 selfTrigger();
             }
@@ -647,128 +705,149 @@ public class LXCPanel extends JPanel {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                // help-button?
-                if (e.getX() < 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                    if (traySelected != HOVER_HELP) {
-                        selfTrigger();
-                        traySelected = HOVER_HELP;
-                    }
-                } else if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                    // self-distribution button
-                    if (traySelected != HOVER_SELFDIST) {
-                        traySelected = HOVER_SELFDIST;
-                        selfTrigger();
-                    }
-                } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                    // settings button
-                    if (traySelected != HOVER_SETTINGS) {
-                        traySelected = HOVER_SETTINGS;
-                        selfTrigger();
-                    }
-                } else {
-                    // turn off hovers
-                    if (traySelected != -1) {
-                        traySelected = -1;
-                        selfTrigger();
-                    }
-                    int newSelIndex = scrollY;
-                    int my = e.getY();
-                    int pre = 20;
-                    int prev = 20;
-                    if (my < pre) {
-                        newSelIndex = -1;
-                    } else {
-                        // Add file after file until we get there
-                        int maxVisibleFiles = LXCPanel.this.getMaxVisibleFiles();
-                        for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles + 1); i++) {
-                            int plus;
-                            LXCFile file = allFiles.get(i);
-                            if (file.isLocal()) {
-                                int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
-                                plus = 30 + jobnum * 20;
+                switch (masterDrawMode) {
+                    case DRAWMODE_INIT:
+                        // ignore
+                        break;
+                    case DRAWMODE_HELP:
+                        // hover help button
+                        if (e.getX() < 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                            if (traySelected != HOVER_HELP) {
+                                traySelected = HOVER_HELP;
+                                selfTrigger();
+                            }
+                        } else {
+                            if (traySelected != HOVER_NONE) {
+                                traySelected = HOVER_NONE;
+                                selfTrigger();
+                            }
+                        }
+                        break;
+                    case DRAWMODE_MAIN:
+                    default:
+                        // help-button?
+                        if (e.getX() < 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                            if (traySelected != HOVER_HELP) {
+                                traySelected = HOVER_HELP;
+                                selfTrigger();
+                            }
+                        } else if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                            // self-distribution button
+                            if (traySelected != HOVER_SELFDIST) {
+                                traySelected = HOVER_SELFDIST;
+                                selfTrigger();
+                            }
+                        } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                            // settings button
+                            if (traySelected != HOVER_SETTINGS) {
+                                traySelected = HOVER_SETTINGS;
+                                selfTrigger();
+                            }
+                        } else {
+                            // turn off hovers
+                            if (traySelected != -1) {
+                                traySelected = -1;
+                                selfTrigger();
+                            }
+                            int newSelIndex = scrollY;
+                            int my = e.getY();
+                            int pre = 20;
+                            int prev = 20;
+                            if (my < pre) {
+                                newSelIndex = -1;
                             } else {
-                                int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
-                                if (jobnum == 0) {
-                                    if (selectedIndex == i) {
-                                        plus = 40;
+                                // Add file after file until we get there
+                                int maxVisibleFiles = LXCPanel.this.getMaxVisibleFiles();
+                                for (int i = scrollY; i < Math.min(allFiles.size(), scrollY + maxVisibleFiles + 1); i++) {
+                                    int plus;
+                                    LXCFile file = allFiles.get(i);
+                                    if (file.isLocal()) {
+                                        int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
+                                        plus = 30 + jobnum * 20;
                                     } else {
-                                        plus = 30;
+                                        int jobnum = file.getJobs() == null ? 0 : file.getJobs().size();
+                                        if (jobnum == 0) {
+                                            if (selectedIndex == i) {
+                                                plus = 40;
+                                            } else {
+                                                plus = 30;
+                                            }
+                                        } else {
+                                            plus = 30 + jobnum * 20;
+                                        }
+                                    }
+                                    pre += plus;
+                                    // reached mouseY?
+                                    if (pre >= my) {
+                                        break;
+                                    } else {
+                                        newSelIndex++;
+                                        prev += plus;
+                                    }
+                                }
+                            }
+                            boolean changed = false;
+                            if (newSelIndex < 0 || newSelIndex >= allFiles.size()) {
+                                // invalid, set to -1
+                                if (selectedIndex != -1) {
+                                    selectedIndex = -1;
+                                    changed = true;
+                                }
+                            } else {
+                                if (selectedIndex != newSelIndex) {
+                                    selectedIndex = newSelIndex;
+                                    changed = true;
+                                }
+                                // job-delete button
+                                if (e.getX() >= LXCPanel.this.getWidth() - 22 && e.getX() <= LXCPanel.this.getWidth() - 7) {
+                                    // mouseX in range, check Y
+                                    boolean found = false;
+                                    for (int o = 0; o < allFiles.get(selectedIndex).getJobs().size(); o++) {
+                                        if (e.getY() >= prev + 30 + 4 + o * 20 && e.getY() <= prev + 30 + 4 + o * 20 + 15) {
+                                            if (subJobDeleteSelected != o) {
+                                                subJobDeleteSelected = o;
+                                                changed = true;
+                                            }
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!found) {
+                                        if (subJobDeleteSelected != -1) {
+                                            subJobDeleteSelected = -1;
+                                            changed = true;
+                                        }
                                     }
                                 } else {
-                                    plus = 30 + jobnum * 20;
-                                }
-                            }
-                            pre += plus;
-                            // reached mouseY?
-                            if (pre >= my) {
-                                break;
-                            } else {
-                                newSelIndex++;
-                                prev += plus;
-                            }
-                        }
-                    }
-                    boolean changed = false;
-                    if (newSelIndex < 0 || newSelIndex >= allFiles.size()) {
-                        // invalid, set to -1
-                        if (selectedIndex != -1) {
-                            selectedIndex = -1;
-                            changed = true;
-                        }
-                    } else {
-                        if (selectedIndex != newSelIndex) {
-                            selectedIndex = newSelIndex;
-                            changed = true;
-                        }
-                        // job-delete button
-                        if (e.getX() >= LXCPanel.this.getWidth() - 22 && e.getX() <= LXCPanel.this.getWidth() - 7) {
-                            // mouseX in range, check Y
-                            boolean found = false;
-                            for (int o = 0; o < allFiles.get(selectedIndex).getJobs().size(); o++) {
-                                if (e.getY() >= prev + 30 + 4 + o * 20 && e.getY() <= prev + 30 + 4 + o * 20 + 15) {
-                                    if (subJobDeleteSelected != o) {
-                                        subJobDeleteSelected = o;
+                                    if (subJobDeleteSelected != -1) {
+                                        subJobDeleteSelected = -1;
                                         changed = true;
                                     }
-                                    found = true;
-                                    break;
                                 }
-                            }
-                            if (!found) {
-                                if (subJobDeleteSelected != -1) {
-                                    subJobDeleteSelected = -1;
-                                    changed = true;
-                                }
-                            }
-                        } else {
-                            if (subJobDeleteSelected != -1) {
-                                subJobDeleteSelected = -1;
-                                changed = true;
-                            }
-                        }
-                        if (e.getX() > LXCPanel.this.getWidth() - 28 && e.getX() < LXCPanel.this.getWidth() - 7) {
-                            if (e.getY() >= prev + 5 && e.getY() <= prev + 26) {
-                                if (!detailSelected) {
-                                    detailSelected = true;
-                                    changed = true;
-                                }
+                                if (e.getX() > LXCPanel.this.getWidth() - 28 && e.getX() < LXCPanel.this.getWidth() - 7) {
+                                    if (e.getY() >= prev + 5 && e.getY() <= prev + 26) {
+                                        if (!detailSelected) {
+                                            detailSelected = true;
+                                            changed = true;
+                                        }
 
-                            } else {
-                                if (detailSelected) {
-                                    detailSelected = false;
-                                    changed = true;
+                                    } else {
+                                        if (detailSelected) {
+                                            detailSelected = false;
+                                            changed = true;
+                                        }
+                                    }
+                                } else {
+                                    if (detailSelected) {
+                                        detailSelected = false;
+                                        changed = true;
+                                    }
                                 }
                             }
-                        } else {
-                            if (detailSelected) {
-                                detailSelected = false;
-                                changed = true;
+                            if (changed) {
+                                selfTrigger();
                             }
                         }
-                    }
-                    if (changed) {
-                        selfTrigger();
-                    }
                 }
             }
         });
@@ -776,21 +855,23 @@ public class LXCPanel extends JPanel {
 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                    int maxVisibleFiles = getMaxVisibleFiles();
-                    int maxScrollY = allFiles.size() - maxVisibleFiles;
-                    int delta = 0;
-                    if (e.getPreciseWheelRotation() > 0) {
-                        delta = 1;
-                    } else if (e.getPreciseWheelRotation() < 0) {
-                        delta = -1;
-                    }
-                    int newScrollY = scrollY + delta;
-                    if (newScrollY >= 0 && newScrollY <= maxScrollY) {
-                        if (newScrollY != scrollY) {
-                            selfTrigger();
+                if (masterDrawMode == DRAWMODE_MAIN) {
+                    if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+                        int maxVisibleFiles = getMaxVisibleFiles();
+                        int maxScrollY = allFiles.size() - maxVisibleFiles;
+                        int delta = 0;
+                        if (e.getPreciseWheelRotation() > 0) {
+                            delta = 1;
+                        } else if (e.getPreciseWheelRotation() < 0) {
+                            delta = -1;
                         }
-                        scrollY = newScrollY;
+                        int newScrollY = scrollY + delta;
+                        if (newScrollY >= 0 && newScrollY <= maxScrollY) {
+                            if (newScrollY != scrollY) {
+                                selfTrigger();
+                            }
+                            scrollY = newScrollY;
+                        }
                     }
                 }
             }
