@@ -58,6 +58,8 @@ public class MIMETypeGuesser {
         hardcodedMIMETypes.put(".mov", "video/quicktime");
         hardcodedMIMETypes.put(".mpg", "video/mpg");
         hardcodedMIMETypes.put(".webm", "video/webm");
+        // misc
+        hardcodedMIMETypes.put(".pdf", "application/pdf");
     }
 
     /**
