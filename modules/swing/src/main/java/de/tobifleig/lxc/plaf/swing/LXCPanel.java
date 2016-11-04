@@ -27,6 +27,7 @@ import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
@@ -102,6 +103,7 @@ public class LXCPanel extends JPanel {
     private FontMetrics mer1Fallback;
     private FontMetrics mer1b;
     private FontMetrics mer2;
+    private Cursor urlClickableCursor;
     private int selectedIndex = -1;
     private int subJobDeleteSelected = -1;
     private int traySelected = HOVER_NONE;
@@ -587,6 +589,7 @@ public class LXCPanel extends JPanel {
         mer1Fallback = this.getGraphics().getFontMetrics(f1Fallback);
         mer1b = this.getGraphics().getFontMetrics(f1b);
         mer2 = this.getGraphics().getFontMetrics(f2);
+        urlClickableCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
         masterDrawMode = DRAWMODE_MAIN;
         this.addMouseListener(new MouseListener() {
             @Override
@@ -607,10 +610,12 @@ public class LXCPanel extends JPanel {
                         // right click exits
                         if (e.getButton() == 3) {
                             masterDrawMode = DRAWMODE_MAIN;
+                            LXCPanel.this.setCursor(Cursor.getDefaultCursor());
                         } else {
                             // close window?
                             if (e.getX() < 30 && e.getY() > LXCPanel.this.getHeight() - 30) {
                                 masterDrawMode = DRAWMODE_MAIN;
+                                LXCPanel.this.setCursor(Cursor.getDefaultCursor());
                             }
                             // click mail, github, license?
                             if (e.getY() >= 260 && e.getY() < 295) {
@@ -720,6 +725,15 @@ public class LXCPanel extends JPanel {
                             if (traySelected != HOVER_NONE) {
                                 traySelected = HOVER_NONE;
                                 selfTrigger();
+                            }
+                        }
+                        if (e.getY() >= 260 && e.getY() <= LXCPanel.this.getHeight() - 25) {
+                            if (!LXCPanel.this.getCursor().equals(urlClickableCursor)) {
+                                LXCPanel.this.setCursor(urlClickableCursor);
+                            }
+                        } else {
+                            if (!LXCPanel.this.getCursor().equals(Cursor.getDefaultCursor())) {
+                                LXCPanel.this.setCursor(Cursor.getDefaultCursor());
                             }
                         }
                         break;
