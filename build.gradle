@@ -19,7 +19,7 @@ configure([project('swing')]) {
 // configure paths
 def signPath = "/mnt/truecrypt1"
 def buildPath = "/tmp/lxcbuild"
-def jnaPath = "lib/swing/jna-4.2.1-win64-stripped.jar"
+def jnaPath = "lib/swing/jna-4.2.1-win-stripped.jar"
 
 
 
@@ -36,6 +36,7 @@ task releaseDesktop() {
     dependsOn desktopProjects().build
     dependsOn "prepareJar"
     dependsOn "prepareJar2"
+    dependsOn "prepareJar3"
     dependsOn "desktopJar"
     dependsOn "packDesktop"
     doLast {
@@ -59,6 +60,7 @@ task packUpdate(dependsOn: desktopProjects().build) {
     dependsOn desktopProjects().build
     dependsOn "prepareJar"
     dependsOn "prepareJar2"
+    dependsOn "prepareJar3"
     dependsOn "desktopJar"
     dependsOn "packDesktop"
     dependsOn "signUpdate"
@@ -110,13 +112,22 @@ task prepareJar(type: Copy) {
 task prepareJar2(type: Copy) {
     mustRunAfter "prepareJar"
 
-    from "lib/swing/lxcwin.dll"
-    into buildPath + "/jar"
+    from "lib/swing/lxcwin64.dll"
+    into buildPath + "/jar/win32-x86-64"
+    rename("lxcwin64.dll", "lxcwin.dll")
+}
+
+task prepareJar3(type: Copy) {
+    mustRunAfter "prepareJar2"
+
+    from "lib/swing/lxcwin32.dll"
+    into buildPath + "/jar/win32-x86"
+    rename("lxcwin32.dll", "lxcwin.dll")
 }
 
 // create main jar
 task desktopJar(type: Zip) {
-    mustRunAfter "prepareJar2"
+    mustRunAfter "prepareJar3"
     
     archiveName "lanxchange.jar"
     destinationDir file(buildPath)

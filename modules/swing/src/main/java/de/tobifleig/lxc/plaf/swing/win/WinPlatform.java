@@ -42,7 +42,7 @@ import java.util.Arrays;
  */
 public class WinPlatform extends GenericPCPlatform {
 
-    private boolean nativeSupportEnabled = false;
+    private boolean nativeSupportEnabled = true;
     private boolean taskbarProgressSupported = true;
     private boolean nativeFileDialogsSupported = true;
     private Pointer taskbar;
@@ -52,10 +52,6 @@ public class WinPlatform extends GenericPCPlatform {
 
 
     public WinPlatform(String[] args) {
-        // enable native support on 64bit windows
-        if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch").equals("x86_64")) {
-            nativeSupportEnabled = true;
-        }
         // native support can be suppressed with a launch option
         if (Arrays.asList(args).contains("-nonative")) {
             nativeSupportEnabled = false;
@@ -96,7 +92,7 @@ public class WinPlatform extends GenericPCPlatform {
 
                     try {
                         Lxcwin.INSTANCE.nop(); // does nothing, but loads dll
-                        System.out.println("Detected win64, enabled advanced windows features");
+                        System.out.println("Detected win, enabled advanced windows features");
                     } catch (Throwable ex) {// alloc in native code may throw all sorts of interesting errors
                         ex.printStackTrace();
                         nativeSupportEnabled = false;
