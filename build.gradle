@@ -62,7 +62,7 @@ task packUpdate(dependsOn: desktopProjects().build) {
     dependsOn "prepareJar2"
     dependsOn "prepareJar3"
     dependsOn "desktopJar"
-    dependsOn "packDesktop"
+    dependsOn "packDesktop2"
     dependsOn "signUpdate"
     dependsOn "packSignedFiles"
     
@@ -160,6 +160,28 @@ task packDesktop(type: Zip) {
     
     from (buildPath + "/lanxchange.jar")
     include ("lanxchange.jar")
+}
+
+// pack desktop release
+// alternative version that includes the version number file, required for updates
+task packDesktop2(type: Zip) {
+    mustRunAfter "desktopJar"
+
+    archiveName "lxc.zip"
+    destinationDir file(buildPath)
+
+    from (".")
+    include ("img/*.png")
+    include ("COPYING")
+    include ("3rd_party_licenses/font_license.txt")
+    include ("lxc")
+    include ("lxc.exe")
+
+    from (buildPath + "/lanxchange.jar")
+    include ("lanxchange.jar")
+
+    from (buildPath + "/update/v")
+    include ("v")
 }
 
 // sign update

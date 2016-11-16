@@ -65,6 +65,7 @@ public class GenericPCPlatform implements Platform {
         boolean checkForUpdates = false;
         boolean forceUpdate = false;
         boolean overrideVerification = false;
+        boolean allowDowngrade = false;
         boolean restartable = false;
         if (Configuration.containsKey("allowupdates")) {
             String result = Configuration.getStringSetting("allowupdates");
@@ -85,6 +86,8 @@ public class GenericPCPlatform implements Platform {
                 forceUpdate = true;
             } else if (s.equals("-overrideVerification")) {
                 overrideVerification = true;
+            }  else if (s.equals("-allowDowngrade")) {
+                allowDowngrade = true;
             } else if (s.equals("-managed")) {
                 // whoever launched LXC tells us he is able to restart us in
                 // case of an update
@@ -98,13 +101,14 @@ public class GenericPCPlatform implements Platform {
             final boolean force = forceUpdate;
             final boolean noVerification = overrideVerification;
             final boolean managed = restartable;
+            final boolean allowDowngradeF = allowDowngrade;
             // check in separate thread
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
                     try {
                         LXCUpdater.checkAndPerformUpdate(gui, force,
-                                noVerification, managed);
+                                noVerification, allowDowngradeF, managed);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014 Tobias Fleig (tobifleig gmail com)
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig (tobifleig gmail com)
  *
  * All rights reserved.
  *
@@ -42,42 +42,66 @@ import java.util.zip.ZipFile;
 
 /**
  * This class manages automated updates for swing-platforms.
- * This system never installs anything without comfirmation. For security reasons, only signed updates are accepted.
+ * The update system never installs anything without confirmation.
+ * Furthermore, the updater only accepts updates after signature verification and a check against downgrade attacks.
  *
- * At default settings, this class will check for updates on every start.
- * "Checking for updates" means reading the version file from updates.lanxchange.com and comparing it to LXC.versionId.
- * If a newer version is available, the user will be asked, if he/she wants to download.
- * If the answer is yes, the update is downloaded and installed and LXC is restarted automatically.
- * This usually happens withing seconds.
- * "Download and install" updates means downloading update_master.zip from updates.lanxchange.com and extracting it.
- * It contains to files: Another zipfile containing a full copy of LXC and a signature file.
- * Before proceeding, the (X509, SHA256withRSA) signature is checked to match the pubkey contained in lxc_updates.pub
- * If correct, the zipfile is extracted into the main folder, overriding all files.
- * Afterwards outdated files contained in oldFiles (see below) are deleted.
+ * By default, LanXchange checks for updates on every start.
+ * This check can be disabled by unchecking the corresponding option in the settings menu or by putting
+ * "allowupdates=false" in the config file.
+ *
+ * LanXchange does not transfer any personal data during the update process.
+ * The author does not collect any data via the update mechanism.
+ * Note that the updates are hosted on servers run by Amazon AWS and/or Github, which may log your IP address, time of request, etc.
+ *
+ * In order to check for updates, LanXchange downloads the version description (updates.lanxchange.com/v) and
+ * compares the offered version to the current version.
+ *
+ * If a newer version is found, the user is prompted.
+ *
+ * The first installation step is to download the update.
+ * The update then extracts two fixed files, a zip file with a full installation and a signature file.
+ *
+ * During the verification, the updater checks the signature in order to make sure the zip file with the
+ * full installation is unaltered. The only accepted public key resides in lxc_updates.pub.
+ * If the signature is valid, the updater extracts a version file ("v") from the verified zip in order
+ * to prevent downgrade attacks. Updates are only accepted, if the supplied version matches the version the server claimed
+ * to send and the version is newer. Exception: when started with the command line option "-forceUpdate", the updater
+ * will also accept re-installs of the same version (but still no older ones).
+ *
+ * After the verification, the updater extracts all files and triggers a restart.
  *
  * The signature is created by de.tobifleig.lxc.util.Signer, but for obvious reasons, the private key is not distributed.
+ *
+ * All verification steps can be skipped by command line options. This is logged.
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 public final class LXCUpdater {
 
     /**
-     * Files, that should no longer be found in the users installation and therefore must be deleted.
+     * Files contained in older versions that can be deleted if they still exist.
      */
     private static final String[] oldFiles = new String[]{"lxc_debug.exe", "LXC.ico", "Ubuntu-R.ttf", "lxc_updates.pub", "font_license.txt"};
 
     /**
-     * Checks for updates, promts the user and installs them.
+     * Checks for updates, prompts the user and installs them.
      *
      * @param gui the gui, required to display the dialog
-     * @param forceUpdate, if true, updates are installed even if there is no new version (however, the user is promted)
-     * @param overrideVerification if true, the signature is not checked (dangerous!)
-     * @param restartable if true, whoever started LXC is aware of this updatesystem and wants to be notifiyed when LXC should be restarted rather than regularely terminated (this is done by returning exit code 6 rather than 0)
+     * @param forceUpdate skips online version check and allows re-installation of the current version. Does *not* disable protection against downgrade attacks
+     * @param overrideVerification skips signature check (dangerous!)
+     * @param allowDowngrade disables downgrade check (dangerous!)
+     * @param restartable if true, whoever started LXC is aware of this update system and wants to be notified when LXC should be restarted rather than regularly terminated (this is done by returning exit code 6 rather than 0)
      * @throws Exception may throw a bunch of exceptions, this class requires, working internet, github, signature checks etc.
      */
-    public static void checkAndPerformUpdate(SwingGui gui, boolean forceUpdate, boolean overrideVerification, boolean restartable) throws Exception {
+    public static void checkAndPerformUpdate(SwingGui gui, boolean forceUpdate, boolean overrideVerification, boolean allowDowngrade, boolean restartable) throws Exception {
         if (forceUpdate) {
             System.out.println("Info: Forcing update...");
+        }
+        if (overrideVerification) {
+            System.out.println("Warning: Update signature check disabled by startup flag");
+        }
+        if (allowDowngrade) {
+            System.out.println("Warning: Update downgrade protection disabled by startup flag");
         }
 
         // Contact update server, download version file
@@ -169,72 +193,81 @@ public final class LXCUpdater {
                 inss.close();
                 // signature ok?
                 if (sign.verify(bs) || overrideVerification) {
-                    updateGui.setStatusToInstall();
-                    // extract update
-                    File source = new File("temp_update.zip");
-                    File target = new File(".");
-                    byte[] buffer3 = new byte[1024];
-                    ZipFile zipFile = new ZipFile(source);
-                    try {
-                        Enumeration<? extends ZipEntry> zipEntryEnum = zipFile.entries();
+                    // protect against downgrade attacks
+                    if (allowDowngrade || verifyVersion(new File("temp_update.zip"), gotver, forceUpdate)) {
+                        updateGui.setStatusToInstall();
+                        // extract update
+                        File source = new File("temp_update.zip");
+                        File target = new File(".");
+                        byte[] buffer3 = new byte[1024];
+                        ZipFile zipFile = new ZipFile(source);
+                        try {
+                            Enumeration<? extends ZipEntry> zipEntryEnum = zipFile.entries();
 
-                        while (zipEntryEnum.hasMoreElements()) {
-                            try {
-                                ZipEntry zipEntry = zipEntryEnum.nextElement();
-                                File file = new File(target, zipEntry.getName());
-                                if (zipEntry.isDirectory()) {
-                                    file.mkdirs();
-                                } else {
-                                    new File(file.getParent()).mkdirs(); // create folder, if required
-                                    BufferedInputStream bins = new BufferedInputStream(zipFile.getInputStream(zipEntry));
-                                    BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(file));
-                                    for (int len; (len = bins.read(buffer3)) != -1;) {
-                                        bout.write(buffer3, 0, len);
+                            while (zipEntryEnum.hasMoreElements()) {
+                                try {
+                                    ZipEntry zipEntry = zipEntryEnum.nextElement();
+                                    File file = new File(target, zipEntry.getName());
+                                    if (zipEntry.isDirectory()) {
+                                        file.mkdirs();
+                                    } else {
+                                        new File(file.getParent()).mkdirs(); // create folder, if required
+                                        BufferedInputStream bins = new BufferedInputStream(zipFile.getInputStream(zipEntry));
+                                        BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(file));
+                                        for (int len; (len = bins.read(buffer3)) != -1; ) {
+                                            bout.write(buffer3, 0, len);
+                                        }
+                                        bins.close();
+                                        bout.close();
                                     }
-                                    bins.close();
-                                    bout.close();
+                                } catch (IOException ex) {
+                                    System.out.println("Update-Error: Cannot unpack file!");
+                                    ex.printStackTrace();
                                 }
-                            } catch (IOException ex) {
-                                System.out.println("Update-Error: Cannot unpack file!");
-                                ex.printStackTrace();
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        } finally {
+                            zipFile.close();
+                        }
+
+                        // delete tempfiles
+                        new File("temp_update.zip.sign").delete();
+                        new File("temp_update.zip").delete();
+                        new File("update_dl.zip").delete();
+                        new File("v").delete();
+
+                        // cleanup, delete outdated files
+                        for (String s : oldFiles) {
+                            File f = new File(s);
+                            if (f.exists()) {
+                                f.delete();
                             }
                         }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    } finally {
-                        zipFile.close();
+
+                        //done
+                        updateGui.setStatusToRestart();
+                        updateGui.setRestartTime(5, !restartable);
+                        Thread.sleep(1000);
+                        updateGui.setRestartTime(4, !restartable);
+                        Thread.sleep(1000);
+                        updateGui.setRestartTime(3, !restartable);
+                        Thread.sleep(1000);
+                        updateGui.setRestartTime(2, !restartable);
+                        Thread.sleep(1000);
+                        updateGui.setRestartTime(1, !restartable);
+                        Thread.sleep(1000);
+                        updateGui.setRestartTime(0, !restartable);
+                        System.exit(6);
+
+                    } else {
+                        System.out.println("ERROR: Downgrade prevented. Current version is " + LXC.versionId + ", but server claimed to send " + gotver + ". Will not update.");
+                        updateGui.setStatusToError();
+                        return;
                     }
-
-                    // delete tempfiles
-                    new File("temp_update.zip.sign").delete();
-                    new File("temp_update.zip").delete();
-                    new File("update_dl.zip").delete();
-
-                    // cleanup, delete outdated files
-                    for (String s : oldFiles) {
-                        File f = new File(s);
-                        if (f.exists()) {
-                            f.delete();
-                        }
-                    }
-
-                    //done
-                    updateGui.setStatusToRestart();
-                    updateGui.setRestartTime(5, !restartable);
-                    Thread.sleep(1000);
-                    updateGui.setRestartTime(4, !restartable);
-                    Thread.sleep(1000);
-                    updateGui.setRestartTime(3, !restartable);
-                    Thread.sleep(1000);
-                    updateGui.setRestartTime(2, !restartable);
-                    Thread.sleep(1000);
-                    updateGui.setRestartTime(1, !restartable);
-                    Thread.sleep(1000);
-                    updateGui.setRestartTime(0, !restartable);
-                    System.exit(6);
 
                 } else {
-                    System.out.println("ERROR: Bad signature! File corrupted (OR MANIPULATED!!!). Will not update!");
+                    System.out.println("ERROR: Bad signature! File corrupted (OR MANIPULATED!!!). Will not update.");
                     updateGui.setStatusToError();
                     return;
                 }
@@ -248,6 +281,40 @@ public final class LXCUpdater {
         }
 
     }
+
+    /**
+     * Extracts the embedded version number from the signed update file to protect against downgrade attacks.
+     * Only allows updates (returns true) iff:
+     * 1. The embedded version equals the version the update server claims to distribute.
+     * AND
+     * 2. The embedded version is strictly greater than the version currently running.
+     *
+     * Note: If "forceUpdate" is true, the second check is weakened and also allows the current version to be installed again (current version equals update version)
+     *
+     * @param zipFile the downloaded and verified update distribution
+     * @param forceUpdate whether to accept re-installations (update version number equals current version number)
+     * @return true if all checks passed, false otherwise
+     */
+    private static boolean verifyVersion(File zipFile, int claimedVersion, boolean forceUpdate) {
+        try {
+            ZipFile zip = new ZipFile(zipFile);
+            Scanner scanner = new Scanner(zip.getInputStream(zip.getEntry("v")), "utf8");
+            int embeddedVersion = Integer.parseInt(scanner.nextLine());
+            // test 1: embedded version must match version server claimed to send
+            if (embeddedVersion == claimedVersion) {
+                // test 2: embedded version must be greater than current version, equal is allowed if forceUpdate is true
+                if (embeddedVersion > LXC.versionId || (forceUpdate && embeddedVersion == LXC.versionId)) {
+                    // all checks passed
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Update version verification failed. Details:");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     /**
      * Utility-Class, private Constructor

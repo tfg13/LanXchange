@@ -367,7 +367,7 @@ public class UpdateDialog extends javax.swing.JDialog {
     void setStatusToError() {
         jLabel10.setForeground(Color.RED);
         jLabel11.setText("ERROR. Update corrupted or manipulated!");
-        jLabel12.setText("For your security, will not be installed");
+        jLabel12.setText("Installation aborted for your security");
         jLabel11.setVisible(true);
         jLabel12.setVisible(true);
     }
