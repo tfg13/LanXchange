@@ -30,9 +30,6 @@ import de.tobifleig.lxc.plaf.swing.GenericPCPlatform;
 import de.tobifleig.lxc.plaf.swing.OverallProgressManager;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 /**
@@ -62,36 +59,10 @@ public class WinPlatform extends GenericPCPlatform {
             @Override
             public void run() {
                 if (nativeSupportEnabled) {
-                    // extract dll from jar
-                    File dllFile = new File("lxcwin.dll");
-                    try (InputStream dllStream = ClassLoader.getSystemResourceAsStream("lxcwin.dll")) {
-                        if (dllStream == null) {
-                            // not found
-                            System.out.println("Unable to extract lxcwin.dll, not found");
-                        } else {
-                            try (FileOutputStream fileOut = new FileOutputStream(new File("lxcwin.dll"))) {
-                                int bytes;
-                                byte[] buf = new byte[4096];
-                                while ((bytes = dllStream.read(buf)) > 0) {
-                                    fileOut.write(buf, 0, bytes);
-                                }
-                            }
-                        }
-                    } catch (IOException e) {
-                        System.out.println("Unable to extract lxcwin.dll, disabling native support");
-                        e.printStackTrace();
-                    }
-                    if (dllFile.exists() && dllFile.length() == 0) {
-                        // extract failure
-                        dllFile.delete();
-                    }
-                    if (!dllFile.exists()) {
-                        nativeSupportEnabled = false;
-                        return;
-                    }
-
                     try {
+                        long startTime = System.currentTimeMillis();
                         Lxcwin.INSTANCE.nop(); // does nothing, but loads dll
+                        System.out.println("Loading advanced windows lib took " + (System.currentTimeMillis() - startTime) + "ms");
                         System.out.println("Detected win, enabled advanced windows features");
                     } catch (Throwable ex) {// alloc in native code may throw all sorts of interesting errors
                         ex.printStackTrace();
