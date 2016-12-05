@@ -55,7 +55,7 @@ public class LXCInstance {
      * The time when the last heartbeat was received.
      * Unused for local instances
      */
-    long heartbeatTime;
+    private long heartbeatTime;
     /**
      * The static accessible, local instance.
      */

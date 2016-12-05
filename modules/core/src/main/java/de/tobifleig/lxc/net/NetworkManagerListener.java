@@ -77,7 +77,7 @@ public interface NetworkManagerListener {
      * Called when a upload was aborted because a file no longer exists.
      * Show a message an tell the user whats going on.
      *
-     * @file The file that was removed.
+     * @param file The file that was removed.
      */
     public void uploadFailedFileMissing(LXCFile file);
 

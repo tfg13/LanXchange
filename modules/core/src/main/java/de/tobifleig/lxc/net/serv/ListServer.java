@@ -96,7 +96,7 @@ public class ListServer implements Runnable {
      * Binds the Socket to port 27717.
      * Used for the single-instance-check.
      *
-     * @throws BindException
+     * @throws BindException most likely means LanXchange is already running
      */
     private void bindSocket() throws BindException {
         try {

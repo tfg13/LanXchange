@@ -172,7 +172,7 @@ public class Leecher extends Transceiver {
      * @param input the InputStream, connected and ready
      * @param transFile the {@link LXCFile} that is to be transferred
      * @param targetFolder the folder to save the files into
-     * @param transVersion version of the transfer protocol {@link LXCTransceiver}
+     * @param transVersion version of the transfer protocol {@link Transceiver}
      */
     public Leecher(Socket socket, ObjectInputStream input, ObjectOutputStream output, LXCFile transFile, File targetFolder, int transVersion) {
         this.socket = socket;

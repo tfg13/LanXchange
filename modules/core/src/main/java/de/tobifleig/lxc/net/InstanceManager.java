@@ -178,7 +178,7 @@ class InstanceManager {
     }
 
     /**
-     * Returns a Iterable over all known remote LXCInstances.
+     * Returns an Iterable over all known remote LXCInstances.
      * The returned Iterable does not contain a real remote LXCInstance more than once.
      *
      * @return all known distinct remote LXCInstances

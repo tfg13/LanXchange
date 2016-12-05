@@ -41,14 +41,14 @@ import java.net.NetworkInterface;
 public interface MulticastHelper {
 
     /**
-     * Wheater this helper supports IPv4.
+     * Whether this helper supports IPv4.
      *
      * @return true, if IPv4 supported, false otherwise
      */
     public boolean supportsIPv4();
 
     /**
-     * Wheater this helper supports IPv6.
+     * Whether this helper supports IPv6.
      *
      * @return true, if IPv6 supported, false otherwise
      */

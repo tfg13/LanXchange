@@ -54,7 +54,7 @@ public class PingServer {
      * Creates a new PingServer.
      * PingServers listen for Ping/KeepAlive-Signals by other instances.
      *
-     * @param listener
+     * @param listener callback listener
      */
     public PingServer(PingServerListener listener) {
         this.listener = listener;

@@ -153,8 +153,8 @@ public class Seeder extends Transceiver {
      * @param output the OutputStream, connected and ready
      * @param input the InputStream, connected and ready
      * @param transFile the {@link LXCFile} that is to be transferred
-     * @param transVersion version of the transfer protocol {@link LXCTransceiver}
-     * @see LXCTransceiver
+     * @param transVersion version of the transfer protocol {@link Transceiver}
+     * @see Transceiver
      */
     public Seeder(Socket socket, ObjectOutputStream output, ObjectInputStream input, LXCFile transFile, int transVersion) {
         this.socket = socket;

@@ -50,7 +50,7 @@ class HeartbeatSender {
      */
     private static final HashMap<String, MulticastHelper> knownHelpers;
 
-    /**
+    /*
      * Static initializer, prepare known MulitcastHelpers
      */
     static {
