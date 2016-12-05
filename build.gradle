@@ -77,11 +77,6 @@ task packUpdate(dependsOn: desktopProjects().build) {
             from signPath + "/update_master.zip"
             into "update"
         }
-        // write version info file
-        new File("update/v").withWriter { out ->
-            out.println(prepareUpdate.ext.newversion)
-            out.println(prepareUpdate.ext.newversionstring)
-        }
         // done!
         println("Done. Commit and push directory \"update\" to apply (do not forget aws!)")
     }
@@ -180,7 +175,7 @@ task packDesktop2(type: Zip) {
     from (buildPath + "/lanxchange.jar")
     include ("lanxchange.jar")
 
-    from (buildPath + "/update/v")
+    from ("update/v")
     include ("v")
 }
 
@@ -233,7 +228,7 @@ task prepareUpdate() << {
     }
     
     // read update system metadata
-    def mainClassFile = new File("src/core/de/tobifleig/lxc/LXC.java")
+    def mainClassFile = new File("modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
     ext.newversion = -1
     mainClassFile.eachLine { line ->
         def matcher = line =~ "\\s*public static final int versionId = ([0-9]+);"
@@ -242,7 +237,7 @@ task prepareUpdate() << {
         }
     }
     if (ext.newversion == -1) {
-        throw new InvalidUserDataException("Cannot read version number from src/core/de/tobifleig/lxc/LXC.java")
+        throw new InvalidUserDataException("Cannot read version number from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
     }
     def oldversion = -1
     def oldversionstring = ""
@@ -261,6 +256,12 @@ task prepareUpdate() << {
     ext.newversionstring = System.console().readLine("Enter new description: ")
     if (ext.newversionstring == null || ext.newversionstring.isEmpty()) {
         throw new InvalidUserDataException("Description cannot be empty")
+    }
+
+    // write new version file
+    new File("update/v").withWriter { out ->
+        out.println(ext.newversion)
+        out.println(ext.newversionstring)
     }
 }
 
