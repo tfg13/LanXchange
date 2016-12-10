@@ -17,7 +17,7 @@ configure([project('swing')]) {
 }
 
 // configure paths
-def signPath = "/mnt/truecrypt1"
+def signPath = "/mnt/veracrypt1"
 def buildPath = "/tmp/lxcbuild"
 def jnaPath = "lib/swing/jna-4.2.1-win-stripped.jar"
 
