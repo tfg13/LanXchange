@@ -245,7 +245,7 @@ public final class LXCUpdater {
                                 try {
                                     ZipEntry zipEntry = zipEntryEnum.nextElement();
                                     File file = new File(target, zipEntry.getName());
-                                    if (!file.toPath().normalize().toAbsolutePath().startsWith(target.getAbsolutePath())) {
+                                    if (!file.toPath().normalize().toAbsolutePath().startsWith(target.toPath().normalize().toAbsolutePath())) {
                                         // directory traversal beyond root dir
                                         System.out.println("WARNING: Skipped directory traversal in file: \"" + file.getAbsolutePath() + "\"");
                                         continue;
@@ -338,8 +338,7 @@ public final class LXCUpdater {
      * @return true if all checks passed, false otherwise
      */
     private static boolean verifyVersion(File zipFile, int claimedVersion, boolean forceUpdate) {
-        try {
-            ZipFile zip = new ZipFile(zipFile);
+        try (ZipFile zip = new ZipFile(zipFile)) {
             Scanner scanner = new Scanner(zip.getInputStream(zip.getEntry("v")), "utf8");
             int embeddedVersion = Integer.parseInt(scanner.nextLine());
             // test 1: embedded version must match version server claimed to send
