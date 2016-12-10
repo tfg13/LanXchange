@@ -20,8 +20,6 @@
  */
 package de.tobifleig.lxc.plaf.swing;
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;

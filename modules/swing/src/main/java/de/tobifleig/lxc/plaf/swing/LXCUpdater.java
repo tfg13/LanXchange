@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.plaf.swing;
 
 import de.tobifleig.lxc.LXC;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -61,6 +63,8 @@ import java.util.zip.ZipFile;
  *      + The version number comes from a text file that is read unauthenticated, the updater only accepts
  *        a very limited number of bytes over this channel and limits all data to very few ASCII chars to stop fancy
  *        trickery with unicode.
+ * - Denial of Service by providing arbitrarily large inputs
+ *      + Hard size limits are enforced for all unsigned content
  *
  * By default, LanXchange checks for updates on every start.
  * This check can be disabled by unchecking the corresponding option in the settings menu or by putting
@@ -109,6 +113,11 @@ public final class LXCUpdater {
      * Max number of bytes for the full update file
      */
     private static final int fullUpdateSizeLimit = 512 * 1024 * 1024; // 512MiB
+
+    /**
+     * Max number of bytes for the signature file
+     */
+    private static final int signatureFileSizeLimit = 1024 * 1024; // 1MiB
 
     /**
      * Checks for updates, prompts the user and installs them.
@@ -169,7 +178,7 @@ public final class LXCUpdater {
                 ZipEntry updatecontent = masterZip.getEntry("lxc.zip");
                 byte[] buffer = new byte[1024];
                 BufferedInputStream masterbins = new BufferedInputStream(masterZip.getInputStream(updatecontent));
-                BufferedOutputStream masterbout = new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip")));
+                OutputStream masterbout = new ByteLimitOutputStream(new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip"))), fullUpdateSizeLimit);
                 for (int len; (len = masterbins.read(buffer)) != -1;) {
                     masterbout.write(buffer, 0, len);
                 }
@@ -178,7 +187,7 @@ public final class LXCUpdater {
                 ZipEntry signfile = masterZip.getEntry("lxc.sign");
                 byte[] buffer2 = new byte[1024];
                 BufferedInputStream signbins = new BufferedInputStream(masterZip.getInputStream(signfile));
-                BufferedOutputStream signbout = new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip.sign")));
+                OutputStream signbout = new ByteLimitOutputStream(new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip.sign"))), signatureFileSizeLimit);
                 for (int len; (len = signbins.read(buffer2)) != -1;) {
                     signbout.write(buffer2, 0, len);
                 }

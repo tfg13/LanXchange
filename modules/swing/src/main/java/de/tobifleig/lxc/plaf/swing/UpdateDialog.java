@@ -50,6 +50,7 @@ public class UpdateDialog extends javax.swing.JDialog {
         jLabel14.setIcon(jLabel13.getIcon());
         jLabel16.setIcon(jLabel13.getIcon());
         jPanel3.setVisible(false);
+        jLabel3.putClientProperty("html.disable", true);
         jLabel3.setText(nextVersion);
         setSize(getWidth(), jPanel2.getSize().height + 130);
         setLocationRelativeTo(parent);
