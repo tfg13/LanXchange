@@ -50,7 +50,11 @@ public class ByteLimitOutputStream extends FilterOutputStream {
         if (bytesLeft < len) {
             throw new IOException("Output write limit reached");
         }
+        int leftPreSuper = bytesLeft;
         super.write(b, off, len);
-        bytesLeft -= len;
+        // subclass may call write(int) multiple times, avoid subtracting the limit multiple times
+        if (bytesLeft != leftPreSuper - len) {
+            bytesLeft -= len;
+        }
     }
 }
