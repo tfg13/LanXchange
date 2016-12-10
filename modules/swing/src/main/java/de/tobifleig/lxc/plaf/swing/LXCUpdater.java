@@ -43,7 +43,24 @@ import java.util.zip.ZipFile;
 /**
  * This class manages automated updates for swing-platforms.
  * The update system never installs anything without confirmation.
- * Furthermore, the updater only accepts updates after signature verification and a check against downgrade attacks.
+ *
+ * This system downloads unauthenticated data from the internet.
+ * The author is aware of this and changed this system multiple times over the years in order to harden it against many
+ * possible attack vectors. The following is a non-exhaustive list of vectors that have been considered and how
+ * this updater deals with them.
+ *
+ * - Generic manipulation of update file by MitM or malicious update server:
+ *      + Updates are signed and only a single, pinned certificate is accepted.
+ * - Zip extraction/directory traversals attacks
+ *      + Before the verification is complete, the updater only extracts two files with fixed names.
+ *      + Directory traversals beyond (up) LanXchange main directory are always prevented (even for valid signatures).
+ * - Version number trickery / downgrade attacks
+ *      + The updater verifies the server really distributes a valid signature for the version it claims to distribute.
+ *      + The updater only accepts updates newer than the version that is running.
+ * - Manipulation of unauthenticated content displayed to the user before update
+ *      + The version number comes from a text file that is read unauthenticated, the updater only accepts
+ *        a very limited number of bytes over this channel and limits all data to very few ASCII chars to stop fancy
+ *        trickery with unicode.
  *
  * By default, LanXchange checks for updates on every start.
  * This check can be disabled by unchecking the corresponding option in the settings menu or by putting
@@ -84,6 +101,16 @@ public final class LXCUpdater {
     private static final String[] oldFiles = new String[]{"lxc_debug.exe", "LXC.ico", "Ubuntu-R.ttf", "lxc_updates.pub", "font_license.txt"};
 
     /**
+     * Max number of bytes read from unauthenticated text sources.
+     */
+    private static final int versionBytesLimit = 32;
+
+    /**
+     * Max number of bytes for the full update file
+     */
+    private static final int fullUpdateSizeLimit = 512 * 1024 * 1024; // 512MiB
+
+    /**
      * Checks for updates, prompts the user and installs them.
      *
      * @param gui the gui, required to display the dialog
@@ -105,7 +132,7 @@ public final class LXCUpdater {
         }
 
         // Contact update server, download version file
-        Scanner scanner = new Scanner(new URL("http://updates.lanxchange.com/v").openStream(), "utf8");
+        Scanner scanner = new Scanner(new VersionDataFilterInputStream(new URL("http://updates.lanxchange.com/v").openStream(), versionBytesLimit), "utf8");
         int gotver = Integer.parseInt(scanner.nextLine());
         String title = scanner.nextLine();
         scanner.close();
@@ -125,7 +152,8 @@ public final class LXCUpdater {
                 int responseCode = conn.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     byte tmp_buffer[] = new byte[4096];
-                    InputStream is = conn.getInputStream();
+                    // limit update size
+                    InputStream is = new ByteLimitInputStream(conn.getInputStream(), fullUpdateSizeLimit);
                     int n;
                     while ((n = is.read(tmp_buffer)) > 0) {
                         os.write(tmp_buffer, 0, n);
@@ -208,6 +236,11 @@ public final class LXCUpdater {
                                 try {
                                     ZipEntry zipEntry = zipEntryEnum.nextElement();
                                     File file = new File(target, zipEntry.getName());
+                                    if (!file.toPath().normalize().toAbsolutePath().startsWith(target.getAbsolutePath())) {
+                                        // directory traversal beyond root dir
+                                        System.out.println("WARNING: Skipped directory traversal in file: \"" + file.getAbsolutePath() + "\"");
+                                        continue;
+                                    }
                                     if (zipEntry.isDirectory()) {
                                         file.mkdirs();
                                     } else {
