@@ -34,8 +34,10 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -162,14 +164,10 @@ public final class SelfDistributor {
     }
 
     private static void computeAddresses() {
-        try {
-            // get hostname & own ip
-            String hostname = InetAddress.getLocalHost().getHostName();
-            String ip = getBestLocalIp();
-            dialog.setAddresses("http://" + hostname + ":8087/lxc.zip", "http://" + ip + ":8087/lxc.zip");
-        } catch (UnknownHostException ex) {
-            ex.printStackTrace();
-        }
+        // get hostname & own ip
+        String hostname = getBestHostName();
+        String ip = getBestLocalIp();
+        dialog.setAddresses("http://" + hostname + ":8087/lxc.zip", "http://" + ip + ":8087/lxc.zip");
     }
 
     private static void createDistribution() {
@@ -211,7 +209,11 @@ public final class SelfDistributor {
             if (!auto.isLoopbackAddress()) {
                 return auto.getHostAddress();
             }
-            // Manual search:
+        } catch (IOException ex) {
+            // ignore, search manually
+        }
+        // Manual search:
+        try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface inter = networkInterfaces.nextElement();
@@ -224,11 +226,73 @@ public final class SelfDistributor {
                     }
                 }
             }
+        } catch (SocketException e) {
+            // nothing works!
+            e.printStackTrace();
+        }
+
+        System.out.println("ERROR: Unable to guess local ip!");
+        return "127.0.0.1";
+    }
+
+    /**
+     * Try to figure out a usable host name.
+     * I used InetAddress.getLocalHost().getHostName() for a while, but it can crash or return "localhost".
+     *
+     * @return a best-effort host name for this machine
+     */
+    private static String getBestHostName() {
+        // try old method first, works fine most of the time
+        try {
+            String naiveResult = InetAddress.getLocalHost().getHostName();
+            if (naiveResult != null && !naiveResult.equals("localhost")) {
+                // just use this
+                return naiveResult;
+            }
+        } catch (UnknownHostException ex) {
+            // this did not work, try more sophisticated methods
+        }
+
+        String envVar;
+        if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+            envVar = "COMPUTERNAME";
+        } else { // assume *nix
+            envVar = "HOSTNAME";
+        }
+
+        String envResult = System.getenv(envVar);
+        if (envResult != null && !envResult.equals("localhost")) {
+            return envResult;
+        }
+
+        String hostnameResult = execHelper("hostname");
+        if (hostnameResult != null && !hostnameResult.equals("localhost")) {
+            return hostnameResult;
+        }
+
+        // special trick for *nix
+        if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+            String etcHostnameResult = execHelper("cat /etc/hostname");
+            if (etcHostnameResult != null && !etcHostnameResult.equals("localhost")) {
+                return etcHostnameResult;
+            }
+        }
+
+        System.out.println("ERROR: Giving up on local host name!");
+        return "localhost";
+    }
+
+    private static String execHelper(String cmd) {
+        try {
+            Process proc = Runtime.getRuntime().exec(cmd);
+            try (Scanner s = new Scanner(proc.getInputStream()).useDelimiter("\\A")) {
+                return (s.hasNext() ? s.next() : "").trim();
+            }
         } catch (IOException ex) {
+            System.out.println("Running \"" + cmd + "\" failed:");
             ex.printStackTrace();
         }
-        System.out.println("selfdist: Unable to guess local ip!");
-        return "127.0.0.1";
+        return null;
     }
 
     /**
