@@ -27,6 +27,7 @@ import de.tobifleig.lxc.plaf.GuiListener;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
@@ -291,6 +292,14 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                                 thread.setPriority(Thread.NORM_PRIORITY - 1);
                                 thread.start();
                             } // adding files aborted, just ignore
+                        }
+                    });
+                    // close help window on ESC
+                    panel.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "closeHelp");
+                    panel.getActionMap().put("closeHelp", new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            panel.closeHelp();
                         }
                     });
                 }

@@ -609,13 +609,11 @@ public class LXCPanel extends JPanel {
                     case DRAWMODE_HELP:
                         // right click exits
                         if (e.getButton() == 3) {
-                            masterDrawMode = DRAWMODE_MAIN;
-                            LXCPanel.this.setCursor(Cursor.getDefaultCursor());
+                            closeHelp();
                         } else {
                             // close window?
                             if (e.getX() < 30 && e.getY() > LXCPanel.this.getHeight() - 30) {
-                                masterDrawMode = DRAWMODE_MAIN;
-                                LXCPanel.this.setCursor(Cursor.getDefaultCursor());
+                                closeHelp();
                             }
                             // click mail, github, license?
                             if (e.getY() >= 260 && e.getY() < 295) {
@@ -921,6 +919,17 @@ public class LXCPanel extends JPanel {
      */
     public void setGuiListener(GuiListener guiListener) {
         this.guiListener = guiListener;
+    }
+
+    /**
+     * Close help view, if open.
+     */
+    void closeHelp() {
+        if (masterDrawMode == DRAWMODE_HELP) {
+            masterDrawMode = DRAWMODE_MAIN;
+            LXCPanel.this.setCursor(Cursor.getDefaultCursor());
+            selfTrigger();
+        }
     }
 
     /**
