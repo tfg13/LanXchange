@@ -26,6 +26,7 @@ import de.tobifleig.lxc.plaf.GuiListener;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -59,6 +60,10 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
      * Timer for repaints.
      */
     private Timer guiTimer;
+    /**
+     * Currently scheduled timer task, if any.
+     */
+    private TimerTask timerTask;
     /**
      * Triggers the repaint-scheduler.
      */
@@ -148,48 +153,47 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
 
     private void start() {
         guiTimer = new Timer();
-        guiTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (schedTrigger) {
-                    // fps?
-                    if (fullFps) {
-                        if (System.currentTimeMillis() - lastRepaint > 100) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    panel.repaint();
-                                }
-                            });
-                            lastRepaint = System.currentTimeMillis();
-                            schedTrigger = false;
-                        }
-                    } else {
-                        if (System.currentTimeMillis() - lastRepaint > 1000) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    panel.repaint();
-                                }
-                            });
-                            lastRepaint = System.currentTimeMillis();
-                            schedTrigger = false;
-                        }
-                    }
-                }
-            }
-        }, 100, 100);
+        // start in fullFps mode
+        fullFps = true;
+        reConfigureTimer();
 
         this.addWindowStateListener(new WindowStateListener() {
             @Override
             public void windowStateChanged(WindowEvent e) {
-                if (e.getNewState() != WindowEvent.WINDOW_ICONIFIED) {
-                    fullFps = true;
-                } else {
-                    fullFps = false;
+                // reschedule timer, if required
+                boolean oldFps = fullFps;
+                fullFps = (e.getNewState() & Frame.ICONIFIED) == 0;
+                if (fullFps != oldFps) {
+                    reConfigureTimer();
                 }
             }
         });
+    }
+
+    private void reConfigureTimer() {
+        if (timerTask != null) {
+            timerTask.cancel();
+        }
+        final int delay = fullFps ? 100 : 1000;
+
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                // always render if requested or 10x delay has passed
+                if (schedTrigger || (System.currentTimeMillis() - lastRepaint) > (10 * delay)) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            panel.repaint();
+                        }
+                    });
+                    schedTrigger = false;
+                    lastRepaint = System.currentTimeMillis();
+                }
+            }
+        };
+
+        guiTimer.schedule(timerTask, delay, delay);
     }
 
     /**
