@@ -121,9 +121,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                             ubuFont = Font.createFont(Font.TRUETYPE_FONT, new File("Ubuntu-R.ttf"));
                         }
 
-                    } catch (FontFormatException ex) {
-                        ex.printStackTrace();
-                    } catch (IOException ex) {
+                    } catch (FontFormatException | IOException ex) {
                         ex.printStackTrace();
                     }
                     if (ubuFont == null) {
@@ -133,9 +131,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     initComponents();
                 }
             });
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } catch (InvocationTargetException ex) {
+        } catch (InterruptedException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
         progressManager = new OverallProgressManager() {
@@ -308,9 +304,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     });
                 }
             });
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } catch (InvocationTargetException ex) {
+        } catch (InterruptedException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }
@@ -330,9 +324,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     update();
                 }
             });
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } catch (InvocationTargetException ex) {
+        } catch (InterruptedException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }
@@ -347,9 +339,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     JOptionPane.showMessageDialog(SwingGui.this, error, "LXC - Error", JOptionPane.ERROR_MESSAGE);
                 }
             });
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } catch (InvocationTargetException ex) {
+        } catch (InterruptedException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }
