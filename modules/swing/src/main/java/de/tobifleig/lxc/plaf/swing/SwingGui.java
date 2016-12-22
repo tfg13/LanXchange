@@ -302,6 +302,14 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                             panel.closeHelp();
                         }
                     });
+                    // show log on CTRL-L
+                    panel.getInputMap().put(KeyStroke.getKeyStroke("ctrl L"), "showLog");
+                    panel.getActionMap().put("showLog", new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            DesktopInteractionHelper.openFile(new File("lxc.log"));
+                        }
+                    });
                 }
             });
         } catch (InterruptedException | InvocationTargetException ex) {
