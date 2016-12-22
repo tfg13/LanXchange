@@ -45,6 +45,8 @@ import java.util.TimerTask;
  */
 class HeartbeatSender {
 
+    private static final int NUM_INIT_HEARTBEATS = 4;
+
     /**
      * All known MulticastHelpers.
      */
@@ -118,8 +120,6 @@ class HeartbeatSender {
             }
         };
         timer.schedule(task, 0, 20000);
-        // inital heartbeat
-        sendHeartbeat(4);
     }
 
     /**
@@ -196,11 +196,17 @@ class HeartbeatSender {
             sockets.get(inter).close();
             sockets.remove(inter);
         }
+        boolean newInterfacesAdded = false;
         // create sockets for new interfaces
         for (NetworkInterface inter : interf) {
             if (!sockets.containsKey(inter)) {
                 createSocket(inter);
+                newInterfacesAdded = true;
             }
+        }
+
+        if (newInterfacesAdded) {
+            sendHeartbeat(NUM_INIT_HEARTBEATS);
         }
     }
 
@@ -237,9 +243,11 @@ class HeartbeatSender {
     }
 
     /**
-     * Send the given signal as a heartbeat to all known instances.
+     * Send the given signal to the specified address,
+     * try all available interfaces.
      *
      * @param data the data to send
+     * @param address the target address
      */
     private synchronized void direct(byte[] data, InetAddress address) {
         DatagramPacket pack = new DatagramPacket(data, data.length, address, 27716);
