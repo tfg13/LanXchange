@@ -93,6 +93,7 @@ public final class SelfDistributor {
         "img/stop.png",
         "img/txt.png",
         "img/update.png",
+        "img/drop.png",
         "COPYING",
         "3rd_party_licenses/font_license.txt",
         "lanxchange.jar",

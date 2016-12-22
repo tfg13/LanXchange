@@ -38,6 +38,11 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -47,6 +52,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.TooManyListenersException;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -73,6 +79,8 @@ public class LXCPanel extends JPanel {
     private static final int DRAWMODE_INIT = 3;
     private static final int DRAWMODE_MAIN = 4;
     private static final int DRAWMODE_HELP = 5;
+    private static final int OVERLAY_NONE = 0;
+    private static final int OVERLAY_DROPNOW = 2 << 1;
     @Deprecated
     private List<LXCFile> allFiles;
     private transient Image logo;
@@ -91,6 +99,7 @@ public class LXCPanel extends JPanel {
     private transient Image download;
     private transient Image cancel;
     private transient Image selfdist_small;
+    private transient Image drop;
     private final Color background;
     private final Color selBackground;
     private Font f0;
@@ -109,6 +118,7 @@ public class LXCPanel extends JPanel {
     private int traySelected = HOVER_NONE;
     private boolean detailSelected = false;
     private int masterDrawMode = DRAWMODE_INIT;
+    private int activeOverlays = OVERLAY_NONE;
     private GuiListener guiListener;
     private final OptionsDialog options;
     private boolean calcing;
@@ -485,6 +495,26 @@ public class LXCPanel extends JPanel {
                 g2.setClip(clip);
                 break;
         }
+        // overlays
+        switch (masterDrawMode) {
+            case DRAWMODE_MAIN:
+            case DRAWMODE_HELP:
+                // draw overlays
+                if ((activeOverlays & OVERLAY_DROPNOW) != 0) {
+                    g2.setColor(background);
+                    g2.fillRoundRect(5, 5, getWidth() - 10, getHeight() - 11, 10, 10);
+                    g2.fillRoundRect(5, 5, getWidth() - 10, getHeight() - 11, 10, 10);
+                    g2.setColor(Color.BLACK);
+                    g2.drawRoundRect(5, 5, getWidth() - 10, getHeight() - 11, 10, 10);
+                    g2.setFont(f1b);
+                    g2.drawString("- drop anywhere to share -", getWidth() / 2 - (mer1b.stringWidth("- drop anywhere to share -") / 2), getHeight() / 2 + 50);
+                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                    g2.drawImage(drop, getWidth() / 2 - 75, getHeight() / 2 - 125, 150, 150, this);
+                }
+                break;
+            default:
+                // not not draw overlays
+        }
     }
 
     private int getMaxVisibleFiles() {
@@ -584,6 +614,7 @@ public class LXCPanel extends JPanel {
         download = loadImg("img/download.png");
         cancel = loadImg("img/cancel.png");
         selfdist_small = loadImg("img/selfdist_small.png");
+        drop = loadImg("img/drop.png");
         mer0 = this.getGraphics().getFontMetrics(f0);
         mer1 = this.getGraphics().getFontMetrics(f1);
         mer1Fallback = this.getGraphics().getFontMetrics(f1Fallback);
@@ -888,6 +919,38 @@ public class LXCPanel extends JPanel {
                 }
             }
         });
+        try {
+            this.getDropTarget().addDropTargetListener(new DropTargetAdapter() {
+                @Override
+                public void drop(DropTargetDropEvent dtde) {
+                    // treat as exit
+                    if ((activeOverlays & OVERLAY_DROPNOW) != 0) {
+                        activeOverlays &= ~OVERLAY_DROPNOW;
+                        selfTrigger();
+                    }
+                }
+
+                @Override
+                public void dragEnter(DropTargetDragEvent dtde) {
+                    if ((activeOverlays & OVERLAY_DROPNOW) == 0) {
+                        activeOverlays |= OVERLAY_DROPNOW;
+                        selfTrigger();
+                    }
+                }
+
+                @Override
+                public void dragExit(DropTargetEvent dte) {
+                    if ((activeOverlays & OVERLAY_DROPNOW) != 0) {
+                        activeOverlays &= ~OVERLAY_DROPNOW;
+                        selfTrigger();
+                    }
+                }
+            });
+        } catch (TooManyListenersException ex) {
+            // should not happen.
+            // not critical, but log this
+            ex.printStackTrace();
+        }
     }
 
     /**
