@@ -101,7 +101,9 @@ public class Leecher extends Transceiver {
                         fileout.close();
                         target.setLastModified(date);
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        if (!abort) {
+                            ex.printStackTrace();
+                        }
                     }
                 } else if (cmd == 'd' || cmd == 'D') {
                     // folder
@@ -135,7 +137,9 @@ public class Leecher extends Transceiver {
             }
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            if (!abort) {
+                ex.printStackTrace();
+            }
             listener.finished(false, false);
         } finally {
             try {
@@ -196,6 +200,7 @@ public class Leecher extends Transceiver {
     public void abort() {
         // Just kill it
         System.out.println("Leecher: Aborting download upon user-request. Exceptions will occur!");
+        abort = true;
         try {
             in.close();
         } catch (Exception ex) {

@@ -50,6 +50,10 @@ public abstract class Transceiver implements Runnable {
      */
     protected int transVersion;
     /**
+     * Silences exceptions after user-triggered transfer abort.
+     */
+    protected boolean abort = false;
+    /**
      * Buffer for five speed-measurements.
      */
     private final int[] lastSpeeds = new int[5];

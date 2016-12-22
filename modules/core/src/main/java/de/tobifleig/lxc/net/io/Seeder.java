@@ -113,7 +113,9 @@ public class Seeder extends Transceiver {
             out.writeByte('e');
             out.flush();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            if (!abort) {
+                ex.printStackTrace();
+            }
             transferOk = false;
         } finally {
             try {
@@ -179,7 +181,8 @@ public class Seeder extends Transceiver {
     @Override
     public void abort() {
         // Just kill it
-        System.out.println("Leecher: Aborting upload upon user-request. Exceptions will occur!");
+        System.out.println("Leecher: Aborting upload upon user-request.");
+        abort = true;
         try {
             in.close();
         } catch (Exception ex) {
