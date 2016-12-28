@@ -49,12 +49,6 @@
                 android:exported="false">
         </service>
 
-        <receiver android:name="de.tobifleig.lxc.plaf.android.ConnectivityChangeReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name="de.tobifleig.lxc.plaf.android.activity.SettingsActivity"
             android:label="@string/title_activity_settings"

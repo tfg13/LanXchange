@@ -27,7 +27,9 @@ import java.util.List;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -88,6 +90,10 @@ public class MainActivity extends AppCompatActivity {
      * True, if the user tried to share a file when the storate permission prompt fired.
      */
     private boolean permissionPromptShareFile;
+    /**
+     * Handles network state changes (wifi coming online)
+     */
+    private ConnectivityChangeReceiver networkStateChangeReceiver;
 
 
     /**
@@ -129,8 +135,8 @@ public class MainActivity extends AppCompatActivity {
                 setWifiWarning(!isWifi);
             }
         });
-        // trigger connectivity listener once to get the current status
-        new ConnectivityChangeReceiver().onReceive(getBaseContext(), null);
+        networkStateChangeReceiver = new ConnectivityChangeReceiver();
+
 
         guiBridge = new GuiInterfaceBridge() {
 
@@ -226,6 +232,20 @@ public class MainActivity extends AppCompatActivity {
         // notify service about the gui becoming invisible.
         // service will stop itself after a while to preserve resources
         AndroidSingleton.onMainActivityHidden(0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getBaseContext().unregisterReceiver(networkStateChangeReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // set up connectivity listener and trigger once to get the current status
+        getBaseContext().registerReceiver(networkStateChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        networkStateChangeReceiver.onReceive(getBaseContext(), null);
     }
 
     @Override
