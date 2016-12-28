@@ -101,7 +101,7 @@ public class LXCService extends Service implements Platform {
             running = true;
 
             /*
-             * Create permanent notifiaction that stays active until this Service is stopped.
+             * Create permanent notification that stays active until this Service is stopped.
              * Tapping the notification brings the user to the main activity.
              */
 
