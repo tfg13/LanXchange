@@ -7,6 +7,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <de.tobifleig.lxc.plaf.android.ui.FileListView
+        android:id="@+id/fileList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill"
+        android:longClickable="true" >
+    </de.tobifleig.lxc.plaf.android.ui.FileListView>
+
     <TextView
         android:id="@+id/noWifiWarning"
         android:layout_width="match_parent"
@@ -17,14 +25,6 @@
         android:text="@string/ui_nowifi"
         android:textColor="?android:attr/textColorPrimaryInverse"
         android:textSize="18sp"/>
-
-    <de.tobifleig.lxc.plaf.android.ui.FileListView
-        android:id="@+id/fileList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="fill"
-        android:longClickable="true" >
-    </de.tobifleig.lxc.plaf.android.ui.FileListView>
 
 
     <android.support.design.widget.FloatingActionButton
