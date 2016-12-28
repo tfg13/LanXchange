@@ -22,10 +22,10 @@ package de.tobifleig.lxc.net;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles known/unknown remote/local instances.
@@ -50,7 +50,7 @@ class InstanceManager {
     /**
      * Contains all known instances.
      */
-    private HashMap<Integer, LXCInstance> instances;
+    private ConcurrentHashMap<Integer, LXCInstance> instances;
     /**
      * Seems to contain all remote instances, without any duplicates.
      * Backed by the instances HashMap
@@ -71,7 +71,7 @@ class InstanceManager {
      * @param listener the listener to pass events to
      */
     InstanceManager(InstanceManagerListener listener) {
-        this.instances = new HashMap<Integer, LXCInstance>();
+        this.instances = new ConcurrentHashMap<Integer, LXCInstance>();
         this.listener = listener;
         this.timer = new Timer("lxc_heartbeat_helper", true);
         remoteView = new Iterable<LXCInstance>() {
