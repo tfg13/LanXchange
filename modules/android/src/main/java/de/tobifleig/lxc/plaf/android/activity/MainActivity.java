@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         // Check intent first
         List<VirtualFile> quickShare = null;
         Intent launchIntent = getIntent();
-        if (launchIntent.getAction() != null && !launchIntent.getAction().equals(Intent.ACTION_MAIN)) {
+        if (launchIntent.getAction() != null && (launchIntent.getAction().equals(Intent.ACTION_SEND) || launchIntent.getAction().equals(Intent.ACTION_SEND_MULTIPLE))) {
             quickShare = computeInputIntent(launchIntent);
             if (quickShare == null) {
                 // unable to access file, inform user
@@ -216,6 +216,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         AndroidSingleton.onCreateMainActivity(this, guiBridge, quickShare);
+
+        // now handle normal intents (ACTION_SEND* has been disarmed by deleting the action)
+        if (launchIntent.getAction() != null) {
+            onNewIntent(launchIntent);
+        }
     }
 
     private void shareFile() {
@@ -366,7 +371,8 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }
                 break;
-            default:
+            case Intent.ACTION_SEND:
+            case Intent.ACTION_SEND_MULTIPLE:
                 // share
                 List<VirtualFile> files = computeInputIntent(intent);
                 if (files != null && !files.isEmpty()) {
@@ -383,6 +389,9 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     handleShareError(intent);
                 }
+                break;
+            default:
+                System.out.println("Received unknown intent! " + intent.getAction());
         }
     }
 
