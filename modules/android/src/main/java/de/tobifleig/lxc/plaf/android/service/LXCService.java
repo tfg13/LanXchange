@@ -36,6 +36,7 @@ import android.media.MediaScannerConnection;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.net.wifi.WifiManager.WifiLock;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -114,6 +115,14 @@ public class LXCService extends Service implements Platform {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
             builder.setContentIntent(contentIntent);
+
+            // quit button
+            Intent quitIntent = new Intent(this, MainActivity.class);
+            quitIntent.setAction(MainActivity.ACTION_STOP_FROMSERVICE);
+            PendingIntent pendingQuitIntent = PendingIntent.getActivity(this, 0, quitIntent, 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                builder.addAction(R.drawable.ic_power_settings_new_white_24dp, getResources().getString(R.string.notification_action_quit), pendingQuitIntent);
+            }
 
             // launch notification
             startForeground(1, builder.getNotification());

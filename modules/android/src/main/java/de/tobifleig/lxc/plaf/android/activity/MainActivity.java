@@ -73,6 +73,17 @@ import de.tobifleig.lxc.plaf.android.ui.FileListView;
  */
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * Intent from service, requests LanXchange termination
+     * This activity may be paused/stopped when the intent is received, so this cannot show a dialog if transfers
+     * are running.
+     */
+    public static final String ACTION_STOP_FROMSERVICE = "de.tobifleig.lxc.plaf.android.activity.ACTION_STOP_FROMSERVICE";
+    /**
+     * Intent fired by this activity. Upon reception, the activity is visible, so dialogs can be used.
+     */
+    public static final String ACTION_STOP_FROMACTIVITY = "de.tobifleig.lxc.plaf.android.activity.ACTION_STOP_FROMACTIVITY";
+
     private static final int RETURNCODE_FILEINTENT = 42;
     private static final int RETURNCODE_PERMISSION_PROMPT_STORAGE = 43;
     private AndroidGuiListener guiListener;
@@ -326,23 +337,52 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        // only act if there is an action and it is not MAIN
-        if (intent.getAction() != null && !intent.getAction().equals(Intent.ACTION_MAIN)) {
-            List<VirtualFile> files = computeInputIntent(intent);
-            if (files != null && !files.isEmpty()) {
-                if (guiListener == null) {
-                    // service not ready yet, cache
-                    AndroidSingleton.onEarlyShareIntent(files);
+        if (intent.getAction() == null) {
+            return;
+        }
+        switch (intent.getAction()) {
+            case Intent.ACTION_MAIN:
+                return;
+            case ACTION_STOP_FROMSERVICE:
+                // try shutdown, but do not ask for transfers yet (the dialog will never show because this activity may
+                // currently be invisible
+                if (guiListener.shutdown(false, false, false)) {
+                    // no transfers running, shutdown went through
+                    AndroidSingleton.onRealDestroy();
+                    finish();
                 } else {
-                    permissionPromptQuickshare = files;
-                    if (verifyStoragePermission()) {
-                        offerFiles(files);
-                        permissionPromptQuickshare = null;
-                    }// otherwise prompt is going up, flow continues in callback
+                    // transfers running, need to prompt user
+                    // for this, the activity has to be visible - this means this method must return
+                    // re-fire intent
+                    Intent quitIntent = new Intent(this, MainActivity.class);
+                    quitIntent.setAction(MainActivity.ACTION_STOP_FROMACTIVITY);
+                    startActivity(quitIntent);
                 }
-            } else {
-                handleShareError(intent);
-            }
+                break;
+            case ACTION_STOP_FROMACTIVITY:
+                if (guiListener.shutdown(false, true, false)) {
+                    // no transfers running, shutdown went through
+                    AndroidSingleton.onRealDestroy();
+                    finish();
+                }
+                break;
+            default:
+                // share
+                List<VirtualFile> files = computeInputIntent(intent);
+                if (files != null && !files.isEmpty()) {
+                    if (guiListener == null) {
+                        // service not ready yet, cache
+                        AndroidSingleton.onEarlyShareIntent(files);
+                    } else {
+                        permissionPromptQuickshare = files;
+                        if (verifyStoragePermission()) {
+                            offerFiles(files);
+                            permissionPromptQuickshare = null;
+                        }// otherwise prompt is going up, flow continues in callback
+                    }
+                } else {
+                    handleShareError(intent);
+                }
         }
     }
 
