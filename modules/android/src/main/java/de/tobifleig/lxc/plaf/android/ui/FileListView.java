@@ -307,7 +307,7 @@ public class FileListView extends RecyclerView {
                 if (!file.isAvailable()) {
                     cachedDownloadStatus.setImageResource(R.drawable.ic_file_download);
                 } else {
-                    cachedDownloadStatus.setImageResource(R.drawable.done);
+                    cachedDownloadStatus.setImageResource(R.drawable.ic_done_black_48dp);
                 }
                 // download starting?
                 if (file.isLocked() && file.getJobs().size() == 0) {
