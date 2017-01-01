@@ -1,32 +1,15 @@
 /*
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig (tobifleig gmail com)
- *
+ * Copyright 2017 Tobias Fleig (tobifleig gmail com)
  * All rights reserved.
  *
- * This file is part of LanXchange.
- *
- * LanXchange is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * LanXchange is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
+ * Usage of this source code is governed by the GNU GENERAL PUBLIC LICENSE version 3 or (at your option) any later version.
+ * For the full license text see the file COPYING or https://github.com/tfg13/LanXchange/blob/master/COPYING
  */
-package de.tobifleig.lxc.plaf.swing;
+package de.tobifleig.lxc.plaf.pc;
 
 import de.tobifleig.lxc.Configuration;
-import de.tobifleig.lxc.LXC;
-import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.Platform;
-import de.tobifleig.lxc.plaf.swing.LXCUpdater;
-import de.tobifleig.lxc.plaf.swing.SwingGui;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,29 +17,24 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
-import javax.swing.*;
 
 /**
- * A generic Platform for all OSes providing Swing and direct write access to the LXC directory.
- *
- * @author Tobias Fleig <tobifleig googlemail com>
+ * Generic PC platform for all platforms with direct write access to the main directory.
+ * Shared by CLI and Swing platforms.
+ * Provides automatic updates and manages the config file.
  */
-public class GenericPCPlatform implements Platform {
+public abstract class PCPlatform implements Platform {
 
     /**
      * path to cfg-file.
      */
     private static final String CONFIG_PATH = "lxc.cfg";
-    /**
-     * the swing-gui.
-     */
-    protected final SwingGui gui = new SwingGui(this);
 
     @Override
     public boolean hasAutoUpdates() {
         return true;
     }
+
 
     @Override
     public void checkAndPerformUpdates(String[] args) {
@@ -107,7 +85,7 @@ public class GenericPCPlatform implements Platform {
                 @Override
                 public void run() {
                     try {
-                        LXCUpdater.checkAndPerformUpdate(gui, force,
+                        LXCUpdater.checkAndPerformUpdate(getUpdaterGui(), force,
                                 noVerification, allowDowngradeF, managed);
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -122,11 +100,6 @@ public class GenericPCPlatform implements Platform {
         } else {
             System.out.println("Not checking for updates. (disabled via lxc.cfg)");
         }
-    }
-
-    @Override
-    public GuiInterface getGui(String[] args) {
-        return gui;
     }
 
     @Override
@@ -155,8 +128,7 @@ public class GenericPCPlatform implements Platform {
             // this is serious. exit
             System.out.println("Cannot read/write configfile (cfg.txt)");
             // display warning (gui not available yet)
-            JOptionPane.showMessageDialog(new JFrame(), "Cannot write to own folder. Please move to your home directory or start as administrator.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            showEarlyError("Cannot write to own folder. Please move to your home directory or start as administrator.");
             System.exit(1);
         } catch (IOException e2) {
             e2.printStackTrace();
@@ -202,7 +174,7 @@ public class GenericPCPlatform implements Platform {
 
     @Override
     public String getDefaultDownloadTarget() {
-        // depends on confituration
+        // depends on configuration
         if (!Configuration.containsKey("defaulttarget")) {
             return null; // default = always ask
         } else {
@@ -217,64 +189,19 @@ public class GenericPCPlatform implements Platform {
     }
 
     @Override
-    public void downloadComplete(LXCFile file, File targetFolder) {
-        // not required for generic pcs
-    }
-
-    @Override
     public String[] getRequiredMulticastHelpers() {
         return new String[0];
     }
 
     /**
-     * Prompts the user for a download target.
-     * See same method GuiInterface.
+     * Display critical errors that occurred during startup.
+     * @param error the message
      */
-    public File getFileTarget(LXCFile file) {
-        // default implementation with swing
-        // subclasses may override this to use a native system dialog
-        JFileChooser cf = new JFileChooser();
-        cf.setApproveButtonText("Choose target");
-        cf.setApproveButtonToolTipText("Download files into selected directory");
-        cf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        cf.setMultiSelectionEnabled(false);
-        cf.setDialogTitle("Target directory for \"" + file.getShownName() + "\"");
-        int chooseResult = cf.showDialog(gui, null);
-        if (chooseResult == JFileChooser.APPROVE_OPTION) {
-            if (cf.getSelectedFile().canWrite()) {
-                return cf.getSelectedFile();
-            } else {
-                // inform user
-                gui.showError("Cannot write there, please selected another target or start LXC as Administrator");
-                // cancel
-                System.out.println("Canceled, cannot write (permission denied)");
-                return null;
-            }
-        } else {
-            // cancel
-            System.out.println("Canceled by user.");
-            return null;
-        }
-    }
+    public abstract void showEarlyError(String error);
 
     /**
-     * Prompts the user for files to share.
+     * Returns the updater gui.
+     * @return the updater gui
      */
-    public File[] openFileForSharing() {
-        // default implementation with swing
-        // subclasses may override this to use a native system dialog
-        JFileChooser cf = new JFileChooser();
-        cf.setApproveButtonText("Share");
-        cf.setApproveButtonToolTipText("Share the selected files with LanXchange");
-        cf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        cf.setMultiSelectionEnabled(true);
-        cf.setDialogTitle("Select file(s) to share");
-        int chooseResult = cf.showDialog(gui, null);
-        if (chooseResult == JFileChooser.APPROVE_OPTION) {
-            return cf.getSelectedFiles();
-        } else {
-            // cancel
-            return null;
-        }
-    }
+    public abstract UpdaterGui getUpdaterGui();
 }

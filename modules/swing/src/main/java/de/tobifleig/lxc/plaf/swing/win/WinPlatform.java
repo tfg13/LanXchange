@@ -26,7 +26,7 @@ import com.sun.jna.WString;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.ptr.PointerByReference;
 import de.tobifleig.lxc.data.LXCFile;
-import de.tobifleig.lxc.plaf.swing.GenericPCPlatform;
+import de.tobifleig.lxc.plaf.swing.GenericSwingPlatform;
 import de.tobifleig.lxc.plaf.swing.OverallProgressManager;
 
 import java.io.File;
@@ -37,7 +37,7 @@ import java.util.Arrays;
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class WinPlatform extends GenericPCPlatform {
+public class WinPlatform extends GenericSwingPlatform {
 
     private boolean nativeSupportEnabled = true;
     private boolean taskbarProgressSupported = true;

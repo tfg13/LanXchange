@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.swing;
+package de.tobifleig.lxc.plaf.pc;
 
 import java.io.IOException;
 import java.io.InputStream;

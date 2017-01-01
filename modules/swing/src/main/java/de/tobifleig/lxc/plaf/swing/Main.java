@@ -26,7 +26,6 @@ import de.tobifleig.lxc.plaf.swing.win.WinPlatform;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 /**
  * Launches the desktop (swing) version of LanXchange with the correct Platform.
@@ -41,7 +40,7 @@ public class Main {
         if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
             platform = new WinPlatform(args);
         } else {
-            platform = new GenericPCPlatform();
+            platform = new GenericSwingPlatform();
         }
 
         // check permission for own folder

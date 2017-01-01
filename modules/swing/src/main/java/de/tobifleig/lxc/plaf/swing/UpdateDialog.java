@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.plaf.swing;
 
+import de.tobifleig.lxc.plaf.pc.UpdaterGui;
+
 import java.awt.Color;
 import javax.swing.ImageIcon;
 
@@ -29,7 +31,7 @@ import javax.swing.ImageIcon;
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class UpdateDialog extends javax.swing.JDialog {
+public class UpdateDialog extends javax.swing.JDialog implements UpdaterGui {
 
     private static final long serialVersionUID = 1L;
     private boolean update = false;
@@ -39,10 +41,8 @@ public class UpdateDialog extends javax.swing.JDialog {
      * Creates new form LXCUpdateDialog
      *
      * @param parent
-     * @param modal
-     * @param nextVersion
      */
-    public UpdateDialog(java.awt.Frame parent, boolean modal, String nextVersion) {
+    public UpdateDialog(java.awt.Frame parent) {
         super(parent, false);
         initComponents();
         jLabel1.setIcon(new ImageIcon("img/update.png"));
@@ -51,7 +51,6 @@ public class UpdateDialog extends javax.swing.JDialog {
         jLabel16.setIcon(jLabel13.getIcon());
         jPanel3.setVisible(false);
         jLabel3.putClientProperty("html.disable", true);
-        jLabel3.setText(nextVersion);
         setSize(getWidth(), jPanel2.getSize().height + 130);
         setLocationRelativeTo(parent);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -323,11 +322,13 @@ public class UpdateDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator2;
     // End of variables declaration//GEN-END:variables
 
-    boolean isUpdate() {
+    @Override
+    public boolean isUpdate() {
         return update;
     }
 
-    void toProgressView() {
+    @Override
+    public void toProgressView() {
         jPanel2.removeAll();
         jPanel2.setLayout(null);
         jPanel2.add(jPanel3);
@@ -342,22 +343,31 @@ public class UpdateDialog extends javax.swing.JDialog {
         repaint();
     }
 
-    void setStatusToVerify() {
+    @Override
+    public void setVersionTitle(String title) {
+        jLabel3.setText(title);
+    }
+
+    @Override
+    public void setStatusToVerify() {
         jLabel10.setVisible(true);
         jLabel13.setVisible(true);
     }
 
-    void setStatusToInstall() {
+    @Override
+    public void setStatusToInstall() {
         jLabel11.setVisible(true);
         jLabel14.setVisible(true);
     }
 
-    void setStatusToRestart() {
+    @Override
+    public void setStatusToRestart() {
         jLabel12.setVisible(true);
         jLabel16.setVisible(true);
     }
 
-    void setRestartTime(int i, boolean manual) {
+    @Override
+    public void setRestartTime(int i, boolean manual) {
         if (manual) {
             jLabel12.setText("OK! Please restart LXC. Terminating in: " + i);
         } else {
@@ -365,11 +375,18 @@ public class UpdateDialog extends javax.swing.JDialog {
         }
     }
 
-    void setStatusToError() {
+    @Override
+    public void setStatusToError() {
         jLabel10.setForeground(Color.RED);
         jLabel11.setText("ERROR. Update corrupted or manipulated!");
         jLabel12.setText("Installation aborted for your security");
         jLabel11.setVisible(true);
         jLabel12.setVisible(true);
+    }
+
+    @Override
+    public void finish() {
+        setVisible(false);
+        dispose();
     }
 }

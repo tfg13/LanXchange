@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.swing;
+package de.tobifleig.lxc.plaf.pc;
 
 import de.tobifleig.lxc.LXC;
 
@@ -122,14 +122,14 @@ public final class LXCUpdater {
     /**
      * Checks for updates, prompts the user and installs them.
      *
-     * @param gui the gui, required to display the dialog
+     * @param updateGui the updater gui
      * @param forceUpdate skips online version check and allows re-installation of the current version. Does *not* disable protection against downgrade attacks
      * @param overrideVerification skips signature check (dangerous!)
      * @param allowDowngrade disables downgrade check (dangerous!)
      * @param restartable if true, whoever started LXC is aware of this update system and wants to be notified when LXC should be restarted rather than regularly terminated (this is done by returning exit code 6 rather than 0)
      * @throws Exception may throw a bunch of exceptions, this class requires, working internet, github, signature checks etc.
      */
-    public static void checkAndPerformUpdate(SwingGui gui, boolean forceUpdate, boolean overrideVerification, boolean allowDowngrade, boolean restartable) throws Exception {
+    public static void checkAndPerformUpdate(UpdaterGui updateGui, boolean forceUpdate, boolean overrideVerification, boolean allowDowngrade, boolean restartable) throws Exception {
         if (forceUpdate) {
             System.out.println("Info: Forcing update...");
         }
@@ -148,7 +148,7 @@ public final class LXCUpdater {
         // compare version number
         if (gotver > LXC.versionId || forceUpdate) {
             System.out.println("Newer Version available!");
-            UpdateDialog updateGui = new UpdateDialog(gui, true, title);
+            updateGui.setVersionTitle(title);
             // prompt user
             if (updateGui.isUpdate()) {
                 updateGui.toProgressView();
@@ -316,8 +316,7 @@ public final class LXCUpdater {
             } else {
                 System.out.println("Update rejected by user");
             }
-            updateGui.setVisible(false);
-            updateGui.dispose();
+            updateGui.finish();
         } else {
             System.out.println("You have the latest version");
         }

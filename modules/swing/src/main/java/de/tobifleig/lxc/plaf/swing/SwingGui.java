@@ -91,12 +91,12 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     /**
      * The platform we are running on.
      */
-    private final GenericPCPlatform platform;
+    private final GenericSwingPlatform platform;
 
     /**
      * Creates new form LXCGui3
      */
-    public SwingGui(GenericPCPlatform platform) {
+    public SwingGui(GenericSwingPlatform platform) {
         this.platform = platform;
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
