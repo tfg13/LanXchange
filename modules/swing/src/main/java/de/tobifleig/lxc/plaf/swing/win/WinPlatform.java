@@ -49,6 +49,7 @@ public class WinPlatform extends GenericSwingPlatform {
 
 
     public WinPlatform(String[] args) {
+        super(args);
         // native support can be suppressed with a launch option
         if (Arrays.asList(args).contains("-nonative")) {
             nativeSupportEnabled = false;

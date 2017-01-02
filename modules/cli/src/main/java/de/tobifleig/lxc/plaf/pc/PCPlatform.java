@@ -30,6 +30,21 @@ public abstract class PCPlatform implements Platform {
      */
     private static final String CONFIG_PATH = "lxc.cfg";
 
+    public PCPlatform(String[] args) {
+        // check permission for own folder
+        try {
+            File.createTempFile("testacl", null, new File(".")).delete();
+            // Can write
+        } catch (IOException ex) {
+            // Cannot write
+            System.out.println("ERROR: Cannot write to my directory ("
+                    + new File(".").getAbsolutePath()
+                    + "). Try running LXC in your home directory.");
+            getGui(args).showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
+            System.exit(1);
+        }
+    }
+
     @Override
     public boolean hasAutoUpdates() {
         return true;

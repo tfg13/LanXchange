@@ -220,7 +220,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void init(String[] args) {
+    public void init() {
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
 

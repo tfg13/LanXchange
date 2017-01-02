@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# This script launches the CLI version of LanXchange.
+# For valid commands, run "lxcc help"
+
+sargs="$*"
+cd `dirname $0`
+ret="0"
+
+# functions
+# starts the frontend
+startfrontend() {
+  if [ -n "$JAVA_HOME" ]; then
+    $JAVA_HOME/bin/java -cp ./lanxchange.jar de.tobifleig.lxc.plaf.cli.CLIFrontend -cli $1 $sargs
+  else
+    java -cp ./lanxchange.jar de.tobifleig.lxc.plaf.cli.CLIFrontend -cli $1 $sargs
+  fi
+  ret="$?"
+}
+
+# starts the backend
+startbackendasync() {
+  if [ -n "$JAVA_HOME" ]; then
+    $JAVA_HOME/bin/java -cp ./lanxchange.jar de.tobifleig.lxc.plaf.cli.CLIBackend -cli $sargs &
+  else
+    java -cp ./lanxchange.jar de.tobifleig.lxc.plaf.cli.CLIBackend -cli $sargs &
+  fi
+}
+
+# real code starts here
+echo "start1"
+startfrontend ""
+
+# frontend can request backend start
+if [ "$ret" -eq "7" ]; then
+    echo "startbackend"
+	startbackendasync
+	echo "start2"
+	startfrontend "bl"
+fi
+
+#done
+cd $OLDPWD

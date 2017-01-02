@@ -40,6 +40,10 @@ public class GenericSwingPlatform extends PCPlatform {
      */
     protected final SwingGui gui = new SwingGui(this);
 
+    public GenericSwingPlatform(String[] args) {
+        super(args);
+    }
+
     @Override
     public boolean hasAutoUpdates() {
         return true;

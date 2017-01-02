@@ -207,7 +207,7 @@ public class LXCService extends Service implements Platform {
             }
 
             @Override
-            public void init(String[] args) {
+            public void init() {
                 // acquire multicast lock
                 WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
                 multicastLock = wifi.createMulticastLock("Lanxchange multicastLock");

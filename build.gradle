@@ -1,6 +1,6 @@
 // define what is required to build the desktop release (swing)
 def desktopProjects() {
-    [project('core'), project('swing')]
+    [project('core'), project('cli'), project('swing')]
 }
 
 // common settings for desktop (swing) projects
@@ -14,6 +14,11 @@ configure(desktopProjects()) {
 configure([project('swing')]) {
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
+}
+
+configure([project('cli')]) {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 // configure paths

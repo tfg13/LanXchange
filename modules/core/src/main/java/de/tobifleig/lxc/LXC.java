@@ -103,7 +103,7 @@ public class LXC {
         // set up listeners
         initListeners();
 
-        gui.init(args);
+        gui.init();
 
         askForDownloadTargetSupported = platform.askForDownloadTargetSupported();
         if (platform.getDefaultDownloadTarget() != null) {

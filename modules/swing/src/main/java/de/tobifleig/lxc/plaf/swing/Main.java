@@ -40,20 +40,7 @@ public class Main {
         if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
             platform = new WinPlatform(args);
         } else {
-            platform = new GenericSwingPlatform();
-        }
-
-        // check permission for own folder
-        try {
-            File.createTempFile("testacl", null, new File(".")).delete();
-            // Can write
-        } catch (IOException ex) {
-            // Cannot write
-            System.out.println("ERROR: Cannot write to my directory ("
-                    + new File(".").getAbsolutePath()
-                    + "). Try running LXC in your home directory.");
-            platform.getGui(args).showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
-            System.exit(1);
+            platform = new GenericSwingPlatform(args);
         }
 
         LXC lxc = new LXC(platform, args);

@@ -40,9 +40,8 @@ public interface GuiInterface {
     /**
      * Initialize the user-inferface.
      *
-     * @param args LXC's arguments
      */
-    public void init(String[] args);
+    public void init();
 
     /**
      * Displays the gui.
