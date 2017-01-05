@@ -11,7 +11,6 @@ import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
-import de.tobifleig.lxc.plaf.cli.cmds.ListCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StartCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StopCommand;
 import de.tobifleig.lxc.plaf.cli.ui.CLITools;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 /**
  * The CLI is non-interactive.
@@ -45,6 +45,16 @@ public class CLIBackend extends PCPlatform {
     private GuiListener listener;
 
     /**
+     * Prints the file lists.
+     */
+    private ListPrinter listPrinter;
+
+    /**
+     * Used to display constant, simple, human-usable ids for files.
+     */
+    private LocalFileIDManager idManager = new LocalFileIDManager();
+
+    /**
      * Flag that indicates if the server mainloop must quit.
      */
     private boolean stopServer = false;
@@ -54,7 +64,8 @@ public class CLIBackend extends PCPlatform {
     public CLIBackend(String[] args) {
         super(args);
 
-        LXC lxc = new LXC(this, args);
+        listPrinter = new ListPrinter(idManager);
+        new LXC(this, args);
 
         receiveLoop();
     }
@@ -103,8 +114,14 @@ public class CLIBackend extends PCPlatform {
             }
 
             @Override
-            public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
-                // ignore
+            public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles, List<LXCFile> affectedFiles) {
+                affectedFiles.forEach(file -> {
+                    if (operation == GuiInterface.UPDATE_OPERATION_ADD) {
+                        idManager.addFile(file);
+                    } else { // remove
+                        idManager.removeFile(file);
+                    }
+                });
             }
 
             @Override
@@ -151,7 +168,7 @@ public class CLIBackend extends PCPlatform {
                 handleStop((StopCommand) command);
                 break;
             case LIST:
-                handleList((ListCommand) command);
+                handleList();
                 break;
             default:
                 // front end should never send invalid commands
@@ -159,8 +176,8 @@ public class CLIBackend extends PCPlatform {
         }
     }
 
-    private void handleList(ListCommand command) {
-        ListPrinter.printList(listener.getFileList());
+    private void handleList() {
+        listPrinter.printList(listener.getFileList());
     }
 
     private void handleStart(StartCommand startCommand) {

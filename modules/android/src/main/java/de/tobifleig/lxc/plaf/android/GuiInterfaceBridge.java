@@ -20,6 +20,10 @@
  */
 package de.tobifleig.lxc.plaf.android;
 
+import de.tobifleig.lxc.data.LXCFile;
+
+import java.util.List;
+
 /**
  * Required to forward some events from LXCService (that implements GuiInterface)
  * to the real Gui (that LXC cannot handle because it can be recreated etc)
@@ -36,7 +40,7 @@ public interface GuiInterfaceBridge {
     /**
      * Forwards some notifyFileChange-calls to the gui.
      */
-    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles);
+    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles, List<LXCFile> affectedFiles);
 
     /**
      * Forwards confirmCloseWithTransfersRunning()-calls to the gui.

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.imageio.ImageIO;
@@ -364,7 +365,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     }
 
     @Override
-    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
+    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles, List<LXCFile> affectedFiles) {
         // swing gui is not interested in all this information
         update();
     }

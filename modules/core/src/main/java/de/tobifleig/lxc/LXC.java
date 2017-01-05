@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -121,11 +122,16 @@ public class LXC {
                 if (!changes.getRemovedFiles().isEmpty()) {
                     // no way of picking multiple files in larger set, must serialize
                     for (FileListChangeSet.FileModification modification : changes.getRemovedFiles()) {
-                        gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_REMOVE, modification.index, 1);
+                        gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_REMOVE, modification.index, 1, Collections.singletonList(modification.file));
                     }
                 }
                 if (!changes.getAddedFiles().isEmpty()) {
-                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_ADD, changes.getAddedFiles().get(0).index, changes.getAddedFiles().size());
+                    // manual list copy. need Java 8 in this module soon...
+                    List<LXCFile> addedLXCFiles = new ArrayList<LXCFile>();
+                    for (FileListChangeSet.FileModification addition : changes.getAddedFiles()) {
+                        addedLXCFiles.add(addition.file);
+                    }
+                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_ADD, changes.getAddedFiles().get(0).index, changes.getAddedFiles().size(), addedLXCFiles);
                 }
             }
 
@@ -150,7 +156,7 @@ public class LXC {
                 if (!removals.getRemovedFiles().isEmpty()) {
                     // no way of picking multiple files in larger set, must serialize
                     for (FileListChangeSet.FileModification modification : removals.getRemovedFiles()) {
-                        gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_REMOVE, modification.index, 1);
+                        gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_REMOTE, GuiInterface.UPDATE_OPERATION_REMOVE, modification.index, 1, Collections.singletonList(modification.file));
                     }
                 }
             }
@@ -234,7 +240,7 @@ public class LXC {
                 int newIndex = LXC.this.files.addLocal(tempFile);
                 if (newIndex != -1) {
                     network.broadcastList();
-                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_LOCAL, GuiInterface.UPDATE_OPERATION_ADD, newIndex, 1);
+                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_LOCAL, GuiInterface.UPDATE_OPERATION_ADD, newIndex, 1, Collections.singletonList(tempFile));
                 }
             }
         }, "lxc_helper_sizecalcer");
@@ -284,7 +290,7 @@ public class LXC {
                 int newIndex = files.addLocal(newFile);
                 if (newIndex != -1) {
                     network.broadcastList();
-                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_LOCAL, GuiInterface.UPDATE_OPERATION_ADD, newIndex, 1);
+                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_LOCAL, GuiInterface.UPDATE_OPERATION_ADD, newIndex, 1, Collections.singletonList(newFile));
                 }
             }
 

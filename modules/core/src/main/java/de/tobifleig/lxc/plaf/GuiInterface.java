@@ -22,6 +22,7 @@ package de.tobifleig.lxc.plaf;
 
 import de.tobifleig.lxc.data.LXCFile;
 import java.io.File;
+import java.util.List;
 
 /**
  * Defines a LXC-GUI.
@@ -82,8 +83,9 @@ public interface GuiInterface {
      * @param operation one of UPDATE_OPERATION_ADD, UPDATE_OPERATION_REMOVE
      * @param firstIndex index of first modified file (index of first removed or future index of first new)
      * @param numberOfFiles number of files that were added/removed in this batch
+     * @param affectedFiles the changed files
      */
-    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles);
+    public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles, List<LXCFile> affectedFiles);
 
     /**
      * Fired to notify the gui of new/removed jobs.
