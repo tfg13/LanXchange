@@ -4,8 +4,11 @@ import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
+import de.tobifleig.lxc.plaf.cli.cmds.ListCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StartCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StopCommand;
+import de.tobifleig.lxc.plaf.cli.ui.CLITools;
+import de.tobifleig.lxc.plaf.cli.ui.ListPrinter;
 import de.tobifleig.lxc.plaf.pc.PCPlatform;
 import de.tobifleig.lxc.plaf.pc.UpdaterGui;
 
@@ -140,10 +143,17 @@ public class CLIBackend extends PCPlatform {
             case STOP:
                 handleStop((StopCommand) command);
                 break;
+            case LIST:
+                handleList((ListCommand) command);
+                break;
             default:
                 // front end should never send invalid commands
                 throw new AssertionError("unexpected command!");
         }
+    }
+
+    private void handleList(ListCommand command) {
+        ListPrinter.printList(listener.getFileList());
     }
 
     private void handleStart(StartCommand startCommand) {

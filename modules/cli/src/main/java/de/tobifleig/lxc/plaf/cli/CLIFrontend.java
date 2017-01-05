@@ -1,7 +1,9 @@
 package de.tobifleig.lxc.plaf.cli;
 
+import de.tobifleig.lxc.plaf.cli.cmds.ListCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StartCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StopCommand;
+import de.tobifleig.lxc.plaf.cli.ui.CLITools;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -54,6 +56,9 @@ public class CLIFrontend {
             case "exit":
                 command = parseStop(args);
                 break;
+            case "list":
+                command = parseList(args);
+                break;
             case "help":
             case "h":
             case "?":
@@ -100,6 +105,13 @@ public class CLIFrontend {
             // TODO handle exception during connection/delivery attempt
             return false;
         }
+    }
+
+    private static BackendCommand parseList(String[] data) {
+        if (verifyCommandLength(data, 0, 0)) {
+            return new ListCommand();
+        }
+        return null;
     }
 
     private static BackendCommand parseStart(String[] data, boolean alreadyStarted) {

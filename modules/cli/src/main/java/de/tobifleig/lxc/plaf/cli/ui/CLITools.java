@@ -1,4 +1,4 @@
-package de.tobifleig.lxc.plaf.cli;
+package de.tobifleig.lxc.plaf.cli.ui;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
