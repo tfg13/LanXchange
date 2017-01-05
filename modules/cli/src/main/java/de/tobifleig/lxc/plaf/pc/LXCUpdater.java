@@ -149,8 +149,7 @@ public final class LXCUpdater {
         if (gotver > LXC.versionId || forceUpdate) {
             System.out.println("Newer Version available!");
             updateGui.setVersionTitle(title);
-            // prompt user
-            if (updateGui.isUpdate()) {
+            if (updateGui.prompt()) {
                 updateGui.toProgressView();
                 // download update
                 URL url = new URL("http://updates.lanxchange.com/update_master.zip");
@@ -316,11 +315,10 @@ public final class LXCUpdater {
             } else {
                 System.out.println("Update rejected by user");
             }
-            updateGui.finish();
         } else {
             System.out.println("You have the latest version");
         }
-
+        updateGui.finish();
     }
 
     /**

@@ -18,7 +18,7 @@ public interface UpdaterGui {
     void setStatusToRestart();
     void setStatusToError();
     void setRestartTime(int i, boolean manual);
-    boolean isUpdate();
+    boolean prompt();
     void toProgressView();
     void finish();
 }

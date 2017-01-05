@@ -60,15 +60,6 @@ public class UpdateDialog extends javax.swing.JDialog implements UpdaterGui {
                 buttonKlicked(false);
             }
         });
-        setVisible(true);
-        synchronized (this) {
-            while (!button) {
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-                }
-            }
-        }
     }
 
     /**
@@ -323,7 +314,16 @@ public class UpdateDialog extends javax.swing.JDialog implements UpdaterGui {
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public boolean isUpdate() {
+    public boolean prompt() {
+        setVisible(true);
+        synchronized (this) {
+            while (!button) {
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
         return update;
     }
 
