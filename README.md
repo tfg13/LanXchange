@@ -40,8 +40,17 @@ A: LanXchange is much faster than the cloud (no slow upload involved) and, unlik
 Q: *But why Java?*  
 A: Historical reasons, I was in school when I started this and only knew Java. Plus, years later it made porting LanXchange to Android much easier.
 
-Q: *What about those automatic updates?*  
-A: Auto updates are recommended because updates frequently break compatibility with older versions. You can disable them, but there should be no need: On every launch, LanXchange *checks* for updates (by reading [this file](http://updates.lanxchange.com/v)), but **never** downloads or installs anything automatically. Also, all updates are signed.
+Q: *Automatic updates?*  
+A: Auto updates are recommended because updates frequently break compatibility with older versions. You can disable them, but there should be no need: On every launch, LanXchange *checks* for updates (by reading [this file](http://updates.lanxchange.com/v)), but **never** downloads or installs anything automatically. Also, I spent quite some time hardening the updater against a wide range of potential attacks. The [code/javadoc](https://github.com/tfg13/LanXchange/blob/master/modules/cli/src/main/java/de/tobifleig/lxc/plaf/pc/LXCUpdater.java) contains more details. If you think I missed something, please send a mail to *mail ät lanxchange.com*!
+
+Privacy Policy
+--------------
+
+The author does not collect or share any personal information.
+
+Please note: A simple version check is enabled by default, which reads a file hosted by either GitHub, Amazon AWS or Google (Cloud).
+These companies may or may not collect information like your IP address.
+Also, the author reserves the right to change the file host at any time without notice.
 
 License
 -------
