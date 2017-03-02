@@ -23,6 +23,7 @@ package de.tobifleig.lxc.plaf.android.service;
 import java.util.List;
 
 import android.content.Intent;
+import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.plaf.android.activity.MainActivity;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
@@ -41,7 +42,7 @@ public class AndroidSingleton {
         }
 
         @Override
-        public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
+        public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles, List<LXCFile> affectedFiles) {
             // do nothing
         }
 

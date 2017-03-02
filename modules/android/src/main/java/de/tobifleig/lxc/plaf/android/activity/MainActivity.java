@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles) {
+            public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles, List<LXCFile> affectedFiles) {
                 if (fileOrigin == GuiInterface.UPDATE_ORIGIN_LOCAL) {
                     // local implies: only 1 file at a time
                     if (operation == GuiInterface.UPDATE_OPERATION_ADD) {
