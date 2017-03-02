@@ -72,7 +72,7 @@
     <string name="about_category_licenses">3rd Party Licenses</string>
 	<string name="about_version">Version</string>
 	<string name="about_copyright">Copyright</string>
-	<string name="about_copyright_text">© 2009–2015 Tobias Fleig\nAll rights reserved.</string>
+	<string name="about_copyright_text">© 2009–2017 Tobias Fleig\nAll rights reserved.</string>
 	<string name="about_license">License</string>
 	<string name="about_license_text">http://www.gnu.org/licenses/gpl-3.0.txt</string>
 	<string name="about_3rd_party_licenses">License for Google Material Design Icons</string>
