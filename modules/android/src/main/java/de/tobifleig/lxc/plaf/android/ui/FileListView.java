@@ -456,7 +456,10 @@ public class FileListView extends RecyclerView {
 
             @Override
             public void run() {
-                files.listChanged();
+                // do *not* call listChanged here!!!
+                // this allows the RecyclerView sometimes to see changed files before the actual add/remove
+                // event arrives. When it later does arrive, RecyclerView crashes.
+                //files.listChanged();
                 manageEmptyView();
                 getAdapter().notifyDataSetChanged();
             }
