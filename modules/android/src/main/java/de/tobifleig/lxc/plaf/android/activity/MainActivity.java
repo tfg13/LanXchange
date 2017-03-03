@@ -507,9 +507,7 @@ public class MainActivity extends AppCompatActivity {
         System.err.println("Intent scheme: " + failedIntent.getScheme());
         System.err.println("Intent package: " + failedIntent.getPackage());
         System.err.println("Intent extras: " + failedIntent.getExtras());
-        if (android.os.Build.VERSION.SDK_INT >= 16) {
-            System.err.println("Intent clipData: " + failedIntent.getClipData());
-        }
+        System.err.println("Intent clipData: " + failedIntent.getClipData());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
         builder.setTitle(R.string.error_cantoffer_title);
@@ -538,7 +536,7 @@ public class MainActivity extends AppCompatActivity {
                         + "\n" + failedIntent.getScheme()
                         + "\n" + failedIntent.getPackage()
                         + "\n" + failedIntent.getExtras()
-                        + (android.os.Build.VERSION.SDK_INT >= 16 ? "\n" + failedIntent.getClipData() : ""));
+                        + "\n" + failedIntent.getClipData());
                 startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(uriText)));
             }
         });
@@ -592,7 +590,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (intent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
             // there is a legacy and a new way to receive multiple files
             // try the new first
-            if (android.os.Build.VERSION.SDK_INT >= 16 && intent.getClipData() != null) {
+            if (intent.getClipData() != null) {
                 return virtualFilesFromClipData(intent.getClipData());
             } else if (intent.getStringArrayListExtra(Intent.EXTRA_STREAM) != null) {
                 ArrayList<Uri> uris = new ArrayList<Uri>();
