@@ -21,6 +21,7 @@
 package de.tobifleig.lxc.plaf.android;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import de.tobifleig.lxc.data.LXCFile;
@@ -50,6 +51,10 @@ public class FileListWrapper {
      * Remote files.
      */
     private final ArrayList<LXCFile> networkFiles;
+    /**
+     * Allows fast lookups of Files to their list index.
+     */
+    private final HashMap<LXCFile, Integer> listIndices;
 
     /**
      * Creates a new wrapper for the given list.
@@ -58,6 +63,7 @@ public class FileListWrapper {
         this.list = list;
         ownFiles = new ArrayList<LXCFile>();
         networkFiles = new ArrayList<LXCFile>();
+        listIndices = new HashMap<>();
         recompute();
     }
 
@@ -88,17 +94,38 @@ public class FileListWrapper {
     }
 
     /**
+     * Returns the index of a given LXCFile in FileListView's notation.
+     */
+    public int getIndexForFile(LXCFile file) {
+        return listIndices.get(file);
+    }
+
+    /**
      * Recomputes the list, creates the required sublists.
      */
     private void recompute() {
         ownFiles.clear();
         networkFiles.clear();
+        listIndices.clear();
         for (LXCFile file : list) {
             if (file.isLocal()) {
                 ownFiles.add(file);
             } else {
                 networkFiles.add(file);
             }
+        }
+        int index = 1; // zero is list header
+        for (LXCFile file : ownFiles) {
+            listIndices.put(file, index);
+            index += 1;
+        }
+        if (!ownFiles.isEmpty()) {
+            // another header for remote files
+            index += 1;
+        }
+        for (LXCFile file : networkFiles) {
+            listIndices.put(file, index);
+            index += 1;
         }
     }
 }

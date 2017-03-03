@@ -47,6 +47,11 @@ public class AndroidSingleton {
         }
 
         @Override
+        public void notifyJobChange(int operation, LXCFile file, int index) {
+            // do nothing
+        }
+
+        @Override
         public boolean confirmCloseWithTransfersRunning() {
             // no gui = no one to ask = no not close
             return false;

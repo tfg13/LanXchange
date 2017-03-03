@@ -167,8 +167,7 @@ public class LXCService extends Service implements Platform {
 
             @Override
             public void notifyJobChange(int operation, LXCFile file, int index) {
-                // no job animations for now
-                update();
+                AndroidSingleton.getInterfaceBridge().notifyJobChange(operation, file, index);
             }
 
             @Override

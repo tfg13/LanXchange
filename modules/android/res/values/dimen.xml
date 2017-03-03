@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="fab_compat_margin">0dp</dimen>
+    <dimen name="file_sizer_standalone">72dp</dimen>
+    <dimen name="file_sizer_withtransfers">60dp</dimen>
 </resources>

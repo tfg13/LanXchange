@@ -20,6 +20,7 @@
  */
 package de.tobifleig.lxc.plaf.android.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.support.v7.app.AlertDialog;
@@ -36,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.tobifleig.lxc.R;
@@ -43,7 +45,6 @@ import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
 import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.plaf.GuiListener;
-import de.tobifleig.lxc.plaf.ProgressIndicator;
 import de.tobifleig.lxc.plaf.android.FileListWrapper;
 import de.tobifleig.lxc.plaf.android.MIMETypeGuesser;
 
@@ -58,14 +59,6 @@ public class FileListView extends RecyclerView {
     private FileListWrapper files;
     private GuiListener guiListener;
     private View emptyView;
-
-    private final ProgressIndicator noopIndicator = new ProgressIndicator() {
-
-        @Override
-        public void update(int percentage) {
-            // do nothing
-        }
-    };
 
     /*
      * Constructors of super class.
@@ -99,6 +92,8 @@ public class FileListView extends RecyclerView {
         private TextView cachedFileInfo;
         // local files only
         private View cachedRemoveLocal;
+        private ArrayList<View> cachedTransferProgress;
+        private View cachedSizer;
         // remote files only
         private ImageView cachedDownloadStatus;
         private ProgressBar cachedProgressBar;
@@ -125,6 +120,8 @@ public class FileListView extends RecyclerView {
             }
             if (type == TYPE_LOCAL) {
                 cachedRemoveLocal = cachedView.findViewById(R.id.removeLocal);
+                cachedSizer = cachedView.findViewById(R.id.sizer);
+                cachedTransferProgress = new ArrayList<>();
             }
             if (type == TYPE_REMOTE) {
                 cachedDownloadStatus = (ImageView) cachedView.findViewById(R.id.downloadStatus);
@@ -278,9 +275,53 @@ public class FileListView extends RecyclerView {
             cachedFileInfo.setText(LXCFile.getFormattedSize(file.getFileSize()));
             // values for local files
             if (type == TYPE_LOCAL) {
-                // Override all default ProgressIndicators
-                for (LXCJob job : file.getJobs()) {
-                    job.getTrans().setProgressIndicator(noopIndicator);
+                // handle spacing with progressbars
+                if (file.getJobs().isEmpty()) {
+                    ((LinearLayout.LayoutParams) cachedSizer.getLayoutParams()).height = (int) getResources().getDimension(R.dimen.file_sizer_standalone);
+                } else {
+                    ((LinearLayout.LayoutParams) cachedSizer.getLayoutParams()).height = (int) getResources().getDimension(R.dimen.file_sizer_withtransfers);
+                }
+                // add progressbars
+                for (int i = 0; i < file.getJobs().size(); i++) {
+                    LXCJob job = file.getJobs().get(i);
+                    View transferProgress;
+                    if (i >= cachedTransferProgress.size()) {
+                        // create new progressbar and add it
+                        transferProgress = inflater.inflate(R.layout.transfer_progress, parent, false);
+                        cachedTransferProgress.add(transferProgress);
+                        ((LinearLayout) cachedView.findViewById(R.id.container)).addView(transferProgress);
+                    } else {
+                        transferProgress = cachedTransferProgress.get(i);
+                    }
+                    final ProgressBar transferProgressBar = ((ProgressBar) transferProgress.findViewById(R.id.progressbar));
+                    final TextView transferProgressLabel = ((TextView) transferProgress.findViewById(R.id.progresslabel));
+                    file.getJobs().get(i).getTrans().setProgressIndicator(new FilterProgressIndicator(0) {
+
+
+                        @Override
+                        protected void updateGui() {
+                            post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    int progress = job.getTrans().getProgress();
+                                    transferProgressBar.setProgress(progress);
+                                    transferProgressLabel.setText(getResources().getString(R.string.ui_uploading) + " " + progress + "%" + " - " + LXCFile.getFormattedSize(job.getTrans().getCurrentSpeed()) + "/s");
+                                }
+                            });
+                        }
+                    });
+                    cachedView.findViewById(R.id.cancelTransfer).setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            job.abortTransfer();
+                        }
+                    });
+
+                }
+                // remove old progressbars
+                for (int i = cachedTransferProgress.size() - 1; i >= file.getJobs().size(); i--) {
+                    ((LinearLayout) cachedView.findViewById(R.id.container)).removeView(cachedTransferProgress.get(i));
+                    cachedTransferProgress.remove(i);
                 }
                 cachedRemoveLocal.setOnClickListener(new OnClickListener() {
                     @Override
@@ -537,6 +578,24 @@ public class FileListView extends RecyclerView {
                     // remove files only
                     getAdapter().notifyItemRangeRemoved((localList.isEmpty() ? 0 : localList.size() + 1) + firstIndex + 1, numberOfFiles);
                 }
+            }
+        });
+    }
+
+    public void notifyLocalJobAdded(LXCFile file, int jobIndex) {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                getAdapter().notifyItemChanged(files.getIndexForFile(file), null);
+            }
+        });
+    }
+
+    public void notifyLocalJobRemoved(LXCFile file, int jobIndex) {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                getAdapter().notifyItemChanged(files.getIndexForFile(file), null);
             }
         });
     }

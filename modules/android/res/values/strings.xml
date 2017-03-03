@@ -15,6 +15,7 @@
     <string name="ui_taptoload">Tap to download</string>
     <string name="ui_connecting">Connecting</string>
     <string name="ui_downloading">Downloading: </string>
+    <string name="ui_uploading">Uploading: </string>
     <string name="ui_available">Tap to open</string>
     <string name="error_cantopen_title_listempty">No matching app found</string>
     <string name="error_cantopen_text_listempty">No app was found that can open this file. If you think this is wrong and you have a matching app, try opening the file there. If that works, send me a mail!</string>
@@ -96,6 +97,7 @@
 	<string name="dialog_closewithrunning_no">No</string>
 	<string name="accessibility_downloadStatus">download status</string>
 	<string name="accessibility_removeLocal">remove this file</string>
+    <string name="accessibility_cancelTransfer">cancel transfer</string>
 	<string name="help_android_selector_nofolder">I cannot select directories!</string>
     <string name="help_android_selector_nofolder_text">If you tap + but cannot select directories, try the other way around: Use a file-browser to select the folder and choose \"Share with\". LanXchange should be one of the options.</string>
 	<string name="permissions_explain_storage">Storage access denied</string>

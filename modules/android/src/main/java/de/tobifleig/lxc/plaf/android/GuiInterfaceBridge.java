@@ -43,6 +43,11 @@ public interface GuiInterfaceBridge {
     public void notifyFileChange(int fileOrigin, int operation, int firstIndex, int numberOfFiles, List<LXCFile> affectedFiles);
 
     /**
+     * Forwards notifiyJobChange-calls to the gui.
+     */
+    public void notifyJobChange(int operation, LXCFile file, int index);
+
+    /**
      * Forwards confirmCloseWithTransfersRunning()-calls to the gui.
      */
     public boolean confirmCloseWithTransfersRunning();

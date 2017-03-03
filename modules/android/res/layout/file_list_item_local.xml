@@ -1,74 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/toplevel"
-              android:layout_width="match_parent"
-              android:layout_height="72dp"
-              android:layout_alignParentLeft="true"
-              android:layout_alignParentStart="true"
-              android:orientation="horizontal">
+              xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/toplevel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:orientation="horizontal">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="top"
             android:layout_marginLeft="24dp"
             android:layout_marginStart="24dp"
             android:layout_marginRight="24dp"
             android:layout_marginEnd="24dp"
+            android:layout_marginTop="24dp"
             android:src="@drawable/ic_file_upload"
             android:contentDescription="@string/accessibility_downloadStatus" />
 
+
         <LinearLayout
-            android:id="@+id/RelativeLayout1"
+            android:id="@+id/container"
             android:layout_width="0dp"
-            android:layout_weight="10"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/filename"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="2dp"
-                android:text="FileName"
-                android:textSize="16sp"
-                android:textColor="?android:attr/textColorPrimary"
-                android:maxLines="1"/>
-
-            <TextView
-                android:id="@+id/fileInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:text="Size: 3GiB"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-light"
-                android:textColor="?android:attr/textColorSecondary"/>
-
-            <ProgressBar
-                android:id="@+id/progressBar1"
-                style="?android:attr/progressBarStyleHorizontal"
+            <LinearLayout
+                android:id="@+id/sizer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:indeterminate="true"
-                android:maxHeight="10dp"
-                android:minHeight="6dp"
-                android:visibility="invisible" />
-        </LinearLayout>
+                android:layout_height="72dp"
+                android:layout_gravity="top"
+                android:orientation="horizontal"
+                tools:ignore="UselessParent">
 
-        <ImageView
-            android:id="@+id/removeLocal"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_delete"
-            android:contentDescription="@string/accessibility_removeLocal" />
+            <LinearLayout
+                android:id="@+id/RelativeLayout1"
+                android:layout_width="0dp"
+                android:layout_weight="10"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/filename"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="2dp"
+                    android:text="FileName"
+                    android:textSize="16sp"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:maxLines="1"/>
+
+                <TextView
+                    android:id="@+id/fileInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:text="Size: 3GiB"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="?android:attr/textColorSecondary"/>
+            </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/removeLocal"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="top"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="24dp"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="@string/accessibility_removeLocal" />
+            </LinearLayout>
+        </LinearLayout>
 
 </LinearLayout>

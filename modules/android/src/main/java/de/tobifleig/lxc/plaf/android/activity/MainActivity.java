@@ -175,6 +175,15 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void notifyJobChange(int operation, LXCFile file, int index) {
+                if (operation == GuiInterface.UPDATE_OPERATION_ADD) {
+                    fileListView.notifyLocalJobAdded(file, index);
+                } else if (operation == GuiInterface.UPDATE_OPERATION_REMOVE) {
+                    fileListView.notifyLocalJobRemoved(file, index);
+                }
+            }
+
+            @Override
             public boolean confirmCloseWithTransfersRunning() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
                 builder.setMessage(R.string.dialog_closewithrunning_text);
