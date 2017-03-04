@@ -136,17 +136,7 @@ public class FileListView extends RecyclerView {
                     @Override
                     public void onClick(View v) {
                         if (!currentFile.isLocked() && !currentFile.isLocal() && !currentFile.isAvailable()) {
-                            currentFile.setLocked(true);
-                            updateGui();
-                            Thread t = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    guiListener.downloadFile(currentFile, false);
-                                }
-                            });
-                            t.setName("lxc_helper_initdl_" + currentFile.getShownName());
-                            t.setDaemon(true);
-                            t.start();
+                            startDownload();
                         } else if (!currentFile.isLocal() && currentFile.isAvailable()) {
                             // open currentFile
                             final Intent openIntent = new Intent();
@@ -250,6 +240,20 @@ public class FileListView extends RecyclerView {
             }
         }
 
+        private void startDownload() {
+            currentFile.setLocked(true);
+            updateGui();
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    guiListener.downloadFile(currentFile, false);
+                }
+            });
+            t.setName("lxc_helper_initdl_" + currentFile.getShownName());
+            t.setDaemon(true);
+            t.start();
+        }
+
         private void setLocalHeader() {
             if (type != TYPE_HEADER) {
                 throw new IllegalStateException("Wrong type of LXCFileViewHolder (called setLocalHeader, but is of type " + type + ")");
@@ -316,6 +320,9 @@ public class FileListView extends RecyclerView {
                         @Override
                         public void onClick(View view) {
                             job.abortTransfer();
+                            // inform abt cancel (cannot offer restart, this is a remote action)
+                            Snackbar.make(parent, getResources().getString(R.string.ui_undo_cancelupload)
+                                    + "\n\"" + file.getShownName() + "\"", Snackbar.LENGTH_LONG).show();
                         }
                     });
 
@@ -386,6 +393,16 @@ public class FileListView extends RecyclerView {
                         @Override
                         public void onClick(View v) {
                             job.abortTransfer();
+                            // offer dl restart
+                            Snackbar.make(parent, getResources().getString(R.string.ui_undo_canceldownload)
+                                    + "\n\"" + file.getShownName() + "\"", Snackbar.LENGTH_LONG)
+                                    .setAction(R.string.snackbar_undocanceldownload_action, new OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            // undo
+                                            startDownload();
+                                        }
+                                    }).show();
                         }
                     });
                 } else if (file.isAvailable()) {
