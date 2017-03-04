@@ -97,6 +97,7 @@ public class FileListView extends RecyclerView {
         // remote files only
         private ImageView cachedDownloadStatus;
         private ProgressBar cachedProgressBar;
+        private ImageView cachedDownloadCancel;
 
         /**
          * The file that is currently held/displayed by this ViewHolder.
@@ -126,6 +127,7 @@ public class FileListView extends RecyclerView {
             if (type == TYPE_REMOTE) {
                 cachedDownloadStatus = (ImageView) cachedView.findViewById(R.id.downloadStatus);
                 cachedProgressBar = (ProgressBar) cachedView.findViewById(R.id.progressBar1);
+                cachedDownloadCancel = (ImageView) cachedView.findViewById(R.id.cancelTransfer);
             }
 
             // setup interaction
@@ -354,11 +356,13 @@ public class FileListView extends RecyclerView {
                 if (file.isLocked() && file.getJobs().size() == 0) {
                     cachedProgressBar.setVisibility(View.VISIBLE);
                     cachedProgressBar.setIndeterminate(true);
+                    cachedDownloadCancel.setVisibility(View.GONE);
                     cachedFileInfo.setText(R.string.ui_connecting);
                 } else if (!file.isAvailable() && file.getJobs().size() == 1) {
                     // downloading
                     cachedProgressBar.setVisibility(View.VISIBLE);
                     cachedProgressBar.setIndeterminate(false);
+                    cachedDownloadCancel.setVisibility(View.VISIBLE);
                     final LXCJob job = file.getJobs().get(0);
                     int progress = job.getTrans().getProgress();
                     cachedProgressBar.setProgress(progress);
@@ -377,13 +381,22 @@ public class FileListView extends RecyclerView {
                             });
                         }
                     });
+                    // config cancel button
+                    cachedDownloadCancel.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            job.abortTransfer();
+                        }
+                    });
                 } else if (file.isAvailable()) {
                     // done
                     cachedFileInfo.setText(R.string.ui_available);
                     cachedProgressBar.setVisibility(View.INVISIBLE);
+                    cachedDownloadCancel.setVisibility(View.GONE);
                 } else {
                     // file status normal
                     cachedProgressBar.setVisibility(View.INVISIBLE);
+                    cachedDownloadCancel.setVisibility(View.GONE);
                 }
             }
         }
