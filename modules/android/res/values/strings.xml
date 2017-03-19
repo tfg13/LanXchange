@@ -54,7 +54,7 @@
     <string name="help_nofiles">Files from other devices don\'t show up!</string>
     <string name="help_nofiles_text">1. Be patient! Files take up to 20 seconds on some devices to appear. \n2. Make sure that all devices have Wifi enabled and are connected to the same network. \n3. Keeping the app open and the screen turned on also improves detection.\n4. Check that no firewall prevents LanXchange from accessing the network.\n5. Sharing between PC and Android? Starting the PC version first usually works better.\n6. Some devices offer a setting for wifi power-saving (in the wifi menu). Try turning that off, it doesn\'t save too much power, anyway.\n7. LanXchange is designed for small (home) networks. Big company or university networks may be too large for devices to find each other.</string>
 	<string name="help_download_location">Where do downloaded files go?</string>
-	<string name="help_download_location_text">All files are saved to the internal memory of your device (also known as internal SD-Card). Look out for the \"download\" folder. LanXchange also notifies Android about received files, so they should apper in all your apps.</string>
+	<string name="help_download_location_text">By default, all files are saved to the internal memory of your device (also known as internal SD-Card). Look out for the \"Download\" folder. LanXchange also notifies Android about received files, so they should appear in all your apps. You can change the target directory in the settings.</string>
 	<string name="help_multiple">Can I share multiple files at once?</string>
 	<string name="help_multiple_text">Yes. If you have Android 4.3 (Jelly Bean M2) or higher, you can use the normal + button for this. Tap and hold a file to enable multi-selection. On older devices, you need to install a file manager/explorer app. Then, select multiple files there and choose \"Share\" and then \"LanXchange\"</string>
 	<string name="help_filetypes">What kind of files can I share with LanXchange?</string>
@@ -62,7 +62,9 @@
 	<string name="help_android_selector_dumb">I cannot select other files than images, videos and audio!</string>
 	<string name="help_android_selector_dumb_text">Lets say you want to share a .PDF file but the android file selector (the thing that pops up when you tap the + button) only offers images, videos and music. In this case, you can install a file manager/explorer from the store. Having such an app installed should allow you to use it for file selection - without type limitations. Another trick is to try sharing the file directly from another app. Most apps offer a \"Share with\" functionality - LanXchange should be one of the options.</string>
 	<string name="help_download_select_target">Is it possible to save received files somewhere else?</string>
-	<string name="help_download_select_target_text">Not yet. I may add this feature in the future, so write me a mail if you need it!</string>
+	<string name="help_download_select_target_text">Yes. Choose the destination directory in the settings. Currently, only the internal device storage is supported.</string>
+    <string name="help_download_select_target_sdcard">I want to download files directly to the SD card!</string>
+    <string name="help_download_select_target_sdcard_text">This can be complicated on Android, but the author is working on it and this feature is coming soon (TM).</string>
 	<string name="help_share_crossplatform">Can I use LanXchange to transfer files between different platforms? (e.g. PC to Android, Mac to Windows)</string>
 	<string name="help_share_crossplatform_text">Yes.</string>
 	<string name="help_pcversion">Where can I get the PC version?</string>
@@ -110,5 +112,7 @@
     <string name="snackbar_action_cancelled_permission_storage_missing">LanXchange was denied access to file storage</string>
     <string name="pref_registerdownloads_title">Show received files in Downloads app</string>
     <string name="pref_registerdownloads_text">Tell Android about completed downloads, so the files appear in the Downloads app. Does not work with incoming directories.</string>
+    <string name="pref_select_download_path_title">Download target directory</string>
+    <string name="pref_select_download_path_text">Default path</string>
     <string name="ext_registerdownload_comment">Downloaded by LanXchange</string>
 </resources>

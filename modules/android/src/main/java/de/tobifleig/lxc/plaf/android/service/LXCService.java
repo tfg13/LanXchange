@@ -295,9 +295,8 @@ public class LXCService extends Service implements Platform {
     @Override
     public String getDefaultDownloadTarget() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) { // We can read and write
-            // the media
-            return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+        if (Environment.MEDIA_MOUNTED.equals(state)) { // We can read and write the media
+            return PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("pref_downloadPath", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
         } else { // Bad. Display error message and exit
             errorCode = 1;
             return ".";

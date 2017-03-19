@@ -9,6 +9,7 @@ buildscript {
 
 repositories {
     mavenCentral()
+    maven { url 'http://guardian.github.com/maven/repo-releases' }
 }
 
 apply plugin: 'com.android.application'
@@ -19,6 +20,7 @@ dependencies {
     compile 'com.android.support:support-v4:25.2.0'
     compile 'com.android.support:design:25.2.0'
     compile 'com.android.support:recyclerview-v7:25.2.0'
+    compile 'net.rdrei.android.dirchooser:library:3.2'
 }
 
 android {

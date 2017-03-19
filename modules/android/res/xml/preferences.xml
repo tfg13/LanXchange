@@ -2,6 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:title="Downloads">
+
+        <de.tobifleig.lxc.plaf.android.ui.DownloadPathPreference
+            android:key="pref_downloadPath"
+            android:title="@string/pref_select_download_path_title"
+            android:summary="@string/pref_select_download_path_text"
+            android:defaultValue="NONE"
+            />
+
         <CheckBoxPreference
             android:key="pref_registerDownload"
             android:title="@string/pref_registerdownloads_title"

@@ -65,6 +65,11 @@
         <de.tobifleig.lxc.plaf.android.ui.HelpElement
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            lanxchange:questionText="@string/help_download_select_target_sdcard"
+            lanxchange:answerText="@string/help_download_select_target_sdcard_text"/>
+        <de.tobifleig.lxc.plaf.android.ui.HelpElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             lanxchange:questionText="@string/help_share_crossplatform"
             lanxchange:answerText="@string/help_share_crossplatform_text"/>
         <de.tobifleig.lxc.plaf.android.ui.HelpElement
