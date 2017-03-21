@@ -112,7 +112,10 @@
     <string name="snackbar_action_cancelled_permission_storage_missing">LanXchange was denied access to file storage</string>
     <string name="pref_registerdownloads_title">Show received files in Downloads app</string>
     <string name="pref_registerdownloads_text">Tell Android about completed downloads, so the files appear in the Downloads app. Does not work with incoming directories.</string>
-    <string name="pref_select_download_path_title">Download target directory</string>
+    <string name="pref_select_download_path_title">Default download directory</string>
     <string name="pref_select_download_path_text">Default path</string>
+    <string name="pref_askdownloadtarget_title">Ask for download target every time</string>
+    <string name="pref_askdownloadtarget_text_on">Ignore default and prompt every time</string>
+    <string name="pref_askdownloadtarget_text_off">Downloads go to default directory</string>
     <string name="ext_registerdownload_comment">Downloaded by LanXchange</string>
 </resources>

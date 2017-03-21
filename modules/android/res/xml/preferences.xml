@@ -3,11 +3,20 @@
     <PreferenceCategory
         android:title="Downloads">
 
+        <CheckBoxPreference
+            android:key="pref_askDownloadTarget"
+            android:title="@string/pref_askdownloadtarget_title"
+            android:summaryOn="@string/pref_askdownloadtarget_text_on"
+            android:summaryOff="@string/pref_askdownloadtarget_text_off"
+            android:defaultValue="false"
+            android:disableDependentsState="true"/>
+
         <de.tobifleig.lxc.plaf.android.ui.DownloadPathPreference
             android:key="pref_downloadPath"
             android:title="@string/pref_select_download_path_title"
             android:summary="@string/pref_select_download_path_text"
             android:defaultValue="NONE"
+            android:dependency="pref_askDownloadTarget"
             />
 
         <CheckBoxPreference

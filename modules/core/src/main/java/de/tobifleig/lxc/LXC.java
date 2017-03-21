@@ -346,6 +346,13 @@ public class LXC {
             }
 
             @Override
+            public void downloadFile(LXCFile file, File targetDir) {
+                if (!network.connectAndDownload(file, targetDir)) {
+                    gui.showError("Download failed, host unreachable.");
+                }
+            }
+
+            @Override
             public void reloadConfiguration() {
                 askForDownloadTargetSupported = platform.askForDownloadTargetSupported();
                 if (platform.getDefaultDownloadTarget() != null) {

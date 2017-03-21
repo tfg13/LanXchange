@@ -21,6 +21,8 @@
 package de.tobifleig.lxc.plaf;
 
 import de.tobifleig.lxc.data.LXCFile;
+
+import java.io.File;
 import java.util.List;
 
 /**
@@ -64,6 +66,14 @@ public interface GuiListener {
      * @param chooseTarget true, if the user wants to choose a file-target even if a default is set
      */
     public void downloadFile(LXCFile file, boolean chooseTarget);
+
+    /**
+     * Called when the user wants to download a certain file.
+     *
+     * @param file the file the user wants to download
+     * @param targetDir the directory to put the file in
+     */
+    public void downloadFile(LXCFile file, File targetDir);
 
     /**
      * Unsets the "downloaded" (available) flag for a given file.

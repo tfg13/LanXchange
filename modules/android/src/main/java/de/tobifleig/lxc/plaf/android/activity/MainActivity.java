@@ -29,6 +29,8 @@ import android.annotation.TargetApi;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -61,6 +63,8 @@ import de.tobifleig.lxc.plaf.android.NonFileContent;
 import de.tobifleig.lxc.plaf.android.PermissionTools;
 import de.tobifleig.lxc.plaf.android.service.AndroidSingleton;
 import de.tobifleig.lxc.plaf.android.ui.FileListView;
+import net.rdrei.android.dirchooser.DirectoryChooserConfig;
+import net.rdrei.android.dirchooser.DirectoryChooserFragment;
 
 /**
  * Platform for Android / Default Activity
@@ -630,6 +634,44 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
         return file;
     }
 
+    private void promptDownloadTarget(LXCFile file) {
+        // create dialog/fragment here
+        final DirectoryChooserConfig config = DirectoryChooserConfig.builder()
+                .allowReadOnlyDirectory(false)
+                .newDirectoryName("LanXchange")
+                .allowNewDirectoryNameModification(true)
+                .initialDirectory(PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                        .getString("pref_downloadPath",
+                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                                        .getAbsolutePath()))
+                .build();
+        final DirectoryChooserFragment dialog = DirectoryChooserFragment.newInstance(config);
+        dialog.show(getFragmentManager(), null);
+        dialog.setDirectoryChooserListener(new DirectoryChooserFragment.OnFragmentInteractionListener() {
+
+            @Override
+            public void onSelectDirectory(@NonNull String path) {
+                dialog.dismiss();
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        guiListener.downloadFile(file, new File(path));
+                    }
+                });
+                t.setName("lxc_helper_initdl_" + file.getShownName());
+                t.setDaemon(true);
+                t.start();
+            }
+
+            @Override
+            public void onCancelChooser() {
+                dialog.dismiss();
+                file.setLocked(false);
+                fileListView.updateGui();
+            }
+        });
+    }
+
     /**
      * Sets the GuiListener. Will be called by AndroidSingleton when LXC is
      * ready. If this Activity has been recreated and LXC is still running,
@@ -656,8 +698,14 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
             public void downloadFile(LXCFile file, boolean chooseTarget) {
                 permissionPromptDownloadFile = file;
                 if (PermissionTools.verifyStoragePermission(MainActivity.this, MainActivity.this)) {
-                    guiListener.downloadFile(file, chooseTarget);
                     permissionPromptDownloadFile = null;
+                    // prompt for download target?
+                    if (PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("pref_askDownloadTarget", false)) {
+                        promptDownloadTarget(file);
+                    } else {
+                        // use default dl target
+                        guiListener.downloadFile(file, chooseTarget);
+                    }
                 } // otherwise prompt is going up, flow continues in callback
             }
         });

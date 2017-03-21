@@ -20,6 +20,7 @@
  */
 package de.tobifleig.lxc.plaf.android;
 
+import java.io.File;
 import java.util.List;
 
 import de.tobifleig.lxc.data.LXCFile;
@@ -68,6 +69,11 @@ public abstract class AndroidGuiListener implements GuiListener {
     @Override
     public void downloadFile(LXCFile file, boolean chooseTarget) {
         basicGuiListener.downloadFile(file, chooseTarget);
+    }
+
+    @Override
+    public void downloadFile(LXCFile file, File targetDir) {
+        basicGuiListener.downloadFile(file, targetDir);
     }
 
     @Override
