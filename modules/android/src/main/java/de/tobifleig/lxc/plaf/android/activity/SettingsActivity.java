@@ -20,13 +20,21 @@
  */
 package de.tobifleig.lxc.plaf.android.activity;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import de.tobifleig.lxc.R;
+import de.tobifleig.lxc.plaf.android.PermissionTools;
+import de.tobifleig.lxc.plaf.android.ui.DownloadPathPreference;
 import de.tobifleig.lxc.plaf.android.ui.SettingsFragment;
 
 /**
  * Shows settings
  */
-public class SettingsActivity extends KeepServiceRunningActivity {
+public class SettingsActivity extends KeepServiceRunningActivity implements CancelablePermissionPromptActivity {
+
+    private DownloadPathPreference permissionDownloadPathPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,4 +45,47 @@ public class SettingsActivity extends KeepServiceRunningActivity {
         getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
     }
 
+    @Override
+    public void cancelPermissionPromptAction() {
+        permissionDownloadPathPref = null;
+        Snackbar.make(findViewById(android.R.id.content), R.string.snackbar_action_cancelled_permission_storage_missing, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == MainActivity.RETURNCODE_PERMISSION_PROMPT_STORAGE) {
+            if (grantResults.length == 0) {
+                // cancelled, try again
+                PermissionTools.verifyStoragePermission(this, this);
+                return;
+            }
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // continue what the user tried to do when the permission dialog fired
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (permissionDownloadPathPref != null) {
+                            permissionDownloadPathPref.prompt();
+                            permissionDownloadPathPref = null;
+                        }
+                    }
+                });
+                t.setName("lxc_helper_useraction");
+                t.setDaemon(true);
+                t.start();
+            } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                cancelPermissionPromptAction();
+            }
+        }
+    }
+
+    public boolean verifyStoragePermission(DownloadPathPreference pref) {
+        permissionDownloadPathPref = pref;
+        boolean result = PermissionTools.verifyStoragePermission(this, this);
+        if (result) {
+            // delete action cache on success
+            permissionDownloadPathPref = null;
+        }
+        return result;
+    }
 }

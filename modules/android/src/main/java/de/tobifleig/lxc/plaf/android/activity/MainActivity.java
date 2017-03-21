@@ -24,7 +24,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.IntentFilter;
@@ -32,8 +31,6 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -61,6 +58,7 @@ import de.tobifleig.lxc.plaf.android.ConnectivityChangeListener;
 import de.tobifleig.lxc.plaf.android.ConnectivityChangeReceiver;
 import de.tobifleig.lxc.plaf.android.GuiInterfaceBridge;
 import de.tobifleig.lxc.plaf.android.NonFileContent;
+import de.tobifleig.lxc.plaf.android.PermissionTools;
 import de.tobifleig.lxc.plaf.android.service.AndroidSingleton;
 import de.tobifleig.lxc.plaf.android.ui.FileListView;
 
@@ -71,7 +69,7 @@ import de.tobifleig.lxc.plaf.android.ui.FileListView;
  * 
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CancelablePermissionPromptActivity {
 
     /**
      * Intent from service, requests LanXchange termination
@@ -85,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String ACTION_STOP_FROMACTIVITY = "de.tobifleig.lxc.plaf.android.activity.ACTION_STOP_FROMACTIVITY";
 
     private static final int RETURNCODE_FILEINTENT = 42;
-    private static final int RETURNCODE_PERMISSION_PROMPT_STORAGE = 43;
+    public static final int RETURNCODE_PERMISSION_PROMPT_STORAGE = 43;
     private AndroidGuiListener guiListener;
     private GuiInterfaceBridge guiBridge;
 
@@ -217,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 permissionPromptShareFile = true;
-                if (verifyStoragePermission()) {
+                if (PermissionTools.verifyStoragePermission(MainActivity.this, MainActivity.this)) {
                     permissionPromptShareFile = false;
                     shareFile();
                 }
@@ -390,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
                         AndroidSingleton.onEarlyShareIntent(files);
                     } else {
                         permissionPromptQuickshare = files;
-                        if (verifyStoragePermission()) {
+                        if (PermissionTools.verifyStoragePermission(this, this)) {
                             offerFiles(files);
                             permissionPromptQuickshare = null;
                         }// otherwise prompt is going up, flow continues in callback
@@ -409,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RETURNCODE_PERMISSION_PROMPT_STORAGE) {
             if (grantResults.length == 0) {
                 // cancelled, try again
-                verifyStoragePermission();
+                PermissionTools.verifyStoragePermission(this, this);
                 return;
             }
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -441,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Cancels the action that resulted in a permission prompt going up
      */
-    private void cancelPermissionPromptAction() {
+    public void cancelPermissionPromptAction() {
         // cancel action and tell user
         if (permissionPromptDownloadFile != null) {
             permissionPromptDownloadFile.setLocked(false);
@@ -451,45 +449,6 @@ public class MainActivity extends AppCompatActivity {
         permissionPromptQuickshare = null;
         permissionPromptShareFile = false;
         Snackbar.make(findViewById(android.R.id.content), R.string.snackbar_action_cancelled_permission_storage_missing, Snackbar.LENGTH_LONG).show();
-    }
-
-    private boolean verifyStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                // user denied this before, explain it
-                final AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
-                builder.setMessage(R.string.permissions_explain_storage_text);
-                builder.setPositiveButton(R.string.permissions_explain_storage_permdeny, new OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        cancelPermissionPromptAction();
-                    }
-                });
-                builder.setNegativeButton(R.string.permissions_explain_storage_retry, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // re-request the permission
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RETURNCODE_PERMISSION_PROMPT_STORAGE);
-                    }
-                });
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                    }
-                });
-            } else {
-                // request it
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RETURNCODE_PERMISSION_PROMPT_STORAGE);
-                return false;
-            }
-            // permission not available now, but may be in the future
-            return false;
-        }
     }
 
     /**
@@ -688,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void downloadFile(LXCFile file, boolean chooseTarget) {
                 permissionPromptDownloadFile = file;
-                if (verifyStoragePermission()) {
+                if (PermissionTools.verifyStoragePermission(MainActivity.this, MainActivity.this)) {
                     guiListener.downloadFile(file, chooseTarget);
                     permissionPromptDownloadFile = null;
                 } // otherwise prompt is going up, flow continues in callback
@@ -705,7 +664,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void quickShare(List<VirtualFile> uris) {
         permissionPromptQuickshare = uris;
-        if (verifyStoragePermission()) {
+        if (PermissionTools.verifyStoragePermission(this, this)) {
             offerFiles(uris);
             permissionPromptQuickshare = null;
         } // otherwise prompt is going up, flow continues in callback

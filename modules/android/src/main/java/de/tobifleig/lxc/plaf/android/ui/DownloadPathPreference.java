@@ -7,7 +7,6 @@
  */
 package de.tobifleig.lxc.plaf.android.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Environment;
@@ -16,6 +15,7 @@ import android.os.Parcelable;
 import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import de.tobifleig.lxc.plaf.android.activity.SettingsActivity;
 import net.rdrei.android.dirchooser.DirectoryChooserConfig;
 import net.rdrei.android.dirchooser.DirectoryChooserFragment;
 
@@ -33,33 +33,40 @@ public class DownloadPathPreference extends Preference {
         super(context, attrs);
     }
 
+    public void prompt() {
+        // super ugly cast
+        SettingsActivity myActivity = (SettingsActivity) getContext();
+        if (myActivity.verifyStoragePermission(this)) {
+            // create dialog/fragment here
+            final DirectoryChooserConfig config = DirectoryChooserConfig.builder()
+                    .allowReadOnlyDirectory(false)
+                    .newDirectoryName("LanXchange")
+                    .allowNewDirectoryNameModification(true)
+                    .initialDirectory(downloadPath)
+                    .build();
+            dialog = DirectoryChooserFragment.newInstance(config);
+            dialog.show(myActivity.getFragmentManager(), null);
+            dialog.setDirectoryChooserListener(new DirectoryChooserFragment.OnFragmentInteractionListener() {
+
+                @Override
+                public void onSelectDirectory(@NonNull String path) {
+                    dialog.dismiss();
+                    downloadPath = path;
+                    persistString(downloadPath);
+                    setSummary(downloadPath);
+                }
+
+                @Override
+                public void onCancelChooser() {
+                    dialog.dismiss();
+                }
+            });
+        }
+    }
+
     @Override
     protected void onClick() {
-        // create dialog/fragment here
-        final DirectoryChooserConfig config = DirectoryChooserConfig.builder()
-                .allowReadOnlyDirectory(false)
-                .newDirectoryName("LanXchange")
-                .allowNewDirectoryNameModification(true)
-                .initialDirectory(downloadPath)
-                .build();
-        dialog = DirectoryChooserFragment.newInstance(config);
-        // super ugly cast
-        dialog.show(((Activity) getContext()).getFragmentManager(), null);
-        dialog.setDirectoryChooserListener(new DirectoryChooserFragment.OnFragmentInteractionListener() {
-
-            @Override
-            public void onSelectDirectory(@NonNull String path) {
-                dialog.dismiss();
-                downloadPath = path;
-                persistString(downloadPath);
-                setSummary(downloadPath);
-            }
-
-            @Override
-            public void onCancelChooser() {
-                dialog.dismiss();
-            }
-        });
+        prompt();
     }
 
     @Override
