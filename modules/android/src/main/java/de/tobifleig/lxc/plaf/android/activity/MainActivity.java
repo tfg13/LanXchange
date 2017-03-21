@@ -103,12 +103,14 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
      * Handles network state changes (wifi coming online)
      */
     private ConnectivityChangeReceiver networkStateChangeReceiver;
-
-
     /**
      * The view that displays all shared and available files
      */
     private FileListView fileListView;
+    /**
+     * Marker to detect when we return from settings.
+     */
+    private boolean launchedSettings = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -269,6 +271,11 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
         // set up connectivity listener and trigger once to get the current status
         getBaseContext().registerReceiver(networkStateChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         networkStateChangeReceiver.onReceive(getBaseContext(), null);
+        // returning from settings?
+        if (launchedSettings) {
+            launchedSettings = false;
+            guiListener.reloadConfiguration();
+        }
     }
 
     @Override
@@ -291,6 +298,7 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
             // display settings
             Intent showSettings = new Intent();
             showSettings.setClass(getBaseContext(), SettingsActivity.class);
+            launchedSettings = true;
             startActivity(showSettings);
             return true;
         case R.id.help:
