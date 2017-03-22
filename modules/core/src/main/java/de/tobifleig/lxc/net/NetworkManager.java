@@ -127,7 +127,7 @@ public class NetworkManager {
                 final Seeder seed = new Seeder(socket, outStream, inStream, file, transVersion);
                 TransceiverListener seedListener = new TransceiverListener() {
                     @Override
-                    public void finished(boolean success, boolean removeFile) {
+                    public void finished(boolean success, boolean removeFile, String problemFilePath) {
                         int removeIndex = file.getJobs().indexOf(jobs.get(seed));
                         listener.notifyRemoveJob(file, removeIndex);
                         file.removeJob(jobs.get(seed), success);
@@ -256,7 +256,7 @@ public class NetworkManager {
                 final Leecher leech = new Leecher(server, input, output, file, targetFolder, file.getLxcTransVersion());
                 TransceiverListener leechListener = new TransceiverListener() {
                     @Override
-                    public void finished(boolean success, boolean removeFile) {
+                    public void finished(boolean success, boolean removeFile, String problemFilePath) {
                         file.setLocked(false);
                         if (success) {
                             file.setAvailable(true);
@@ -265,8 +265,10 @@ public class NetworkManager {
                         int removeIndex = file.getJobs().indexOf(jobs.get(leech));
                         listener.notifyRemoveJob(file, removeIndex);
                         file.removeJob(jobs.get(leech), success);
-                        if (removeFile) {
+                        if (!success && removeFile) {
                             listener.downloadFailedFileMissing();
+                        } else if (!success) { // && !removeFile
+                            listener.downloadFailedFileOk(problemFilePath);
                         }
                         jobs.remove(leech);
                         listener.refreshGui();

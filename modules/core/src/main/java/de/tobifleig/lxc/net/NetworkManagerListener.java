@@ -86,4 +86,12 @@ public interface NetworkManagerListener {
      * Show a message an tell the user whats going on.
      */
     public void downloadFailedFileMissing();
+
+    /**
+     * Called when a download was aborted because, but the remote file was ok.
+     * Usually, this indicates a client problem like missing write permissions or full disks.
+     *
+     * @param problemFilePath The file that caused the abort
+     */
+    public void downloadFailedFileOk(String problemFilePath);
 }

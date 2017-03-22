@@ -172,6 +172,11 @@ public class LXC {
             }
 
             @Override
+            public void downloadFailedFileOk(String problemFilePath) {
+                gui.showError("Download error, unable to create/write file:\n\"" + problemFilePath + "\"\nPossible reasons include missing write permissions and insufficient free space.");
+            }
+
+            @Override
             public void uploadFailedFileMissing(LXCFile file) {
                 if (file.getFiles().size() == 1) {
                     gui.showError("Uploading \"" + file.getShownName() + "\" failed, LXC cannot locate this file anymore (did you move/delete it?)\n To avoid future errors, this file is no longer offered.");

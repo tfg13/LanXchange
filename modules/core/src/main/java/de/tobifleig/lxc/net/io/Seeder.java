@@ -130,10 +130,10 @@ public class Seeder extends Transceiver {
 
         if (transferOk) {
             System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
-            listener.finished(true, false);
+            listener.finished(true, false, null);
             System.out.println("Seeder: Done seeding.");
         } else {
-            listener.finished(false, fileBroken);
+            listener.finished(false, fileBroken, null);
             System.out.println("Seeder: Lost connection, aborting.");
         }
 

@@ -26,6 +26,7 @@ import de.tobifleig.lxc.data.impl.RealFile;
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -100,6 +101,17 @@ public class Leecher extends Transceiver {
                         fileout.flush();
                         fileout.close();
                         target.setLastModified(date);
+                    } catch (FileNotFoundException ex) {
+                        // cannot create file, possible reasons are:
+                        // - name invalid on this file system
+                        // - trying to create file, but already exists as dir
+                        // - no write permission
+                        //
+                        // abort
+                        System.out.println("Error: Cannot create file \"" + target.getAbsolutePath() + "\", aborting transfer");
+                        ex.printStackTrace();
+                        listener.finished(false, false, target.getAbsolutePath());
+                        break;
                     } catch (IOException ex) {
                         if (!abort) {
                             ex.printStackTrace();
@@ -124,12 +136,12 @@ public class Leecher extends Transceiver {
                     System.out.println("Leecher: Done receiving.");
                     // set base files
                     file.setBaseFiles(baseFiles);
-                    listener.finished(true, false);
+                    listener.finished(true, false, null);
                     break;
                 } else if (cmd == 's') {
                     // error, client no longer has the file
                     System.out.println("Error: Remote reports missing file, aborting transfer.");
-                    listener.finished(false, true);
+                    listener.finished(false, true, null);
                     break;
                 } else {
                     System.out.println("Leecher: Unused command: " + cmd);
@@ -140,7 +152,7 @@ public class Leecher extends Transceiver {
             if (!abort) {
                 ex.printStackTrace();
             }
-            listener.finished(false, false);
+            listener.finished(false, false, null);
         } finally {
             try {
                 in.close();

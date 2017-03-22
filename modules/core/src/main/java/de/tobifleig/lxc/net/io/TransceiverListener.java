@@ -29,9 +29,9 @@ public interface TransceiverListener {
 
     /**
      * Called by Transceiver upon completion of the download/upload.
-     *
-     * @param success true, if succuessful, false if aborted/interrupted
+     *  @param success true, if successful, false if aborted/interrupted
      * @param removeFile if true, the error was severe and the file should no longer be offered (only used by seeders)
+     * @param problemFilePath path of problematic file, if a file caused a transfer abort/cancel (null otherwise)
      */
-    public void finished(boolean success, boolean removeFile);
+    public void finished(boolean success, boolean removeFile, String problemFilePath);
 }
