@@ -172,6 +172,7 @@ public class LXCService extends Service implements Platform {
 
             @Override
             public void showError(String error) {
+                AndroidSingleton.getInterfaceBridge().showError(error);
                 System.err.println(error);
             }
 

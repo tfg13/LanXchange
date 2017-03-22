@@ -52,4 +52,12 @@ public interface GuiInterfaceBridge {
      */
     public boolean confirmCloseWithTransfersRunning();
 
+    /**
+     * Forwards error-messages from the LanXchange core.
+     * Displays errors on a best-effort basis only!
+     *
+     * @param error The error message
+     */
+    public void showError(String error);
+
 }

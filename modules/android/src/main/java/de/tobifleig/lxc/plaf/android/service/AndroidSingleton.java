@@ -56,6 +56,12 @@ public class AndroidSingleton {
             // no gui = no one to ask = no not close
             return false;
         }
+
+        @Override
+        public void showError(String error) {
+            // no gui = do nothing
+            // maybe consider creating a notification in the future
+        }
     };
     private static GuiInterfaceBridge currentBridge = genericBridge;
     private static List<VirtualFile> quickShare;

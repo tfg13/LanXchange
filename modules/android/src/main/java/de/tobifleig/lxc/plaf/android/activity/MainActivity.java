@@ -214,6 +214,28 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
                 // if the user decides to kill lanxchange anyway, shutdown is called again
                 return false;
             }
+
+            @Override
+            public void showError(String error) {
+                View main = findViewById(R.id.main_layout);
+                main.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(main.getContext());
+                        builder.setTitle(R.string.error_generic_from_core_title);
+                        builder.setMessage(error);
+                        builder.setCancelable(false);
+                        builder.setPositiveButton("OK", new OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
+                    }
+                });
+            }
         };
 
         // setup floating action button
