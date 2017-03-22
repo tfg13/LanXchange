@@ -85,6 +85,10 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
      * Intent fired by this activity. Upon reception, the activity is visible, so dialogs can be used.
      */
     public static final String ACTION_STOP_FROMACTIVITY = "de.tobifleig.lxc.plaf.android.activity.ACTION_STOP_FROMACTIVITY";
+    /**
+     * Intent from notification created by service, requests display of LanXchange core error message.
+     */
+    public static final String ACTION_SHOW_ERROR = "de.tobifleig.lxc.plaf.android.activity.ACTION_SHOW_ERROR";
 
     private static final int RETURNCODE_FILEINTENT = 42;
     public static final int RETURNCODE_PERMISSION_PROMPT_STORAGE = 43;
@@ -131,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
             }
             // disarm intent to prevent sharing the same file twice on screen rotate
             launchIntent.setAction(null);
+        } else if (launchIntent.getAction() != null && launchIntent.getAction().equals(ACTION_SHOW_ERROR)) {
+            showErrorDialog(this, launchIntent.getCharSequenceExtra(Intent.EXTRA_TEXT));
         }
 
         // load layout
@@ -216,23 +222,12 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
             }
 
             @Override
-            public void showError(String error) {
+            public void showError(Context context, String error) {
                 View main = findViewById(R.id.main_layout);
                 main.post(new Runnable() {
                     @Override
                     public void run() {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(main.getContext());
-                        builder.setTitle(R.string.error_generic_from_core_title);
-                        builder.setMessage(error);
-                        builder.setCancelable(false);
-                        builder.setPositiveButton("OK", new OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                        builder.show();
+                        showErrorDialog(main.getContext(), error);
                     }
                 });
             }
@@ -256,6 +251,21 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
         if (launchIntent.getAction() != null) {
             onNewIntent(launchIntent);
         }
+    }
+
+    private void showErrorDialog(Context context, CharSequence error) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.error_generic_from_core_title);
+        builder.setMessage(error);
+        builder.setCancelable(false);
+        builder.setPositiveButton("OK", new OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
     }
 
     private void shareFile() {
@@ -430,6 +440,9 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
                 } else {
                     handleShareError(intent);
                 }
+                break;
+            case ACTION_SHOW_ERROR:
+                showErrorDialog(this, intent.getCharSequenceExtra(Intent.EXTRA_TEXT));
                 break;
             default:
                 System.out.println("Received unknown intent! " + intent.getAction());

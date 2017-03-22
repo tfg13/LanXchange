@@ -20,6 +20,7 @@
  */
 package de.tobifleig.lxc.plaf.android;
 
+import android.content.Context;
 import de.tobifleig.lxc.data.LXCFile;
 
 import java.util.List;
@@ -56,8 +57,9 @@ public interface GuiInterfaceBridge {
      * Forwards error-messages from the LanXchange core.
      * Displays errors on a best-effort basis only!
      *
+     * @param context The context of the background service, required to create a notification
      * @param error The error message
      */
-    public void showError(String error);
+    public void showError(Context context, String error);
 
 }

@@ -22,7 +22,14 @@ package de.tobifleig.lxc.plaf.android.service;
 
 import java.util.List;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.support.v7.app.NotificationCompat;
+import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.plaf.android.activity.MainActivity;
@@ -58,9 +65,28 @@ public class AndroidSingleton {
         }
 
         @Override
-        public void showError(String error) {
+        public void showError(Context context, String error) {
             // no gui = do nothing
             // maybe consider creating a notification in the future
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+            builder.setSmallIcon(R.drawable.ic_lxc_running);
+            builder.setContentTitle(context.getResources().getString(R.string.notification_error_title));
+            builder.setContentText(context.getResources().getString(R.string.notification_error_text));
+            builder.setAutoCancel(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                builder.setCategory(Notification.CATEGORY_ERROR);
+            }
+            builder.setPriority(Notification.PRIORITY_HIGH);
+            builder.setTicker(context.getResources().getString(R.string.notification_error_title));
+
+            Intent showErrorIntent = new Intent();
+            showErrorIntent.setAction(MainActivity.ACTION_SHOW_ERROR);
+            showErrorIntent.putExtra(Intent.EXTRA_TEXT, error);
+            showErrorIntent.setClass(context.getApplicationContext(), MainActivity.class); // explicit intent!
+
+            builder.setContentIntent(PendingIntent.getActivity(context, 0, showErrorIntent, 0));
+
+            ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(2, builder.build());
         }
     };
     private static GuiInterfaceBridge currentBridge = genericBridge;
