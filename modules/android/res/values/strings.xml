@@ -89,6 +89,8 @@
     <string name="about_licenses_icons_text">© Google Inc. Used under license: CC-BY 4.0\nIcons unmodified, tap for license details.</string>
 	<string name="about_licenses_support">Android Support Library</string>
 	<string name="about_licenses_support_text">© The Android Open Source Project\nApache License 2.0 - tap for details.</string>
+    <string name="about_licenses_filechooser">Android DirectoryChooser</string>
+    <string name="about_licenses_filechooser_text">© 2013–2016 Pascal Hartig\nApache License 2.0 - tap for details.</string>
 	<string name="about_source">Source Code</string>
 	<string name="about_source_text">https://github.com/tfg13/LanXchange</string>
 	<string name="about_mailme">Email me!</string>

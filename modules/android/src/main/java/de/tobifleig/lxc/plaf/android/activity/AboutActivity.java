@@ -79,6 +79,12 @@ public class AboutActivity extends KeepServiceRunningActivity {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.apache.org/licenses/LICENSE-2.0")));
             }
         });
+        findViewById(R.id.about_license_filechooser).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.apache.org/licenses/LICENSE-2.0")));
+            }
+        });
     }
 
 }

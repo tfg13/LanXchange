@@ -86,6 +86,13 @@
             lanxchange:contentText="@string/about_licenses_support_text"
             android:id="@+id/about_license_support"/>
 
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_licenses_filechooser"
+            lanxchange:contentText="@string/about_licenses_filechooser_text"
+            android:id="@+id/about_license_filechooser"/>
+
     </LinearLayout>
 
 </ScrollView>
