@@ -397,7 +397,7 @@ public class LXCPanel extends JPanel {
                             g2.setFont(f2);
                             String status = "Available - Click to download";
                             if (file.isAvailable()) {
-                                status = "Download completed - Right-click to remove/redownload";
+                                status = "Click to open - Right-click to dismiss/redownload";
                             }
                             if (!file.isLocked()) {
                                 g2.drawString(status, this.getWidth() / 2 - mer2.stringWidth(status) / 2, y + 36); // center
