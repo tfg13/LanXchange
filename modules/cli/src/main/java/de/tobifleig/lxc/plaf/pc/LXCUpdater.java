@@ -65,6 +65,9 @@ import java.util.zip.ZipFile;
  *        trickery with unicode.
  * - Denial of Service by providing arbitrarily large inputs
  *      + Hard size limits are enforced for all unsigned content
+ * - Misc
+ *      + The updater sends an empty user-agent to the update server in order to prevent information leaks about the
+ *        version of the java runtime.
  *
  * By default, LanXchange checks for updates on every start.
  * This check can be disabled by unchecking the corresponding option in the settings menu or by putting
@@ -141,7 +144,9 @@ public final class LXCUpdater {
         }
 
         // Contact update server, download version file
-        Scanner scanner = new Scanner(new VersionDataFilterInputStream(new URL("http://updates.lanxchange.com/v").openStream(), versionBytesLimit), "utf8");
+        HttpURLConnection versionCheckConnection = (HttpURLConnection) new URL("http://updates.lanxchange.com/v").openConnection();
+        versionCheckConnection.setRequestProperty("User-Agent", ""); // do not leak java version
+        Scanner scanner = new Scanner(new VersionDataFilterInputStream(versionCheckConnection.getInputStream(), versionBytesLimit), "utf8");
         int gotver = Integer.parseInt(scanner.nextLine());
         String title = scanner.nextLine();
         scanner.close();
@@ -156,6 +161,7 @@ public final class LXCUpdater {
                 FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
+                conn.setRequestProperty("User-Agent", ""); // do not leak java version
                 conn.connect();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
