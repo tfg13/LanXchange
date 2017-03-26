@@ -21,6 +21,8 @@
 package de.tobifleig.lxc.data;
 
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.net.LXCInstance;
 
 import java.io.File;
@@ -53,6 +55,9 @@ public class LXCFile implements Serializable {
      * The user wants to share multiple files (and/or folders).
      */
     public static final int TYPE_MULTI = 3;
+
+    private static final LXCLogger logger = LXCLogBackend.getLogger("file");
+
     /**
      * Identifier, chosen at random, required for equals.
      */
@@ -408,7 +413,7 @@ public class LXCFile implements Serializable {
                     }
                 }
                 // this should never be reached
-                System.out.println("WARNING: Cannot find TopLevel node for " + file.getAbsolutePath());
+                logger.warn("Cannot find TopLevel node for " + file.getAbsolutePath());
                 // just assume this is toplevel as well
                 result.add(new RealFile(file));
             }

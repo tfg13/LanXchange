@@ -23,6 +23,8 @@ package de.tobifleig.lxc;
 import de.tobifleig.lxc.data.FileListChangeSet;
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.net.LXCInstance;
 import de.tobifleig.lxc.net.NetworkManager;
 import de.tobifleig.lxc.net.NetworkManagerListener;
@@ -31,8 +33,6 @@ import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +54,10 @@ public class LXC {
      * The external version id.
      */
     public static final String versionString = "v1.41";
+    /**
+     * Logger for core components
+     */
+    private final LXCLogger logger;
     /**
      * The Platform we are running on.
      */
@@ -87,11 +91,10 @@ public class LXC {
      * @param args command-line args
      */
     public LXC(Platform platform, final String[] args) {
+        logger = LXCLogBackend.getLogger("core");
         this.platform = platform;
 
-        initLogging(args);
-
-        System.out.println("This is LanXchange " + versionString + " (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig - License GPLv3 or later");
+        logger.info("This is LanXchange " + versionString + " (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig - License GPLv3 or later");
 
         platform.readConfiguration(args);
 
@@ -193,7 +196,7 @@ public class LXC {
             gui.showError("LXC is already running!");
             System.exit(1);
         }
-        System.out.println("My instance-id is " + LXCInstance.local.id);
+        logger.info("My instance-id is " + LXCInstance.local.id);
 
         // startup completed, display gui
         gui.display();
@@ -219,7 +222,7 @@ public class LXC {
             return;
         }
         if (quickShare.isEmpty()) {
-            System.out.println("Quickshare: No files found, sharing nothing");
+            logger.info("Quickshare: No files found, sharing nothing");
             return;
         }
 
@@ -230,11 +233,11 @@ public class LXC {
             if (file.exists()) {
                 actualFiles.add(file);
             } else {
-                System.out.println("Quickshare: Cannot find file \"" + path + "\"");
+                logger.warn("Quickshare: Cannot find file \"" + path + "\"");
             }
         }
         if (actualFiles.isEmpty()) {
-            System.out.println("Quickshare: No files found, sharing nothing");
+            logger.info("Quickshare: No files found, sharing nothing");
         }
         Thread thread = new Thread(new Runnable() {
 
@@ -251,38 +254,6 @@ public class LXC {
         }, "lxc_helper_sizecalcer");
         thread.setPriority(Thread.NORM_PRIORITY - 1);
         thread.start();
-    }
-
-    /**
-     * Manages logging.
-     *
-     * @param args the start-params
-     */
-    private void initLogging(final String[] args) {
-        // logging disabled?
-        boolean logging = true;
-        for (String s : args) {
-            if (s.equals("-nolog")) {
-                logging = false;
-                break;
-            }
-        }
-        // write to logfile
-        if (logging) {
-            try {
-                File logfile = new File("lxc.log");
-                if (!logfile.exists()) {
-                    logfile.createNewFile();
-                }
-                PrintStream logger = new PrintStream(logfile);
-                System.setOut(logger);
-                System.setErr(logger);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        } else {
-            System.out.println("Logging to file disabled.");
-        }
     }
 
     /**
@@ -389,6 +360,6 @@ public class LXC {
         platform.writeConfiguration();
 
         // done, exit
-        System.out.println("LXC done. Thank you.");
+        logger.info("LXC done. Thank you.");
     }
 }

@@ -20,6 +20,9 @@
  */
 package de.tobifleig.lxc.net;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -48,6 +51,10 @@ class InstanceManager {
      */
     public static final String SOURCE_UNICAST_HEARTBEAT = "unicast heartbeat";
     /**
+     * Logger for all instance-related stuff
+     */
+    private final LXCLogger logger;
+    /**
      * Contains all known instances.
      */
     private ConcurrentHashMap<Integer, LXCInstance> instances;
@@ -71,6 +78,7 @@ class InstanceManager {
      * @param listener the listener to pass events to
      */
     InstanceManager(InstanceManagerListener listener) {
+        this.logger = LXCLogBackend.getLogger("instance-manager");
         this.instances = new ConcurrentHashMap<Integer, LXCInstance>();
         this.listener = listener;
         this.timer = new Timer("lxc_heartbeat_helper", true);
@@ -133,7 +141,7 @@ class InstanceManager {
                         }
                         if (System.currentTimeMillis() - inst.getHeartbeatTime() > 60000) {
                             // timeout
-                            System.out.println("Instance " + inst.id + " timed out, removing");
+                            logger.info("Instance " + inst.id + " timed out, removing");
                             timedOut.add(inst);
                         }
                     }
@@ -234,7 +242,7 @@ class InstanceManager {
         // create new:
         LXCInstance newRemote = new LXCInstance(address, id);
         instances.put(id, newRemote);
-        System.out.println("New Instance at " + address + " id: " + id + " (detected via: " + source + ")");
+        logger.info("New Instance at " + address + " id: " + id + " (detected via: " + source + ")");
         // Send a file list to this new instance
         listener.instanceAdded(newRemote);
         return newRemote;
@@ -248,7 +256,7 @@ class InstanceManager {
         while (iter.hasNext()) {
             LXCInstance inst = iter.next();
             if (inst.id == id) {
-                System.out.println("Instance " + id + " removed");
+                logger.info("Instance " + id + " removed");
                 iter.remove();
                 listener.instanceRemoved(inst);
                 break;

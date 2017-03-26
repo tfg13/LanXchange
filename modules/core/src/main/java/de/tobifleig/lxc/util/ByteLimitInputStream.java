@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.pc;
+package de.tobifleig.lxc.util;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class ByteLimitInputStream extends FilterInputStream {
 
     private int bytesAvailable;
 
-    protected ByteLimitInputStream(InputStream in, int byteLimit) {
+    public ByteLimitInputStream(InputStream in, int byteLimit) {
         super(in);
         bytesAvailable = byteLimit;
     }

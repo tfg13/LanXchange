@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.net.serv;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.net.LookaheadObjectInputStream;
 import de.tobifleig.lxc.net.TransFileList;
 import java.io.IOException;
@@ -36,6 +38,7 @@ import java.net.SocketException;
  */
 public class ListServer implements Runnable {
 
+    private LXCLogger logger;
     /**
      * The ServerSocket used.
      */
@@ -67,18 +70,14 @@ public class ListServer implements Runnable {
                         // List-request
                         listener.listRequested();
                     }
-                } catch (ClassNotFoundException ex) {
-                    ex.printStackTrace();
-                } catch (ClassCastException ex) {
-                    ex.printStackTrace();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                } catch (ClassNotFoundException | ClassCastException | IOException ex) {
+                    logger.warn("Unable to receive list from " + client.getInetAddress(), ex);
                 } finally {
                     closeSocket(client);
                 }
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (Exception ex) {
+            logger.error("Unrecoverable problem", ex);
         }
     }
 
@@ -87,7 +86,7 @@ public class ListServer implements Runnable {
             try {
                 socket.close();
             } catch (IOException ex) {
-                ex.printStackTrace();
+                // ignore
             }
         }
     }
@@ -114,6 +113,7 @@ public class ListServer implements Runnable {
      * @param listener the listener used to deliver incoming filelists
      */
     public ListServer(ListServerListener listener) {
+        this.logger = LXCLogBackend.getLogger("list-server");
         this.listener = listener;
     }
 

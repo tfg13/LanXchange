@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.net;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.net.mchelper.IPv4ManualBroadcaster;
 import de.tobifleig.lxc.net.mchelper.IPv6AllNodesBroadcaster;
 import de.tobifleig.lxc.net.mchelper.MulticastHelper;
@@ -63,6 +65,7 @@ class HeartbeatSender {
         knownHelpers.put(v6Helper.getIdentifier(), v6Helper);
     }
 
+    private final LXCLogger logger;
     /**
      * Contains all sockets used to deploy multicasts.
      */
@@ -88,6 +91,7 @@ class HeartbeatSender {
      * Creates a new HeartbeatSender
      */
     HeartbeatSender(String[] applicableHelpers, Iterable<LXCInstance> remoteInstances) {
+        this.logger = LXCLogBackend.getLogger("heartbeat-sender");
         this.remoteInstances = remoteInstances;
         sockets = new HashMap<NetworkInterface, InterfaceHandler>();
         // create packet
@@ -219,7 +223,7 @@ class HeartbeatSender {
         try {
             sockets.put(inter, new InterfaceHandler(inter));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.warn("Cannot create socket for interface " + inter, ex);
         }
     }
 
@@ -233,7 +237,7 @@ class HeartbeatSender {
             try {
                 handler.multicast();
             } catch (IOException ex) {
-                ex.printStackTrace();
+                logger.warn("Cannot send multicast", ex);
             }
         }
         // prevent timeouts on android
@@ -255,7 +259,7 @@ class HeartbeatSender {
             try {
                 handler.direct(pack);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                logger.warn("Cannot send unicast", ex);
             }
         }
     }

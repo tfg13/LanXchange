@@ -21,6 +21,9 @@
 package de.tobifleig.lxc.data.impl;
 
 import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,6 +39,8 @@ import java.util.List;
  * @author Tobias Fleig <tobifleig@googlemail.com>
  */
 public class RealFile extends VirtualFile {
+
+    private static final LXCLogger logger = LXCLogBackend.getLogger("realfile");
 
     /**
      * The real file.
@@ -117,7 +122,7 @@ public class RealFile extends VirtualFile {
                 result.add(new RealFile(contentFile, getTransferPath()));
             }
         } else {
-            System.out.println("Cannot read " + file.getAbsolutePath());
+            logger.warn("Cannot read " + file.getAbsolutePath());
         }
         return result;
     }

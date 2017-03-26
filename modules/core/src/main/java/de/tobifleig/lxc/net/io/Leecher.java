@@ -23,6 +23,9 @@ package de.tobifleig.lxc.net.io;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -42,6 +45,7 @@ import java.util.List;
  */
 public class Leecher extends Transceiver {
 
+    private final LXCLogger logger;
     /**
      * The folder to save the loaded files into.
      */
@@ -49,7 +53,7 @@ public class Leecher extends Transceiver {
 
     @Override
     public void run() {
-        System.out.println("Leecher: Starting transmission... (version " + transVersion + ")");
+       logger.info("Starting transmission... (version " + transVersion + ")");
 
         long startTime = System.currentTimeMillis();
         List<VirtualFile> baseFiles = new ArrayList<VirtualFile>();
@@ -108,13 +112,12 @@ public class Leecher extends Transceiver {
                         // - no write permission
                         //
                         // abort
-                        System.out.println("Error: Cannot create file \"" + target.getAbsolutePath() + "\", aborting transfer");
-                        ex.printStackTrace();
+                        logger.error("Cannot create file \"" + target.getAbsolutePath() + "\", aborting transfer", ex);
                         listener.finished(false, false, target.getAbsolutePath());
                         break;
                     } catch (IOException ex) {
                         if (!abort) {
-                            ex.printStackTrace();
+                            logger.error("Unexpected IOException", ex);
                         }
                     }
                 } else if (cmd == 'd' || cmd == 'D') {
@@ -132,39 +135,42 @@ public class Leecher extends Transceiver {
                     }
                 } else if (cmd == 'e') {
                     // done
-                    System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
-                    System.out.println("Leecher: Done receiving.");
+                    logger.info("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
+                    logger.info("Done receiving.");
                     // set base files
                     file.setBaseFiles(baseFiles);
                     listener.finished(true, false, null);
                     break;
                 } else if (cmd == 's') {
                     // error, client no longer has the file
-                    System.out.println("Error: Remote reports missing file, aborting transfer.");
+                    logger.warn("Remote reports missing file, aborting transfer.");
                     listener.finished(false, true, null);
                     break;
                 } else {
-                    System.out.println("Leecher: Unused command: " + cmd);
+                    logger.warn("Unused command: " + cmd);
                 }
             }
 
         } catch (IOException ex) {
             if (!abort) {
-                ex.printStackTrace();
+                logger.error("Unexpected IOException(2)", ex);
             }
             listener.finished(false, false, null);
         } finally {
             try {
                 in.close();
             } catch (Exception ex) {
+                // ignore
             }
             try {
                 out.close();
             } catch (Exception ex) {
+                // ignore
             }
             try {
                 socket.close();
             } catch (Exception ex) {
+                // ignore
             }
             // force immediate release of file handles
             System.gc();
@@ -191,6 +197,7 @@ public class Leecher extends Transceiver {
      * @param transVersion version of the transfer protocol {@link Transceiver}
      */
     public Leecher(Socket socket, ObjectInputStream input, ObjectOutputStream output, LXCFile transFile, File targetFolder, int transVersion) {
+        this.logger = LXCLogBackend.getLogger("leech-" + transFile.id);
         this.socket = socket;
         this.file = transFile;
         this.out = output;
@@ -204,18 +211,19 @@ public class Leecher extends Transceiver {
     @Override
     public void start() {
         Thread thread = new Thread(this);
-        thread.setName("leecher_" + file.getShownName());
+        thread.setName("leecher_" + file.id);
         thread.start();
     }
 
     @Override
     public void abort() {
         // Just kill it
-        System.out.println("Leecher: Aborting download upon user-request. Exceptions will occur!");
+        logger.info("Aborting download upon user-request. Exceptions may occur!");
         abort = true;
         try {
             in.close();
         } catch (Exception ex) {
+            // ignore
         }
     }
 }

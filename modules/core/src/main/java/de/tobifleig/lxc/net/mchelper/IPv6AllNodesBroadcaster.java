@@ -20,6 +20,9 @@
  */
 package de.tobifleig.lxc.net.mchelper;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -38,6 +41,12 @@ import java.net.UnknownHostException;
  * @author Tobias Fleig <tobifleig@googlemail.com>
  */
 public class IPv6AllNodesBroadcaster implements MulticastHelper {
+
+    private final LXCLogger logger;
+
+    public IPv6AllNodesBroadcaster() {
+        logger = LXCLogBackend.getLogger("v6all-broadcaster");
+    }
 
     @Override
     public boolean supportsIPv4() {
@@ -61,10 +70,8 @@ public class IPv6AllNodesBroadcaster implements MulticastHelper {
             
             DatagramPacket dpack = new DatagramPacket(packet, packet.length, adr, 27716);
             socket.send(dpack);
-        } catch (UnknownHostException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.warn("Unable to send allnodes-broadcast", ex);
         }
     }
 

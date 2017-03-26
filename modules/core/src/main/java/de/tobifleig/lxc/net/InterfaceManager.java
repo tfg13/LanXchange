@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.net;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.net.serv.PingServer;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -40,6 +42,7 @@ import java.util.TimerTask;
  */
 public class InterfaceManager {
 
+    private final LXCLogger logger;
     /**
      * Server listening for pings/heartbeats.
      */
@@ -64,6 +67,7 @@ public class InterfaceManager {
      * @param multi the multicaster
      */
     InterfaceManager(PingServer serv, HeartbeatSender multi) {
+        logger = LXCLogBackend.getLogger("interface-manager");
         pingListener = serv;
         pingMulticaster = multi;
     }
@@ -87,7 +91,7 @@ public class InterfaceManager {
                 pingMulticaster.updateInterfaces(usedInterfaces);
             }
         } catch (SocketException ex) {
-            ex.printStackTrace();
+            logger.warn("cannot enumerate network interfaces:", ex);
         }
     }
 

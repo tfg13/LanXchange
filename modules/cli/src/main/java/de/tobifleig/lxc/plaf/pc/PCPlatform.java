@@ -8,6 +8,7 @@
 package de.tobifleig.lxc.plaf.pc;
 
 import de.tobifleig.lxc.Configuration;
+import de.tobifleig.lxc.log.LXCLogBackend;
 import de.tobifleig.lxc.plaf.Platform;
 
 import java.io.BufferedReader;
@@ -25,6 +26,9 @@ import java.util.Iterator;
  */
 public abstract class PCPlatform implements Platform {
 
+    private static final int MAX_LOG_SIZE_CHARS = 134217728; // ~128MiB
+    private static final int LOG_ROTATION_SIZE = 3;
+
     /**
      * path to cfg-file.
      */
@@ -37,12 +41,21 @@ public abstract class PCPlatform implements Platform {
             // Can write
         } catch (IOException ex) {
             // Cannot write
-            System.out.println("ERROR: Cannot write to my directory ("
+            System.err.println("ERROR: Cannot write to my directory ("
                     + new File(".").getAbsolutePath()
                     + "). Try running LXC in your home directory.");
             getGui(args).showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
             System.exit(1);
         }
+        // init logging
+        boolean debug = false;
+        for (String s : args) {
+            if (s.equals("-nolog")) {
+                debug = true;
+                break;
+            }
+        }
+        LXCLogBackend.init(new File("."), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, debug);
     }
 
     @Override

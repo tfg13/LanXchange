@@ -1,6 +1,8 @@
 package de.tobifleig.lxc.net;
 
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -10,6 +12,8 @@ import java.util.ArrayList;
  * Only a fixed set of classes is allowed to be loaded.
  */
 public final class LookaheadObjectInputStream extends ObjectInputStream {
+
+    private final LXCLogger logger;
 
     /**
      * List of white-listed classes.
@@ -25,6 +29,7 @@ public final class LookaheadObjectInputStream extends ObjectInputStream {
 
     public LookaheadObjectInputStream(InputStream in) throws IOException {
         super(in);
+        logger = LXCLogBackend.getLogger("network-security");
     }
 
     /**
@@ -33,7 +38,7 @@ public final class LookaheadObjectInputStream extends ObjectInputStream {
     @Override
     protected Class<?> resolveClass(ObjectStreamClass objectStreamClass) throws IOException, ClassNotFoundException {
         if (!isPermitted(objectStreamClass.getName())) {
-            System.out.println("Blocked attempt to deserialize non-whitelisted class \"" + objectStreamClass.getName() + "\"");
+            logger.warn("Blocked attempt to deserialize non-whitelisted class \"" + objectStreamClass.getName() + "\"");
             throw new InvalidClassException("Blocked attempt to deserialize non-whitelisted class \"" + objectStreamClass.getName() + "\"");
         }
         // permitted, go on

@@ -22,6 +22,8 @@ package de.tobifleig.lxc.net.serv;
 
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.net.LookaheadObjectInputStream;
 
 import java.io.BufferedInputStream;
@@ -41,6 +43,7 @@ import java.net.SocketException;
  */
 public class FileServer implements Runnable {
 
+    private final LXCLogger logger;
     /**
      * The listener to pass events to.
      */
@@ -61,6 +64,7 @@ public class FileServer implements Runnable {
      * @param fileManager the filemanager, used to check if files are available for download
      */
     public FileServer(FileServerListener listener, FileManager fileManager) {
+        this.logger = LXCLogBackend.getLogger("file-server");
         this.listener = listener;
         this.fileManager = fileManager;
     }
@@ -107,18 +111,16 @@ public class FileServer implements Runnable {
                                 output.flush();
                             }
                         }
-                    } catch (ClassNotFoundException ex) {
-                        ex.printStackTrace();
-                    } catch (ClassCastException ex) {
-                        ex.printStackTrace();
+                    } catch (ClassNotFoundException | ClassCastException ex) {
+                        logger.warn("Cannot read incoming file request", ex);
                     }
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    logger.warn("Problem receiving file request", ex);
                 }
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Unrecoverable problem", ex);
         }
     }
 

@@ -20,6 +20,9 @@
  */
 package de.tobifleig.lxc.net;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,6 +36,7 @@ import java.util.Random;
  */
 public class LXCInstance {
 
+    private static LXCLogger logger = LXCLogBackend.getLogger("instance");
     /**
      * The id of this instance.
      * There must not be any duplicates throughout the local network
@@ -123,7 +127,7 @@ public class LXCInstance {
      */
     void heartBeat(InetAddress address, String source) {
         if (!addresses.contains(address)) {
-            System.out.println("New address for instance " + id + ": " + address + " (detected via: " + source + ")");
+            logger.info("New address for instance " + id + ": " + address + " (detected via: " + source + ")");
             addresses.add(address);
         }
         heartbeatTime = System.currentTimeMillis();

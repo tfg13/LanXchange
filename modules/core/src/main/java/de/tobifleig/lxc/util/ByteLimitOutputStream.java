@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with LanXchange. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.tobifleig.lxc.plaf.pc;
+package de.tobifleig.lxc.util;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -30,16 +30,19 @@ import java.io.OutputStream;
 public class ByteLimitOutputStream extends FilterOutputStream {
 
     private int bytesLeft;
+    private Runnable limitReachedAction;
 
-    public ByteLimitOutputStream(OutputStream out, int byteLimit) {
+    public ByteLimitOutputStream(OutputStream out, int byteLimit, Runnable limitReachedAction) {
         super(out);
         this.bytesLeft = byteLimit;
+        this.limitReachedAction = limitReachedAction;
     }
 
     @Override
     public void write(int b) throws IOException {
         if (bytesLeft <= 0) {
-            throw new IOException("Output write limit reached");
+            limitReachedAction.run();
+            return;
         }
         super.write(b);
         bytesLeft -= 1;
@@ -48,7 +51,9 @@ public class ByteLimitOutputStream extends FilterOutputStream {
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         if (bytesLeft < len) {
-            throw new IOException("Output write limit reached");
+            bytesLeft = 0; // prevent retry with smaller buffer
+            limitReachedAction.run();
+            return;
         }
         int leftPreSuper = bytesLeft;
         super.write(b, off, len);

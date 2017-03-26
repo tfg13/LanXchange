@@ -21,6 +21,8 @@
 package de.tobifleig.lxc.plaf.pc;
 
 import de.tobifleig.lxc.LXC;
+import de.tobifleig.lxc.util.ByteLimitInputStream;
+import de.tobifleig.lxc.util.ByteLimitOutputStream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -183,7 +185,12 @@ public final class LXCUpdater {
                 ZipEntry updatecontent = masterZip.getEntry("lxc.zip");
                 byte[] buffer = new byte[1024];
                 BufferedInputStream masterbins = new BufferedInputStream(masterZip.getInputStream(updatecontent));
-                OutputStream masterbout = new ByteLimitOutputStream(new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip"))), fullUpdateSizeLimit);
+                OutputStream masterbout = new ByteLimitOutputStream(new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip"))), fullUpdateSizeLimit,  new Runnable() {
+                    @Override
+                    public void run() {
+                        throw new RuntimeException("Output write limit reached");
+                    }
+                });
                 for (int len; (len = masterbins.read(buffer)) != -1;) {
                     masterbout.write(buffer, 0, len);
                 }
@@ -192,7 +199,12 @@ public final class LXCUpdater {
                 ZipEntry signfile = masterZip.getEntry("lxc.sign");
                 byte[] buffer2 = new byte[1024];
                 BufferedInputStream signbins = new BufferedInputStream(masterZip.getInputStream(signfile));
-                OutputStream signbout = new ByteLimitOutputStream(new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip.sign"))), signatureFileSizeLimit);
+                OutputStream signbout = new ByteLimitOutputStream(new BufferedOutputStream(new FileOutputStream(new File("temp_update.zip.sign"))), signatureFileSizeLimit,  new Runnable() {
+                    @Override
+                    public void run() {
+                        throw new RuntimeException("Output write limit reached");
+                    }
+                });
                 for (int len; (len = signbins.read(buffer2)) != -1;) {
                     signbout.write(buffer2, 0, len);
                 }

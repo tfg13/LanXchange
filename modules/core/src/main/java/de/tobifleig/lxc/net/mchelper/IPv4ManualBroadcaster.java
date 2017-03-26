@@ -20,6 +20,9 @@
  */
 package de.tobifleig.lxc.net.mchelper;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -37,6 +40,12 @@ import java.util.Enumeration;
  * @author Tobias Fleig <tobifleig@googlemail.com>
  */
 public class IPv4ManualBroadcaster implements MulticastHelper {
+
+    private final LXCLogger logger;
+
+    public IPv4ManualBroadcaster() {
+        logger = LXCLogBackend.getLogger("v4manual-broadcast");
+    }
 
     @Override
     public boolean supportsIPv4() {
@@ -76,7 +85,7 @@ public class IPv4ManualBroadcaster implements MulticastHelper {
                     socket.send(pack);
                 }
             } catch (IOException ex) {
-                ex.printStackTrace();
+                logger.info("Manual broadcast to " + localAddress + " failed", ex);
             }
         }
     }

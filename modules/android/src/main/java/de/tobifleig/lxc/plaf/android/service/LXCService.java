@@ -46,6 +46,7 @@ import de.tobifleig.lxc.R;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
@@ -58,7 +59,10 @@ public class LXCService extends Service implements Platform {
     /**
      * After how many ms without activity the service should stop itself.
      */
-    private final long STOP_SERVICE_MS = 1000 * 60 * 15;// 15 mins
+    private static final long STOP_SERVICE_MS = 1000 * 60 * 15;// 15 mins
+    private static final int MAX_LOG_SIZE_CHARS = 8388608; // ~8MiB
+    private static final int LOG_ROTATION_SIZE = 3;
+
     /**
      * Flat to prevent multiple service instances running at a time.
      */
@@ -126,6 +130,10 @@ public class LXCService extends Service implements Platform {
 
             // launch notification
             startForeground(1, builder.getNotification());
+
+            // config logging
+            // TODO verify this works without permissions
+            LXCLogBackend.init(new File("lxc.log"), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, true);
 
             // launch LXC
             startLXC();

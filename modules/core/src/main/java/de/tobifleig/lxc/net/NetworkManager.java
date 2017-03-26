@@ -23,6 +23,8 @@ package de.tobifleig.lxc.net;
 import de.tobifleig.lxc.data.FileManager;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.net.io.Leecher;
 import de.tobifleig.lxc.net.io.Seeder;
 import de.tobifleig.lxc.net.io.Transceiver;
@@ -59,6 +61,7 @@ import java.util.Map;
  */
 public class NetworkManager {
 
+    private final LXCLogger logger;
     /**
      * this server listens for incoming file-requests.
      */
@@ -105,6 +108,7 @@ public class NetworkManager {
      * @param platform the platform we are running on
      */
     public NetworkManager(final NetworkManagerListener listener, FileManager fileManager, Platform platform) {
+        this.logger = LXCLogBackend.getLogger("network-manager");
         this.listener = listener;
         this.fileManager = fileManager;
         jobs = new HashMap<Transceiver, LXCJob>();
@@ -232,7 +236,7 @@ public class NetworkManager {
             server.setSendBufferSize(212992);
             server.setReceiveBufferSize(212992);
             if (!connectToInstance(server, file.getInstance(), 27719)) {
-                System.out.println("Download aborted. (See exceptions above)");
+                logger.error("Download aborted. (See exceptions above)");
                 file.setLocked(false);
                 return false;
             }
@@ -249,7 +253,7 @@ public class NetworkManager {
 
             if (result == 'n') {
                 // request refused
-                System.out.println("Request refused!");
+                logger.warn("Request refused!");
                 file.setLocked(false);
             } else if (result == 'y') {
                 // accepted
@@ -289,13 +293,12 @@ public class NetworkManager {
                 leech.start();
             }
         } catch (NoRouteToHostException ex) {
-            System.out.println("Download aborted. No route to host.");
+            logger.error("Download aborted. No route to host.");
             file.setLocked(false);
             return false;
         } catch (IOException ex) {
-            System.out.println("Download aborted. IOException.");
+            logger.error("Download aborted. IOException.", ex);
             file.setLocked(false);
-            ex.printStackTrace();
         }
         return true;
     }
@@ -320,7 +323,7 @@ public class NetworkManager {
                     } catch (ConcurrentModificationException ex) {
                         // whoops, instance list was changed while iterating over it
                         // just re-send everything (= continue while)
-                        System.out.println("Warning: Re-starting list broadcast due to unexpected instance list modification");
+                        logger.info("Re-starting list broadcast due to unexpected instance list modification");
                         // this is obviously not a proper fix, but most fixes are much uglier
                         // since java lacks a CopyOnWriteMap
                         // additionally, this only happened once in 4 years ;)
@@ -351,7 +354,7 @@ public class NetworkManager {
                 sock.close();
             } // no else, errors are reported by connectToInstance
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.info("Cannot send list to " + dest + ", details: ", ex);
         }
     }
 
@@ -376,17 +379,16 @@ public class NetworkManager {
                 socket.connect(new InetSocketAddress(address, port));
                 connected = true;
             } catch (IOException ex) {
-                System.out.println("Attempt to connect to " + address + " failed.");
+                logger.info("Attempt to connect to " + address + " failed.");
                 exceptions.put(address, ex);
             }
         }
 
         // print debug if not successful
         if (!connected) {
-            System.out.println("All connection attempts to " + instance + " failed. Detailed errors for all addresses:");
+            logger.error("All connection attempts to " + instance + " failed. Detailed errors for all addresses:");
             for (InetAddress address : exceptions.keySet()) {
-                System.out.println("CON to " + address + " resulted in:");
-                exceptions.get(address).printStackTrace();
+                logger.error("CON to " + address + " resulted in:", exceptions.get(address));
             }
         }
 

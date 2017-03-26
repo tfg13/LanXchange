@@ -22,6 +22,9 @@ package de.tobifleig.lxc.net.io;
 
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,9 +42,11 @@ import java.util.List;
  */
 public class Seeder extends Transceiver {
 
+    private final LXCLogger logger;
+
     @Override
     public void run() {
-        System.out.println("Seeder: Starting transmission... (version " + transVersion + ")");
+        logger.info("Starting transmission... (version " + transVersion + ")");
         long startTime = System.currentTimeMillis();
         boolean transferOk = true;
         boolean fileBroken = false;
@@ -88,17 +93,18 @@ public class Seeder extends Transceiver {
                             // done
                             out.flush();
                         } catch (FileNotFoundException ex) {
-                            System.out.println("Seeder: Unexpected Error! This should not happen...");
+                            logger.error("Unexpected FileNotFoundException during transfer", ex);
                         } finally {
                             try {
                                 if (filein != null) {
                                     filein.close();
                                 }
                             } catch (IOException ex) {
+                                // ignore
                             }
                         }
                     } catch (FileNotFoundException ex) {
-                        System.out.println("Error: Cannot upload file with transferpath \"" + currentFile.getTransferPath() + "\", file no longer exists - aborting transfer.");
+                        logger.error("Cannot upload file with transferpath \"" + currentFile.getTransferPath() + "\", file no longer exists - aborting transfer.");
                         // Cannot read file, send sorry (newer clients (>=149) display a message; older clients silently discard this.
                         out.writeByte('s');
                         out.flush();
@@ -114,7 +120,7 @@ public class Seeder extends Transceiver {
             out.flush();
         } catch (IOException ex) {
             if (!abort) {
-                ex.printStackTrace();
+                logger.error("Unexpected IException", ex);
             }
             transferOk = false;
         } finally {
@@ -129,12 +135,12 @@ public class Seeder extends Transceiver {
         }
 
         if (transferOk) {
-            System.out.println("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
+            logger.info("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
             listener.finished(true, false, null);
-            System.out.println("Seeder: Done seeding.");
+            logger.info("Done seeding.");
         } else {
             listener.finished(false, fileBroken, null);
-            System.out.println("Seeder: Lost connection, aborting.");
+            logger.error("Lost connection, aborting.");
         }
 
     }
@@ -159,6 +165,7 @@ public class Seeder extends Transceiver {
      * @see Transceiver
      */
     public Seeder(Socket socket, ObjectOutputStream output, ObjectInputStream input, LXCFile transFile, int transVersion) {
+        logger = LXCLogBackend.getLogger("seed-" + transFile.id);
         this.socket = socket;
         this.file = transFile;
         this.out = output;
@@ -181,11 +188,12 @@ public class Seeder extends Transceiver {
     @Override
     public void abort() {
         // Just kill it
-        System.out.println("Leecher: Aborting upload upon user-request.");
+        logger.info("Leecher: Aborting upload upon user-request.");
         abort = true;
         try {
             in.close();
         } catch (Exception ex) {
+            // ignore
         }
     }
 }

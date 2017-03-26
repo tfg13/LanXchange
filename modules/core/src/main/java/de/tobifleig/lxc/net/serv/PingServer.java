@@ -20,6 +20,9 @@
  */
 package de.tobifleig.lxc.net.serv;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.Inet4Address;
@@ -41,6 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PingServer {
 
+    private final LXCLogger logger;
     /**
      * The sockets currently in use.
      */
@@ -57,6 +61,7 @@ public class PingServer {
      * @param listener callback listener
      */
     public PingServer(PingServerListener listener) {
+        logger = LXCLogBackend.getLogger("ping-server");
         this.listener = listener;
         listenSockets = new ConcurrentHashMap<NetworkInterface, InterfaceHandler>();
     }
@@ -101,9 +106,9 @@ public class PingServer {
                     listenSockets.put(inter, handler);
                     handler.handle(inter);
                 } catch (SocketException ex) {
-                    System.out.println("No longer listening to " + inter.getName());
+                    logger.info("No longer listening to " + inter.getName());
                 } catch (IOException ex) {
-                    System.out.println("Cannot listen to interface \"" + inter.getDisplayName() + "\"");
+                    logger.warn("Cannot listen to interface \"" + inter.getDisplayName() + "\"");
                 }
             }
         }, "lxc_udplisten_" + inter.getName());
@@ -159,7 +164,7 @@ public class PingServer {
             if (useIPv6) {
                 socket.joinGroup(Inet6Address.getByAddress("ff15::4c61:6e58:6368:616e:6765", new byte[]{(byte) 0xff, (byte) 0x15, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x4c, (byte) 0x61, (byte) 0x6e, (byte) 0x58, (byte) 0x63, (byte) 0x68, (byte) 0x61, (byte) 0x6e, (byte) 0x67, (byte) 0x65}, interf));
             }
-            System.out.println("Listening to " + interf.getName() + ", which supports IPv4:" + useIPv4 + " IPv6:" + useIPv6);
+            logger.info("Listening to " + interf.getName() + ", which supports IPv4:" + useIPv4 + " IPv6:" + useIPv6);
         }
 
         /**
@@ -170,7 +175,7 @@ public class PingServer {
         private void handle(final NetworkInterface interf) throws IOException {
             // don't do anything when no supported protocol was found
             if (!useIPv4 && !useIPv6) {
-                System.out.println(interf.getName() + " does not seem to support any known protocol!");
+                logger.warn(interf.getName() + " does not seem to support any known protocol!");
                 return;
             }
             byte[] buffer = new byte[5];

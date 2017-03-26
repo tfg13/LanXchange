@@ -20,6 +20,8 @@
  */
 package de.tobifleig.lxc.plaf.pc;
 
+import de.tobifleig.lxc.util.ByteLimitInputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 
