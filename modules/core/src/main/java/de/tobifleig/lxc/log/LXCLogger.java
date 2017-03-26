@@ -90,6 +90,11 @@ public class LXCLogger {
         log(CODE_ASSERT, message);
     }
 
+    public void wtf(Throwable cause) {
+        // this is the only loglevel that allows exceptions without a message
+        wtf("Assertion Error", cause);
+    }
+
     public void wtf(String message,  Throwable cause) {
         log(CODE_ASSERT, message, cause);
     }
