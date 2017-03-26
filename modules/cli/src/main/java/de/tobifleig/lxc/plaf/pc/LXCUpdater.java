@@ -21,6 +21,8 @@
 package de.tobifleig.lxc.plaf.pc;
 
 import de.tobifleig.lxc.LXC;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.util.ByteLimitInputStream;
 import de.tobifleig.lxc.util.ByteLimitOutputStream;
 
@@ -104,6 +106,7 @@ import java.util.zip.ZipFile;
  */
 public final class LXCUpdater {
 
+    private static final LXCLogger logger = LXCLogBackend.getLogger("updater");
     /**
      * Files contained in older versions that can be deleted if they still exist.
      */
@@ -136,13 +139,13 @@ public final class LXCUpdater {
      */
     public static void checkAndPerformUpdate(UpdaterGui updateGui, boolean forceUpdate, boolean overrideVerification, boolean allowDowngrade, boolean restartable) throws Exception {
         if (forceUpdate) {
-            System.out.println("Info: Forcing update...");
+            logger.info("Forcing update...");
         }
         if (overrideVerification) {
-            System.out.println("Warning: Update signature check disabled by startup flag");
+            logger.warn("Update signature check disabled by startup flag");
         }
         if (allowDowngrade) {
-            System.out.println("Warning: Update downgrade protection disabled by startup flag");
+            logger.warn("Warning: Update downgrade protection disabled by startup flag");
         }
 
         // Contact update server, download version file
@@ -154,7 +157,7 @@ public final class LXCUpdater {
         scanner.close();
         // compare version number
         if (gotver > LXC.versionId || forceUpdate) {
-            System.out.println("Newer Version available!");
+            logger.info("Newer Version available!");
             updateGui.setVersionTitle(title);
             if (updateGui.prompt()) {
                 updateGui.toProgressView();
@@ -264,7 +267,7 @@ public final class LXCUpdater {
                                     File file = new File(target, zipEntry.getName());
                                     if (!file.toPath().normalize().toAbsolutePath().startsWith(target.toPath().normalize().toAbsolutePath())) {
                                         // directory traversal beyond root dir
-                                        System.out.println("WARNING: Skipped directory traversal in file: \"" + file.getAbsolutePath() + "\"");
+                                        logger.warn("Skipped directory traversal in file: \"" + file.getAbsolutePath() + "\"");
                                         continue;
                                     }
                                     if (zipEntry.isDirectory()) {
@@ -280,12 +283,11 @@ public final class LXCUpdater {
                                         bout.close();
                                     }
                                 } catch (IOException ex) {
-                                    System.out.println("Update-Error: Cannot unpack file!");
-                                    ex.printStackTrace();
+                                    logger.error("Cannot unpack file!", ex);
                                 }
                             }
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            logger.error("Unexpected problem extracting update", ex);
                         } finally {
                             zipFile.close();
                         }
@@ -320,21 +322,21 @@ public final class LXCUpdater {
                         System.exit(6);
 
                     } else {
-                        System.out.println("ERROR: Downgrade prevented. Current version is " + LXC.versionId + ", but server claimed to send " + gotver + ". Will not update.");
+                        logger.error("Downgrade prevented. Current version is " + LXC.versionId + ", but server claimed to send " + gotver + ". Will not update.");
                         updateGui.setStatusToError();
                         return;
                     }
 
                 } else {
-                    System.out.println("ERROR: Bad signature! File corrupted (OR MANIPULATED!!!). Will not update.");
+                    logger.error("Bad signature! File corrupted (OR MANIPULATED!!!). Will not update.");
                     updateGui.setStatusToError();
                     return;
                 }
             } else {
-                System.out.println("Update rejected by user");
+                logger.info("Update rejected by user");
             }
         } else {
-            System.out.println("You have the latest version");
+            logger.info("You have the latest version");
         }
         updateGui.finish();
     }
@@ -364,9 +366,8 @@ public final class LXCUpdater {
                     return true;
                 }
             }
-        } catch (IOException e) {
-            System.out.println("Update version verification failed. Details:");
-            e.printStackTrace();
+        } catch (IOException ex) {
+            logger.error("Update version verification failed.", ex);
         }
         return false;
     }

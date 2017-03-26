@@ -105,7 +105,7 @@ public abstract class PCPlatform implements Platform {
             }
         }
         if (checkForUpdates || forceUpdate) {
-            System.out.println("Checking for Updates...");
+            logger.info("Checking for Updates...");
             // Ugly workaround, anonymous inner classes require (local)
             // variables to be final
             final boolean force = forceUpdate;
@@ -120,7 +120,7 @@ public abstract class PCPlatform implements Platform {
                         LXCUpdater.checkAndPerformUpdate(getUpdaterGui(), force,
                                 noVerification, allowDowngradeF, managed);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        logger.error("Updater crashed", ex);
                     }
                 }
             };
@@ -130,7 +130,7 @@ public abstract class PCPlatform implements Platform {
             t.setDaemon(true);
             t.start();
         } else {
-            System.out.println("Not checking for updates. (disabled via lxc.cfg)");
+            logger.info("Not checking for updates. (disabled via lxc.cfg)");
         }
     }
 
@@ -156,14 +156,11 @@ public abstract class PCPlatform implements Platform {
                     Configuration.putStringSetting(v1, v2);
                 }
             }
-        } catch (FileNotFoundException e1) {
+        } catch (IOException ex) {
             // this is serious. exit
-            System.out.println("Cannot read/write configfile (cfg.txt)");
+            logger.error("Cannot read/write configfile (cfg.txt)", ex);
             // display warning (gui not available yet)
             showEarlyError("Cannot write to own folder. Please move to your home directory or start as administrator.");
-            System.exit(1);
-        } catch (IOException e2) {
-            e2.printStackTrace();
             System.exit(1);
         } finally {
             try {
@@ -184,17 +181,20 @@ public abstract class PCPlatform implements Platform {
             Iterator<String> iter = Configuration.getKeyIterator();
             while (iter.hasNext()) {
                 String s = iter.next();
-                writer.append(s.toString() + "="
-                        + Configuration.getStringSetting(s) + '\n');
+                writer.append(s);
+                writer.append("=");
+                writer.append(Configuration.getStringSetting(s));
+                writer.append('\n');
             }
         } catch (IOException ex) {
-            System.out.println("CRITICAL: ERROR WRITING TO LOGFILE!");
+            logger.error("Cannot write config file.", ex);
         } finally {
             try {
                 if (writer != null) {
                     writer.close();
                 }
             } catch (IOException ex) {
+                // ignore
             }
         }
     }

@@ -2,6 +2,8 @@ package de.tobifleig.lxc.plaf.cli.ui;
 
 import de.tobifleig.lxc.LXC;
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.plaf.cli.LocalFileIDManager;
 
 import java.util.List;
@@ -15,9 +17,12 @@ public class ListPrinter {
     private static final String TEMPLATE_FILENAME = "                              "; // 30 spaces
     private static final String TEMPLATE_ID = "    "; // 4 spaces
 
+    private final LXCLogger logger;
+
     private LocalFileIDManager idManager;
 
     public ListPrinter(LocalFileIDManager idManager) {
+        logger = LXCLogBackend.getLogger("cli-listprinter");
         this.idManager = idManager;
     }
 
@@ -67,7 +72,7 @@ public class ListPrinter {
         int id = idManager.getId(file);
         if (id < 0) {
             // this should never ever happen
-            System.out.println("Error: No ID for file " + file);
+            logger.wtf("Error: No ID for file " + file);
             id = -1;
         }
         String idString = String.valueOf(id);
