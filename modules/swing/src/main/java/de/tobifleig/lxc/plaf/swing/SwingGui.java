@@ -21,6 +21,8 @@
 package de.tobifleig.lxc.plaf.swing;
 
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 
@@ -57,6 +59,8 @@ import javax.swing.UIManager;
 public class SwingGui extends javax.swing.JFrame implements GuiInterface {
 
     private static final long serialVersionUID = 1L;
+
+    private final LXCLogger logger;
     /**
      * Timer for repaints.
      */
@@ -98,6 +102,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
      * Creates new form LXCGui3
      */
     public SwingGui(GenericSwingPlatform platform) {
+        this.logger = LXCLogBackend.getLogger("swing-gui");
         this.platform = platform;
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
@@ -111,7 +116,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                         }
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        logger.warn("Unable to set L&F", ex);
                     }
                     try {
                         InputStream ubuFontRes = ClassLoader.getSystemClassLoader().getResourceAsStream("Ubuntu-R.ttf");
@@ -123,17 +128,17 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                         }
 
                     } catch (FontFormatException | IOException ex) {
-                        ex.printStackTrace();
+                        logger.warn("Problem loading fonts", ex);
                     }
                     if (ubuFont == null) {
-                        System.out.println("WARNING: Cannot find fontfile \"Ubuntu-R.ttf\"!");
+                        logger.error("Cannot find fontfile \"Ubuntu-R.ttf\"!");
                         ubuFont = Font.decode("Sans");
                     }
                     initComponents();
                 }
             });
         } catch (InterruptedException | InvocationTargetException ex) {
-            ex.printStackTrace();
+            logger.wtf(ex);
         }
         progressManager = new OverallProgressManager() {
             @Override
@@ -251,7 +256,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     try {
                         setIconImage(ImageIO.read(new File("img/logo.png")));
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        logger.error("Unable to set icon image", ex);
                     }
                     addWindowListener(new WindowAdapter() {
                         @Override
@@ -272,7 +277,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                             if (files != null && files.length > 0) {
                                 for (File file : files) {
                                     if (!file.canRead()) {
-                                        System.out.println("Aborting preparation for new files to share, cannot read file \"" + file.getAbsolutePath() + "\"");
+                                        logger.error("Aborting preparation for new files to share, cannot read file \"" + file.getAbsolutePath() + "\"");
                                         // showError() cannot must not called from event dispatcher thread
                                         JOptionPane.showMessageDialog(SwingGui.this, "Cannot read at least one of the selected files:\n\"" + file.getAbsolutePath() + "\"", "LXC - Error", JOptionPane.ERROR_MESSAGE);
                                         return;
@@ -314,7 +319,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                 }
             });
         } catch (InterruptedException | InvocationTargetException ex) {
-            ex.printStackTrace();
+            logger.wtf(ex);
         }
     }
 
@@ -334,7 +339,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                 }
             });
         } catch (InterruptedException | InvocationTargetException ex) {
-            ex.printStackTrace();
+            logger.wtf(ex);
         }
     }
 
@@ -349,7 +354,7 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                 }
             });
         } catch (InterruptedException | InvocationTargetException ex) {
-            ex.printStackTrace();
+            logger.wtf(ex);
         }
     }
 

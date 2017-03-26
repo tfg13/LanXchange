@@ -90,12 +90,12 @@ public class GenericSwingPlatform extends PCPlatform {
                 // inform user
                 gui.showError("Cannot write there, please selected another target or start LXC as Administrator");
                 // cancel
-                System.out.println("Canceled, cannot write (permission denied)");
+                logger.info("Canceled download, cannot write to selected target (permission denied)");
                 return null;
             }
         } else {
             // cancel
-            System.out.println("Canceled by user.");
+            logger.info("Download attempt canceled by user.");
             return null;
         }
     }

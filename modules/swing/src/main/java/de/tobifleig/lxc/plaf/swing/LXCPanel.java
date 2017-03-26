@@ -25,6 +25,8 @@ import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.LXCJob;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.plaf.GuiListener;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -81,6 +83,9 @@ public class LXCPanel extends JPanel {
     private static final int DRAWMODE_HELP = 5;
     private static final int OVERLAY_NONE = 0;
     private static final int OVERLAY_DROPNOW = 2 << 1;
+
+    private final LXCLogger logger;
+
     @Deprecated
     private List<LXCFile> allFiles;
     private transient Image logo;
@@ -576,6 +581,7 @@ public class LXCPanel extends JPanel {
      */
     @SuppressWarnings("unchecked")
     public LXCPanel() {
+        logger = LXCLogBackend.getLogger("lxcpanel");
         background = new java.awt.Color(255, 255, 255, 200);
         selBackground = new java.awt.Color(220, 220, 220, 200);
         options = new OptionsDialog((JFrame) SwingUtilities.getRoot(LXCPanel.this), true);
@@ -585,7 +591,7 @@ public class LXCPanel extends JPanel {
         try {
             return ImageIO.read(new File(path));
         } catch (IOException ex) {
-            System.out.println("ERROR loading image \"" + path + "\". Re-Download LanXchange to fix.");
+            logger.error("loading image \"" + path + "\". Re-Download LanXchange to fix.");
             // create 1x1 transparent image as replacement
             BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
             image.setRGB(0, 0, new java.awt.Color(0, 0, 0, 0).getRGB());
@@ -949,7 +955,7 @@ public class LXCPanel extends JPanel {
         } catch (TooManyListenersException ex) {
             // should not happen.
             // not critical, but log this
-            ex.printStackTrace();
+            logger.warn("Mild assertion error", ex);
         }
     }
 

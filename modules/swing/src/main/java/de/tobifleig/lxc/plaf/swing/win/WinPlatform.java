@@ -63,10 +63,10 @@ public class WinPlatform extends GenericSwingPlatform {
                     try {
                         long startTime = System.currentTimeMillis();
                         Lxcwin.INSTANCE.nop(); // does nothing, but loads dll
-                        System.out.println("Loading advanced windows lib took " + (System.currentTimeMillis() - startTime) + "ms");
-                        System.out.println("Detected win, enabled advanced windows features");
+                        logger.info("Loading advanced windows lib took " + (System.currentTimeMillis() - startTime) + "ms");
+                        logger.info("Detected win, enabled advanced windows features");
                     } catch (Throwable ex) {// alloc in native code may throw all sorts of interesting errors
-                        ex.printStackTrace();
+                        logger.error("Unexpected error in native code", ex);
                         nativeSupportEnabled = false;
                     }
                 }
@@ -93,15 +93,14 @@ public class WinPlatform extends GenericSwingPlatform {
                                 taskbar = Lxcwin.INSTANCE.allocTaskbarObject();
                                 hwnd = new WinDef.HWND(Native.getWindowPointer(gui));
                             } catch (Error ex) {
-                                ex.printStackTrace();
                                 taskbarProgressSupported = false;
-                                System.out.println("Unable to get window handle, disabling taskbar support.");
+                                logger.error("Unable to get window handle, disabling taskbar support.", ex);
                                 return;
                             }
                         }
                         // check init worked
                         if (taskbar == null) {
-                            System.out.println("Failed to init taskbar");
+                            logger.error("Failed to init taskbar");
                             taskbarProgressSupported = false;
                         }
                         if (percentage > 0 && percentage < 100) {
@@ -111,7 +110,7 @@ public class WinPlatform extends GenericSwingPlatform {
                             Lxcwin.INSTANCE.setProgressState(taskbar, hwnd, Lxcwin.TBPF_NOPROGRESS);
                         }
                     } catch (UnsatisfiedLinkError | Exception | NoClassDefFoundError ex) {
-                        ex.printStackTrace();
+                        logger.error("Unable to load lxcwin lib", ex);
                         taskbarProgressSupported = false;
                     }
                 }
@@ -149,8 +148,7 @@ public class WinPlatform extends GenericSwingPlatform {
                 result = null;
             }
         } catch (Error ex) {
-            ex.printStackTrace();
-            System.out.println("Error communicating with native file dialog, hr: " + hr.toString());
+            logger.error("Error communicating with native file dialog, hr: " + hr.toString(), ex);
             nativeFileDialogsSupported = false;
         }
 
@@ -163,12 +161,12 @@ public class WinPlatform extends GenericSwingPlatform {
                 // inform user
                 gui.showError("Cannot write there, please selected another target or start LXC as Administrator");
                 // cancel
-                System.out.println("Canceled, cannot write (permission denied)");
+                logger.info("Canceled, cannot write (permission denied)");
                 return null;
             }
         } else {
             // cancel
-            System.out.println("Canceled by user.");
+            logger.info("Canceled by user.");
             return null;
         }
     }
@@ -199,8 +197,7 @@ public class WinPlatform extends GenericSwingPlatform {
                 result = null;
             }
         } catch (Error ex) {
-            ex.printStackTrace();
-            System.out.println("Error communicating with native file dialog, hr: " + hr.toString());
+            logger.error("Error communicating with native file dialog, hr: " + hr.toString(), ex);
             nativeFileDialogsSupported = false;
         }
 

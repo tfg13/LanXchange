@@ -23,6 +23,9 @@ package de.tobifleig.lxc.plaf.swing;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,6 +56,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class SelfDistributor {
 
+    private static final LXCLogger logger = LXCLogBackend.getLogger("selfdist");
     /**
      * The GUI.
      */
@@ -139,14 +143,14 @@ public final class SelfDistributor {
                 @Override
                 public void handle(HttpExchange he) {
                     try {
-                        System.out.println("selfdist: Download from: " + he.getRemoteAddress());
+                        logger.info("Download from: " + he.getRemoteAddress());
                         //he.setAttribute("Content-Type", "application/octet-stream");
                         he.sendResponseHeaders(200, lxc.length);
                         OutputStream out = he.getResponseBody();
                         out.write(lxc);
                         out.close();
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        logger.warn("Download failed", ex);
                     }
                 }
 
@@ -154,7 +158,7 @@ public final class SelfDistributor {
             httpServer.setExecutor(null);
             httpServer.start();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error("Unrecoverable error in httpserver", ex);
         }
     }
 
@@ -191,9 +195,9 @@ public final class SelfDistributor {
             }
             outStream.close();
             lxc = buffer.toByteArray();
-            System.out.println("selfdist: distribution created, size " + lxc.length);
+            logger.info("distribution created, size " + lxc.length);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error("Cannot create distribution", ex);
         }
     }
 
@@ -227,12 +231,12 @@ public final class SelfDistributor {
                     }
                 }
             }
-        } catch (SocketException e) {
+        } catch (SocketException ex) {
             // nothing works!
-            e.printStackTrace();
+            logger.error("Unexpected exception during local ip guessing", ex);
         }
 
-        System.out.println("ERROR: Unable to guess local ip!");
+        logger.error("Unable to guess local ip!");
         return "127.0.0.1";
     }
 
@@ -279,7 +283,7 @@ public final class SelfDistributor {
             }
         }
 
-        System.out.println("ERROR: Giving up on local host name!");
+        logger.error("Giving up on local host name!");
         return "localhost";
     }
 
@@ -290,8 +294,7 @@ public final class SelfDistributor {
                 return (s.hasNext() ? s.next() : "").trim();
             }
         } catch (IOException ex) {
-            System.out.println("Running \"" + cmd + "\" failed:");
-            ex.printStackTrace();
+            logger.warn("Running \"" + cmd + "\" failed:", ex);
         }
         return null;
     }

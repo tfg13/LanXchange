@@ -9,6 +9,7 @@ package de.tobifleig.lxc.plaf.pc;
 
 import de.tobifleig.lxc.Configuration;
 import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.plaf.Platform;
 
 import java.io.BufferedReader;
@@ -34,6 +35,8 @@ public abstract class PCPlatform implements Platform {
      */
     private static final String CONFIG_PATH = "lxc.cfg";
 
+    protected final LXCLogger logger;
+
     public PCPlatform(String[] args) {
         // check permission for own folder
         try {
@@ -56,6 +59,7 @@ public abstract class PCPlatform implements Platform {
             }
         }
         LXCLogBackend.init(new File("."), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, debug);
+        logger = LXCLogBackend.getLogger("platform");
     }
 
     @Override

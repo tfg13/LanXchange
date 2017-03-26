@@ -24,12 +24,13 @@ import de.tobifleig.lxc.Configuration;
 import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.InMemoryFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.InvalidDnDOperationException;
-import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.URI;
@@ -58,6 +59,8 @@ public class DropTransferHandler extends TransferHandler {
      * Flavor for copy-pasted plain text.
      */
     private static final String PLAIN_TEXT_MIME_TYPE = "application/x-java-serialized-object; class=java.lang.String";
+
+    private final LXCLogger logger;
     /**
      * The known flavors for actual files.
      */
@@ -77,6 +80,7 @@ public class DropTransferHandler extends TransferHandler {
      * @param listener the listener to pass events to
      */
     public DropTransferHandler(FileDropListener listener) {
+        logger = LXCLogBackend.getLogger("droptransfer-handler");
         this.listener = listener;
         fileFlavor = DataFlavor.javaFileListFlavor;
         try {
@@ -85,8 +89,8 @@ public class DropTransferHandler extends TransferHandler {
             inMemoryFlavors = new DataFlavor[2];
             inMemoryFlavors[0] = new DataFlavor(PLAIN_TEXT_MIME_TYPE);
             inMemoryFlavors[1] = DataFlavor.imageFlavor;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException ex) {
+            logger.error("Unable to create dnd flavors", ex);
         }
     }
 
@@ -148,13 +152,14 @@ public class DropTransferHandler extends TransferHandler {
         DataFlavor[] importFlavors = t.getTransferDataFlavors();
 
         if ("true".equals(Configuration.getStringSetting("debug_printDropFlavors"))) {
-            System.out.println("Printing flavors: " + importFlavors.length);
+            logger.info("Printing flavors: " + importFlavors.length);
             for (DataFlavor f : importFlavors) {
                 try {
-                    System.out.println(f.getMimeType());
-                    System.out.println(t.getTransferData(f));
-                    System.out.println();
+                    logger.info(f.getMimeType());
+                    logger.info("" + t.getTransferData(f));
+                    logger.info("");
                 } catch (Exception ex) {
+                    // ignore
                 }
             }
         }
@@ -221,7 +226,7 @@ public class DropTransferHandler extends TransferHandler {
                         ByteArrayOutputStream arrayOutput = new ByteArrayOutputStream();
                         Object image = t.getTransferData(inMemoryFlavors[1]);
                         if (!(image instanceof RenderedImage)) {
-                            System.out.println("Unsupported image format");
+                            logger.warn("Unsupported image format");
                             return false;
                         }
                         ImageIO.write((RenderedImage) image, "png", arrayOutput);
@@ -233,17 +238,16 @@ public class DropTransferHandler extends TransferHandler {
                     listener.newCalcedFile(memFile);
                     return true;
                 } else {
-                    System.out.println("Unsupported Drop-Operation. Sry");
+                    logger.error("Unsupported Drop-Operation. Sry");
                 }
             }
         } catch (UnsupportedFlavorException ufe) {
-            System.out.println("importData: unsupported data flavor");
+            logger.warn("importData: unsupported data flavor");
         } catch (IOException ieo) {
-            System.out.println("importData: I/O exception");
+            logger.warn("importData: I/O exception");
         } catch (RuntimeException ex) {
             // the event dispatcher silently discards this exception, therefore we catch it here
-            System.out.println("importData: Runtime Exception. Details:");
-            ex.printStackTrace();
+            logger.error("importData: Runtime Exception.", ex);
         }
         return false;
     }
@@ -271,10 +275,8 @@ public class DropTransferHandler extends TransferHandler {
                 URI uri = new URI(s);
                 File file = new File(uri);
                 list.add(file);
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+            } catch (URISyntaxException | IllegalArgumentException ex) {
+                logger.error("Unexpected exception during textURIListToFileList", ex);
             }
         }
         return list;

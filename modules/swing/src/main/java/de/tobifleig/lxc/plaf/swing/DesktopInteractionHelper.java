@@ -20,6 +20,9 @@
  */
 package de.tobifleig.lxc.plaf.swing;
 
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
+
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +35,8 @@ import java.net.URISyntaxException;
  * @author Tobias Fleig <tobifleig googlemail com>
  */
 final class DesktopInteractionHelper {
+
+    private static final LXCLogger logger = LXCLogBackend.getLogger("desktop-helper");
 
     /**
      * utility class
@@ -50,8 +55,8 @@ final class DesktopInteractionHelper {
                 try {
                     desktop.browse(new URI(url));
                     return;
-                } catch (IOException | URISyntaxException e) {
-                    e.printStackTrace();
+                } catch (IOException | URISyntaxException ex) {
+                    logger.error("open browser with method 1 failed", ex);
                 }
             }
         }
@@ -60,15 +65,15 @@ final class DesktopInteractionHelper {
         try {
             runtime.exec("xdg-open " + url);
             return;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            logger.error("open browser with method 2 failed", ex);
         }
 
         // last straw for mac
         try {
             runtime.exec("open" + url);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            logger.error("open browser with method 3 failed", ex);
         }
     }
 
@@ -83,8 +88,8 @@ final class DesktopInteractionHelper {
             if (desktop.isSupported(Desktop.Action.MAIL)) {
                 try {
                     desktop.mail(new URI(mailto));
-                } catch (IOException | URISyntaxException e) {
-                    e.printStackTrace();
+                } catch (IOException | URISyntaxException ex) {
+                    logger.error("send mail failed", ex);
                 }
             }
         }
@@ -105,21 +110,21 @@ final class DesktopInteractionHelper {
         if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
             try {
                 Runtime.getRuntime().exec("rundll32 SHELL32.DLL,ShellExec_RunDLL "+ file.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                logger.error("open file with method 1 failed", ex);
             }
         } else if (System.getProperty("os.name").toLowerCase().contains("mac")) {
             try {
                 Runtime.getRuntime().exec("open "+ file.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                logger.error("open file with method 2 failed", ex);
             }
         } else { // linux, bsd etc
             // requires xdg-open
             try {
                 Runtime.getRuntime().exec("xdg-open "+ file.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                logger.error("open file with method 3 failed", ex);
             }
         }
     }
