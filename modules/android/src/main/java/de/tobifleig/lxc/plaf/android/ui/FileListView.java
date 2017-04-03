@@ -23,6 +23,7 @@ package de.tobifleig.lxc.plaf.android.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -143,8 +144,10 @@ public class FileListView extends RecyclerView {
                             openIntent.setAction(Intent.ACTION_VIEW);
                             // Hack: Local files are RealFiles
                             final RealFile realFile = (RealFile) currentFile.getFiles().get(0);
-                            Uri fileUri = Uri.fromFile(realFile.getBackingFile());
+                            // create content:// uri, file:// is no longer allowed on android 7+
+                            Uri fileUri = FileProvider.getUriForFile(parent.getContext(), "de.tobifleig.lxc.fileprovider", realFile.getBackingFile());
                             openIntent.setDataAndType(fileUri, MIMETypeGuesser.guessMIMEType(realFile, getContext()));
+                            openIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             // check if intent can be processed
                             List<ResolveInfo> list = getContext().getPackageManager().queryIntentActivities(openIntent, 0);
 

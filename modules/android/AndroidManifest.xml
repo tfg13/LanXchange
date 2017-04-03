@@ -6,7 +6,7 @@
 
     <uses-sdk
             android:minSdkVersion="16"
-            android:targetSdkVersion="23"/>
+            android:targetSdkVersion="25"/>
 
     <!--normal permissions (Marshmallow)-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -89,6 +89,16 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".plaf.android.activity.MainActivity"/>
         </activity>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="de.tobifleig.lxc.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
