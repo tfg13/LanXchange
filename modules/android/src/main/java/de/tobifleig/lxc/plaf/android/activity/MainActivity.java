@@ -54,6 +54,8 @@ import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.InMemoryFile;
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.android.AndroidGuiListener;
 import de.tobifleig.lxc.plaf.android.ConnectivityChangeListener;
@@ -92,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
 
     private static final int RETURNCODE_FILEINTENT = 42;
     public static final int RETURNCODE_PERMISSION_PROMPT_STORAGE = 43;
+
+    private LXCLogger logger;
+
     private AndroidGuiListener guiListener;
     private GuiInterfaceBridge guiBridge;
 
@@ -123,6 +128,8 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        logger = LXCLogBackend.getLogger("main-activity");
 
         // Check intent first
         List<VirtualFile> quickShare = null;
@@ -445,7 +452,7 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
                 showErrorDialog(this, intent.getCharSequenceExtra(Intent.EXTRA_TEXT));
                 break;
             default:
-                System.out.println("Received unknown intent! " + intent.getAction());
+                logger.warn("Received unknown intent! " + intent.getAction());
         }
     }
 
@@ -504,16 +511,16 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
      *
      */
     private void handleShareError(final Intent failedIntent) {
-        System.err.println("Sharing failed. Intent details:");
-        System.err.println("Intent object: " + failedIntent);
-        System.err.println("Intent action: " + failedIntent.getAction());
-        System.err.println("Intent dataString: " + failedIntent.getDataString());
-        System.err.println("Intent data: " + failedIntent.getData());
-        System.err.println("Intent type: " + failedIntent.getType());
-        System.err.println("Intent scheme: " + failedIntent.getScheme());
-        System.err.println("Intent package: " + failedIntent.getPackage());
-        System.err.println("Intent extras: " + failedIntent.getExtras());
-        System.err.println("Intent clipData: " + failedIntent.getClipData());
+        logger.error("Sharing failed. Intent details:");
+        logger.error("Intent object: " + failedIntent);
+        logger.error("Intent action: " + failedIntent.getAction());
+        logger.error("Intent dataString: " + failedIntent.getDataString());
+        logger.error("Intent data: " + failedIntent.getData());
+        logger.error("Intent type: " + failedIntent.getType());
+        logger.error("Intent scheme: " + failedIntent.getScheme());
+        logger.error("Intent package: " + failedIntent.getPackage());
+        logger.error("Intent extras: " + failedIntent.getExtras());
+        logger.error("Intent clipData: " + failedIntent.getClipData());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(findViewById(R.id.main_layout).getContext());
         builder.setTitle(R.string.error_cantoffer_title);
@@ -569,7 +576,7 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
                     writer.close();
                     result.add(new InMemoryFile("text.txt", arrayOutput.toByteArray()));
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    logger.error("Unable to create InMemoryFile from clipdata", ex);
                 }
             }
         }
@@ -622,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
      */
     private void offerFiles(List<VirtualFile> files) {
         if (files.isEmpty()) {
-            System.err.println("invalid input!");
+            logger.error("invalid input!");
             return;
         }
 
@@ -657,8 +664,8 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
                 try {
                     ParcelFileDescriptor desc = resolver.openFileDescriptor(uri, "r");
                     file = new NonFileContent(name, desc, uri, resolver);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                } catch (FileNotFoundException ex) {
+                    logger.error("Unable to open fd and create NonFileContent", ex);
                 }
                 cursor.close();
             }

@@ -24,6 +24,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 import de.tobifleig.lxc.data.impl.RealFile;
+import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 
 import java.io.IOException;
 import java.net.URLConnection;
@@ -36,6 +38,8 @@ import java.util.Map;
 public class MIMETypeGuesser {
 
     public final static String GENERIC_RESULT = "*/*";
+
+    private static final LXCLogger logger = LXCLogBackend.getLogger("mimetypeguesser");
 
     private static final Map<String, String> hardcodedMIMETypes = new HashMap<String, String>();
 
@@ -108,8 +112,8 @@ public class MIMETypeGuesser {
             if (isUsefulMIMEType(magicResult)) {
                 return magicResult;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            logger.warn("Method 2 did not work", ex);
         }
 
         // METHOD 3: Ask the content resolver
@@ -119,7 +123,7 @@ public class MIMETypeGuesser {
         }
 
         // Everything failed
-        System.err.println("Cannot guess MIMEType for file " + file.getBackingFile().getAbsolutePath());
+        logger.error("Cannot guess MIMEType for file " + file.getBackingFile().getAbsolutePath());
         return GENERIC_RESULT;
     }
 

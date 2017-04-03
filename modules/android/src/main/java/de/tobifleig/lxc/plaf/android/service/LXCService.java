@@ -47,6 +47,7 @@ import de.tobifleig.lxc.data.LXCFile;
 import de.tobifleig.lxc.data.VirtualFile;
 import de.tobifleig.lxc.data.impl.RealFile;
 import de.tobifleig.lxc.log.LXCLogBackend;
+import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.plaf.GuiInterface;
 import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.Platform;
@@ -62,6 +63,8 @@ public class LXCService extends Service implements Platform {
     private static final long STOP_SERVICE_MS = 1000 * 60 * 15;// 15 mins
     private static final int MAX_LOG_SIZE_CHARS = 8388608; // ~8MiB
     private static final int LOG_ROTATION_SIZE = 3;
+
+    private LXCLogger logger;
 
     /**
      * Flat to prevent multiple service instances running at a time.
@@ -133,7 +136,9 @@ public class LXCService extends Service implements Platform {
 
             // config logging
             // TODO verify this works without permissions
+            // TODO put in a private storage dir
             LXCLogBackend.init(new File("lxc.log"), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, true);
+            logger = LXCLogBackend.getLogger("platform");
 
             // launch LXC
             startLXC();
@@ -181,7 +186,7 @@ public class LXCService extends Service implements Platform {
             @Override
             public void showError(String error) {
                 AndroidSingleton.getInterfaceBridge().showError(LXCService.this, error);
-                System.err.println(error);
+                logger.error(error);
             }
 
             @Override
@@ -273,7 +278,7 @@ public class LXCService extends Service implements Platform {
             @Override
             public void run() {
                 if (listener.shutdown(false, false, true)) {
-                    System.out.println("LanXchange auto-quits now to preserve your battery");
+                    logger.info("LanXchange auto-quits now to preserve your battery");
                     AndroidSingleton.serviceStopping();
                     timer.cancel();
                     stopSelf();
