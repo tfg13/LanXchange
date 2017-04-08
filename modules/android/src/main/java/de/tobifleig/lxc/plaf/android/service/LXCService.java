@@ -62,7 +62,7 @@ public class LXCService extends Service implements Platform {
      */
     private static final long STOP_SERVICE_MS = 1000 * 60 * 15;// 15 mins
     private static final int MAX_LOG_SIZE_CHARS = 307200; // ~300KiB
-    private static final int LOG_ROTATION_SIZE = 3;
+    private static final int LOG_ROTATION_SIZE = 2;
 
     private LXCLogger logger;
 
