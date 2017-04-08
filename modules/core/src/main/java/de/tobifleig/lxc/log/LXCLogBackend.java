@@ -100,8 +100,8 @@ public final class LXCLogBackend {
         // handle log rotation
         if (current.exists() && logRotationCopies > 0) {
             for (int i = logRotationCopies - 1; i >= 1; i--) {
-                File rotateDown = new File(targetDir,"lxc.log.prev" + i);
-                File rotateVictim = new File(targetDir,"lxc.log.prev" + (i + 1));
+                File rotateDown = new File(targetDir,"lxc_oldlog" + i + ".log");
+                File rotateVictim = new File(targetDir,"lxc_oldlog" + (i + 1) + ".log");
                 if (rotateDown.exists()) {
                     if (rotateVictim.exists()) {
                         rotateVictim.delete();
@@ -109,7 +109,7 @@ public final class LXCLogBackend {
                     rotateDown.renameTo(rotateVictim);
                 }
             }
-            File previous = new File(targetDir,"lxc.log.prev1");
+            File previous = new File(targetDir,"lxc_oldlog1.log");
             if (previous.exists()) {
                 previous.delete();
             }
