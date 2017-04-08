@@ -61,7 +61,7 @@ public class LXCService extends Service implements Platform {
      * After how many ms without activity the service should stop itself.
      */
     private static final long STOP_SERVICE_MS = 1000 * 60 * 15;// 15 mins
-    private static final int MAX_LOG_SIZE_CHARS = 8388608; // ~8MiB
+    private static final int MAX_LOG_SIZE_CHARS = 307200; // ~300KiB
     private static final int LOG_ROTATION_SIZE = 3;
 
     private LXCLogger logger;
@@ -135,9 +135,7 @@ public class LXCService extends Service implements Platform {
             startForeground(1, builder.getNotification());
 
             // config logging
-            // TODO verify this works without permissions
-            // TODO put in a private storage dir
-            LXCLogBackend.init(new File("lxc.log"), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, true);
+            LXCLogBackend.init(getCacheDir(), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, true);
             logger = LXCLogBackend.getLogger("platform");
 
             // launch LXC
