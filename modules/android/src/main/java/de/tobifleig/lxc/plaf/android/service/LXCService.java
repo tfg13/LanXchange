@@ -135,7 +135,7 @@ public class LXCService extends Service implements Platform {
             startForeground(1, builder.getNotification());
 
             // config logging
-            LXCLogBackend.init(getCacheDir(), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, true);
+            LXCLogBackend.init(getCacheDir(), MAX_LOG_SIZE_CHARS, LOG_ROTATION_SIZE, false);
             logger = LXCLogBackend.getLogger("platform");
 
             // launch LXC
@@ -148,7 +148,7 @@ public class LXCService extends Service implements Platform {
     }
 
     private void startLXC() {
-        new LXC(this, new String[]{"-nolog"});
+        new LXC(this, new String[]{});
     }
 
     @Override
