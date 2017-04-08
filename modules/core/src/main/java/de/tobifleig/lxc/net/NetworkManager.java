@@ -131,7 +131,7 @@ public class NetworkManager {
                 final Seeder seed = new Seeder(socket, outStream, inStream, file, transVersion);
                 TransceiverListener seedListener = new TransceiverListener() {
                     @Override
-                    public void finished(boolean success, boolean removeFile, String problemFilePath) {
+                    public void finished(boolean success, boolean cancelled, boolean removeFile, String problemFilePath) {
                         int removeIndex = file.getJobs().indexOf(jobs.get(seed));
                         listener.notifyRemoveJob(file, removeIndex);
                         file.removeJob(jobs.get(seed), success);
@@ -259,19 +259,21 @@ public class NetworkManager {
                 // accepted
                 final Leecher leech = new Leecher(server, input, output, file, targetFolder, file.getLxcTransVersion());
                 TransceiverListener leechListener = new TransceiverListener() {
+
                     @Override
-                    public void finished(boolean success, boolean removeFile, String problemFilePath) {
+                    public void finished(boolean success, boolean cancelled, boolean removeFile, String problemFilePath) {
                         file.setLocked(false);
                         if (success) {
                             file.setAvailable(true);
                             listener.downloadComplete(file, targetFolder);
                         }
-                        int removeIndex = file.getJobs().indexOf(jobs.get(leech));
+                        LXCJob job = jobs.get(leech);
+                        int removeIndex = file.getJobs().indexOf(job);
                         listener.notifyRemoveJob(file, removeIndex);
-                        file.removeJob(jobs.get(leech), success);
-                        if (!success && removeFile) {
+                        file.removeJob(job, success);
+                        if (!cancelled && !success && removeFile) {
                             listener.downloadFailedFileMissing();
-                        } else if (!success) { // && !removeFile
+                        } else if (!cancelled && !success) { // && !removeFile
                             listener.downloadFailedFileOk(problemFilePath);
                         }
                         jobs.remove(leech);

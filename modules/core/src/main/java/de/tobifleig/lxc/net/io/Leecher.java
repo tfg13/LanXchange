@@ -113,7 +113,7 @@ public class Leecher extends Transceiver {
                         //
                         // abort
                         logger.error("Cannot create file \"" + target.getAbsolutePath() + "\", aborting transfer", ex);
-                        listener.finished(false, false, target.getAbsolutePath());
+                        listener.finished(false, false, false, target.getAbsolutePath());
                         break;
                     } catch (IOException ex) {
                         if (!abort) {
@@ -139,12 +139,12 @@ public class Leecher extends Transceiver {
                     logger.info("Done receiving.");
                     // set base files
                     file.setBaseFiles(baseFiles);
-                    listener.finished(true, false, null);
+                    listener.finished(true, false, false, null);
                     break;
                 } else if (cmd == 's') {
                     // error, client no longer has the file
                     logger.warn("Remote reports missing file, aborting transfer.");
-                    listener.finished(false, true, null);
+                    listener.finished(false, false, true, null);
                     break;
                 } else {
                     logger.warn("Unused command: " + cmd);
@@ -155,7 +155,7 @@ public class Leecher extends Transceiver {
             if (!abort) {
                 logger.error("Unexpected IOException(2)", ex);
             }
-            listener.finished(false, false, null);
+            listener.finished(false, abort,false, null);
         } finally {
             try {
                 in.close();

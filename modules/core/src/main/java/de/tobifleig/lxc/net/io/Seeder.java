@@ -136,10 +136,10 @@ public class Seeder extends Transceiver {
 
         if (transferOk) {
             logger.info("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
-            listener.finished(true, false, null);
+            listener.finished(true, abort, false, null);
             logger.info("Done seeding.");
         } else {
-            listener.finished(false, fileBroken, null);
+            listener.finished(false, abort, fileBroken,null);
             logger.error("Lost connection, aborting.");
         }
 
