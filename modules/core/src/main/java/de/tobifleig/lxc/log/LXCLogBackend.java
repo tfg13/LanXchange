@@ -91,7 +91,7 @@ public final class LXCLogBackend {
 
     public static LXCLogger getLogger(String from) {
         // format from so it has 16 chars
-        from = String.format("%16s", from);
+        from = String.format("%16.16s", from);
         return new LXCLogger(printer, from);
     }
 
