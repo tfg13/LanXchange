@@ -32,6 +32,7 @@ import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.content.ClipData;
@@ -160,8 +161,10 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
         // set up the text displayed when there are no files
         TextView emptyText = (TextView) ((LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.empty_list, null);
         fileListView.setEmptyView(emptyText);
-        ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
-        root.addView(emptyText);
+        ViewGroup root = (ViewGroup) findViewById(R.id.main_layout);
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.WRAP_CONTENT, CoordinatorLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.gravity = Gravity.CENTER;
+        root.addView(emptyText, layoutParams);
 
         ConnectivityChangeReceiver.setConnectivityListener(new ConnectivityChangeListener() {
 
