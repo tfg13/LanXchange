@@ -60,6 +60,35 @@
         <View style="@style/Divider"/>
 
         <TextView
+            android:id="@+id/about_category_header_debug"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textStyle="bold"
+            android:textColor="@color/material_accent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@string/about_category_debug"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_debug_showlog"
+            lanxchange:contentText="@string/about_debug_showlog_text"
+            android:id="@+id/about_debug_showlog"/>
+
+        <de.tobifleig.lxc.plaf.android.ui.AboutElement
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            lanxchange:headerText="@string/about_debug_sendlogs"
+            lanxchange:contentText="@string/about_debug_sendlogs_text"
+            android:id="@+id/about_debug_sendlogs"/>
+
+        <View style="@style/Divider"/>
+
+        <TextView
             android:id="@+id/about_category_header_licenses"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textStyle="bold"

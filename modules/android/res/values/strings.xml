@@ -75,9 +75,10 @@
 	<string name="help_nofiles2">I tried everything, but I still cannot see files from other devices!</string>
 	<string name="help_nofiles2_text">Sometimes restarting the app on both sides helps. If the problem persists, send me a mail! (Select About in the main menu)</string>
 	<string name="help_bugfeature">I want feature XY, I found a bug.</string>
-	<string name="help_bugfeature_text">Email me! Select "About" in the main menu.</string>
+	<string name="help_bugfeature_text">Send me an email! To find my address, select \"About\" in the main menu. There, you will also find a button to send the last 3 log files to me via mail. Please make use of this feature if you found a problem, the contents of the log files are important to find out what went wrong.</string>
 	<string name="help_category_general">F.A.Q.</string>
 	<string name="about_category_general">About</string>
+    <string name="about_category_debug">Debug options</string>
     <string name="about_category_licenses">3rd Party Licenses</string>
 	<string name="about_version">Version</string>
 	<string name="about_copyright">Copyright</string>
@@ -98,6 +99,10 @@
 	<string name="about_twitter">Author on Twitter</string>
 	<string name="about_twitter_text">https://twitter.com/tfg13</string>
 	<string name="about_version_internal">Internal Version</string>
+    <string name="about_debug_showlog">Show most recent log file</string>
+    <string name="about_debug_showlog_text">Tap to open with default text viewer</string>
+    <string name="about_debug_sendlogs">Send log files to developer</string>
+    <string name="about_debug_sendlogs_text">Opens email app, sends 3 most recent logfiles</string>
 	<string name="pcversion_header">Get the PC version at</string>
 	<string name="pcversion_text">lanxchange.com</string>
 	<string name="pcversion_url">http://lanxchange.com/</string>
