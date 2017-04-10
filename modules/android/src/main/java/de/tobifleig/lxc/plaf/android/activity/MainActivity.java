@@ -150,6 +150,13 @@ public class MainActivity extends AppCompatActivity implements CancelablePermiss
         setContentView(R.layout.main);
         // layout is loaded, setup main view
         fileListView = (FileListView) findViewById(R.id.fileList);
+        // set up action bar logo
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayUseLogoEnabled(true);
+            getSupportActionBar().setLogo(R.drawable.ic_branding_white);
+        }
         // set up the text displayed when there are no files
         TextView emptyText = (TextView) ((LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.empty_list, null);
         fileListView.setEmptyView(emptyText);
