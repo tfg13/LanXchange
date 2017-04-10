@@ -4,6 +4,7 @@ manifest.mf
 /build/
 lxc.cfg
 lxc.log
+lxc_oldlog*.log
 /bin/
 /gen/
 /libs/android-support-v4.jar
