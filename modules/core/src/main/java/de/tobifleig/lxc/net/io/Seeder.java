@@ -34,6 +34,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The actual file-sender.
@@ -135,7 +136,7 @@ public class Seeder extends Transceiver {
         }
 
         if (transferOk) {
-            logger.info("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
+            logger.info("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + String.format(Locale.US, "%.2f", 1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
             listener.finished(true, abort, false, null);
             logger.info("Done seeding.");
         } else {

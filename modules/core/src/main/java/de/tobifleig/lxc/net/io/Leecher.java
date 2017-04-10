@@ -37,6 +37,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The actual file-receiver
@@ -135,7 +136,7 @@ public class Leecher extends Transceiver {
                     }
                 } else if (cmd == 'e') {
                     // done
-                    logger.info("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + (1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
+                    logger.info("Finished in " + (System.currentTimeMillis() - startTime) + "ms, speed was " + String.format(Locale.US, "%.2f", 1.0 * totalBytes / (System.currentTimeMillis() - startTime)) + "kb/s");
                     logger.info("Done receiving.");
                     // set base files
                     file.setBaseFiles(baseFiles);
