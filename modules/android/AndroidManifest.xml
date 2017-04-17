@@ -24,7 +24,10 @@
             android:icon="@drawable/ic_launcher"
             android:label="@string/app_name"
             tools:replace="android:theme"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:resizeableActivity="true"
+        >
+        <meta-data android:name="android.max_aspect" android:value="2.1" />
         <activity
                 android:name=".plaf.android.activity.MainActivity"
                 android:label="@string/title_activity_lxc"
