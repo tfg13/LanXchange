@@ -104,8 +104,8 @@
     <string name="about_debug_sendlogs">Send log files to developer</string>
     <string name="about_debug_sendlogs_text">Opens email app, sends 3 most recent logfiles</string>
 	<string name="pcversion_header">Get the PC version at</string>
-	<string name="pcversion_text">lanxchange.com</string>
-	<string name="pcversion_url">http://lanxchange.com/</string>
+	<string name="pcversion_text">www.lanxchange.com</string>
+	<string name="pcversion_url">https://www.lanxchange.com/</string>
 	<string name="dialog_closewithrunning_title">Tranfers running in background!</string>
 	<string name="dialog_closewithrunning_text">Stopping now will abort them. Continue anyway?</string>
 	<string name="dialog_closewithrunning_yes">Yes</string>
