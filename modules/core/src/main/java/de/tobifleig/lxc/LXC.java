@@ -49,11 +49,11 @@ public class LXC {
      * The internal version id.
      * For automatic updates.
      */
-    public static final int versionId = 169;
+    public static final int versionId = 170;
     /**
      * The external version id.
      */
-    public static final String versionString = "v1.41";
+    public static final String versionString = "v1.50";
     /**
      * Logger for core components
      */
@@ -94,7 +94,7 @@ public class LXC {
         logger = LXCLogBackend.getLogger("core");
         this.platform = platform;
 
-        logger.info("This is LanXchange " + versionString + " (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Tobias Fleig - License GPLv3 or later");
+        logger.info("This is LanXchange " + versionString + " (" + versionId + ") - Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017 Tobias Fleig - License GPLv3 or later");
 
         platform.readConfiguration(args);
 
