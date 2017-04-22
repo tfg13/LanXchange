@@ -14,6 +14,7 @@ import de.tobifleig.lxc.plaf.GuiListener;
 import de.tobifleig.lxc.plaf.cli.cmds.StartCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StopCommand;
 import de.tobifleig.lxc.plaf.cli.ui.CLITools;
+import de.tobifleig.lxc.plaf.cli.ui.CLIUpdaterGui;
 import de.tobifleig.lxc.plaf.cli.ui.ListPrinter;
 import de.tobifleig.lxc.plaf.pc.PCPlatform;
 import de.tobifleig.lxc.plaf.pc.UpdaterGui;
@@ -53,6 +54,8 @@ public class CLIBackend extends PCPlatform {
      * Used to display constant, simple, human-usable ids for files.
      */
     private LocalFileIDManager idManager = new LocalFileIDManager();
+
+    private CLIUpdaterGui updaterGui = new CLIUpdaterGui();
 
     /**
      * Flag that indicates if the server mainloop must quit.
@@ -155,7 +158,7 @@ public class CLIBackend extends PCPlatform {
 
     @Override
     public UpdaterGui getUpdaterGui() {
-        return null;
+        return updaterGui;
     }
 
     private void handleCommand(BackendCommand command) {
