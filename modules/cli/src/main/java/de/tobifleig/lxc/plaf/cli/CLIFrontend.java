@@ -23,7 +23,7 @@ import java.net.Socket;
  */
 public class CLIFrontend {
 
-    private static int EXITCODE_REQUEST_DAEMON = 7;
+    private static int EXITCODE_REQUEST_BACKEND_START = 7;
 
     public static void main(String[] args) {
         // this should only be called by lxcc (the cli launch script)
@@ -96,12 +96,12 @@ public class CLIFrontend {
         if (startRequired) {
             if (alreadyStarted) {
                 // TODO error
-                CLITools.out.println("Unable to connect to backend!");
+                CLITools.out.println("DEBUG/ERROR: Unable to connect to backend!");
             } else {
                 // request restart?
                 if (command.startBackendOnSendError()) {
                     CLITools.out.println("DEBUG: Failure, requesting backend start...");
-                    System.exit(7);
+                    System.exit(EXITCODE_REQUEST_BACKEND_START);
                 } else {
                     CLITools.out.println("DEBUG: Unable to deliver command, but this is ok.");
                 }
@@ -116,7 +116,7 @@ public class CLIFrontend {
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
             output.writeObject(command);
             output.flush();
-            CLITools.out.println("Command submission to backend OK");
+            CLITools.out.println("DEBUG: Command submission to backend OK");
             return true;
         } catch (IOException e) {
             // TODO handle exception during connection/delivery attempt
