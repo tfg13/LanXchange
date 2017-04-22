@@ -9,6 +9,7 @@ package de.tobifleig.lxc.plaf.cli;
 
 import de.tobifleig.lxc.plaf.cli.cmds.ListCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StartCommand;
+import de.tobifleig.lxc.plaf.cli.cmds.StatusCommand;
 import de.tobifleig.lxc.plaf.cli.cmds.StopCommand;
 import de.tobifleig.lxc.plaf.cli.ui.CLITools;
 
@@ -53,6 +54,10 @@ public class CLIFrontend {
 
         BackendCommand command = null;
         switch (args[0].toLowerCase()) {
+            case "status":
+            case "stat":
+                command = parseStatus(args);
+                break;
             case "start":
             case "launch":
             case "run":
@@ -128,6 +133,13 @@ public class CLIFrontend {
     private static BackendCommand parseStart(String[] data, boolean alreadyStarted) {
         if (verifyCommandLength(data, 0, 0)) {
             return new StartCommand(alreadyStarted);
+        }
+        return null;
+    }
+
+    private static BackendCommand parseStatus(String[] data) {
+        if (verifyCommandLength(data, 0, 0)) {
+            return new StatusCommand();
         }
         return null;
     }

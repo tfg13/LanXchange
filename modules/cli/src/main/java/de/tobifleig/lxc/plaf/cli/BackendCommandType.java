@@ -19,5 +19,6 @@ public enum BackendCommandType {
     SHARE, // offers a file
     ABORT, // aborts a transfer
     VERSION, // displays version info
+    NOP, // used for frontend-handled commands like STATUS
 
 }
