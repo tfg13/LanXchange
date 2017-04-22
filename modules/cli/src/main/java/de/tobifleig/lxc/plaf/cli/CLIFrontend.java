@@ -140,7 +140,7 @@ public class CLIFrontend {
             }
         } while (awaitBackendStartup && reconnectDelay <= RECONNECT_DELAY_MS_MAX);
         // TODO unreachable even after waiting quite a while!
-        CLITools.out.println("DEBUG: Submisson failed, retry time limit exceeded - giving up.");
+        CLITools.out.println("DEBUG: Submission failed, retry time limit exceeded - giving up.");
         return false;
     }
 
