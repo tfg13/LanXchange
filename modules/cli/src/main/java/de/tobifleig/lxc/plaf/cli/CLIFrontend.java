@@ -182,8 +182,24 @@ public class CLIFrontend {
     }
 
     private static void printHelp() {
-        // TODO
-        CLITools.out.println("help will be added in the future!");
+        CLITools.out.println("LanXchange command line interface");
+        CLITools.out.println();
+        CLITools.out.println("This is advanced functionality for power users.");
+        CLITools.out.println("If you don't know what all this means, please run \"lxc\" instead of \"lxcc\" to get the graphical user interface");
+        CLITools.out.println();
+        CLITools.out.println("Available commands: (CAPS for clarity, can use lowercase)");
+        CLITools.out.println();
+        CLITools.out.println("lxcc HELP                          Prints this text");
+        CLITools.out.println("lxcc LIST                          Lists all files (shared by this machines and shared by others)");
+        CLITools.out.println("lxcc START                         Starts the background service");
+        CLITools.out.println("lxcc STATUS                        Prints whether the background service is running");
+        CLITools.out.println("lxcc STOP [force]                  Stops the background service, optionally aborting running transfers");
+        CLITools.out.println();
+        CLITools.out.println("The background service is automatically started on most commands and quits after a timeout");
+        CLITools.out.println("as long as you are not sharing any files. In this case, please exit manually.");
+        CLITools.out.println();
+        CLITools.out.println("LanXchange CLI is BETA functionality, expect some hiccups!");
+        CLITools.out.println("Found issue/comment? mail@lanxchange.com or github.com/tfg13/lanxchange/issues");
     }
 
     private static boolean verifyCommandLength(String[] args, int minNumAdditionalParams, int maxNumAdditionalParams) {
