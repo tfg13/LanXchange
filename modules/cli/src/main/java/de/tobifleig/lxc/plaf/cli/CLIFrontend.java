@@ -15,6 +15,7 @@ import de.tobifleig.lxc.plaf.cli.ui.CLITools;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -24,6 +25,9 @@ import java.net.Socket;
 public class CLIFrontend {
 
     private static int EXITCODE_REQUEST_BACKEND_START = 7;
+
+    private static int RECONNECT_DELAY_MS_INITIAL = 100;
+    private static int RECONNECT_DELAY_MS_MAX = 6400;
 
     public static void main(String[] args) {
         // this should only be called by lxcc (the cli launch script)
@@ -84,7 +88,7 @@ public class CLIFrontend {
         // try to send this command (will only work if the backend is already running)
         if (command != null) {
             CLITools.out.println("DEBUG: Launching command now!");
-            if (!connectAndPushCommand(command)) {
+            if (!connectAndPushCommand(command, alreadyStarted)) {
                 // did not work, try again after backend was started
                 startRequired = true;
             } else {
@@ -110,18 +114,34 @@ public class CLIFrontend {
         }
     }
 
-    private static boolean connectAndPushCommand(BackendCommand command) {
+    private static boolean connectAndPushCommand(BackendCommand command, boolean awaitBackendStartup) {
         // try to connect to the backend.
-        try (Socket socket = new Socket(InetAddress.getLoopbackAddress(), CLIBackend.LANXCHANGE_DAEMON_PORT)) {
-            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-            output.writeObject(command);
-            output.flush();
-            CLITools.out.println("DEBUG: Command submission to backend OK");
-            return true;
-        } catch (IOException e) {
-            // TODO handle exception during connection/delivery attempt
-            return false;
-        }
+        int reconnectDelay = RECONNECT_DELAY_MS_INITIAL;
+        do {
+            try (Socket socket = new Socket(InetAddress.getLoopbackAddress(), CLIBackend.LANXCHANGE_DAEMON_PORT)) {
+                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                output.writeObject(command);
+                output.flush();
+                CLITools.out.println("DEBUG: Command submission to backend OK");
+                return true;
+            } catch (ConnectException e) {
+                // backend might be in startup, retry with exponential backoff
+                CLITools.out.println("DEBUG: Submisson failed, retry in " + reconnectDelay);
+                try {
+                    Thread.sleep(reconnectDelay);
+                } catch (InterruptedException e1) {
+                    // ignore
+                }
+                reconnectDelay *= 2;
+            } catch (IOException e) {
+                // unexpected
+                // TODO!
+                return false;
+            }
+        } while (awaitBackendStartup && reconnectDelay <= RECONNECT_DELAY_MS_MAX);
+        // TODO unreachable even after waiting quite a while!
+        CLITools.out.println("DEBUG: Submisson failed, retry time limit exceeded - giving up.");
+        return false;
     }
 
     private static BackendCommand parseList(String[] data) {
