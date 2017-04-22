@@ -69,6 +69,7 @@ public class CLIFrontend {
                 command = parseStop(args);
                 break;
             case "list":
+            case "query":
                 command = parseList(args);
                 break;
             case "help":
