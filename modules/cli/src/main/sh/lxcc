@@ -28,14 +28,14 @@ startbackendasync() {
 }
 
 # real code starts here
-echo "start1"
+echo "SHELL: startfrontend_1"
 startfrontend ""
 
 # frontend can request backend start
 if [ "$ret" -eq "7" ]; then
-    echo "startbackend"
+    echo "SHELL: startbackend"
 	startbackendasync
-	echo "start2"
+	echo "SHELL: startfrontend_2"
 	startfrontend "bl"
 fi
 

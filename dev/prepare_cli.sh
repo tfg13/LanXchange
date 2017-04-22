@@ -8,3 +8,4 @@ if [ ! -f "releases/stable/lxc.zip" ]; then
 fi
 
 unzip -o releases/stable/lxc.zip lanxchange.jar
+cp modules/cli/src/main/sh/lxcc lxcc
