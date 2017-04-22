@@ -29,13 +29,13 @@ public class LocalFileIDManager {
     private HashMap<Long, Integer> usedIds = new HashMap<>();
 
     public void addFile(LXCFile file) {
-        CLITools.out.println("ADD ID " + file.id +", internal " + idCounter);
+        CLITools.out.println("DEBUG: ADD ID " + file.id +", internal " + idCounter);
         usedIds.put(file.id, idCounter);
         idCounter++;
     }
 
     public void removeFile(LXCFile file) {
-        CLITools.out.println("REM ID " + file.id +", internal " + usedIds.get(file.id));
+        CLITools.out.println("DEBUG: REM ID " + file.id +", internal " + usedIds.get(file.id));
         usedIds.remove(file.id);
     }
 
