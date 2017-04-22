@@ -173,6 +173,9 @@ public class CLIBackend extends PCPlatform {
             case LIST:
                 handleList();
                 break;
+            case NOP:
+                // do nothing, as requested
+                break;
             default:
                 // front end should never send invalid commands
                 throw new AssertionError("unexpected command!");
