@@ -27,13 +27,11 @@ public class ListPrinter {
     }
 
     public void printList(List<LXCFile> files) {
-        CLITools.out.println("LanXchange " + LXC.versionString + " (" + LXC.versionId + ") running.");
-
         List<LXCFile> ownFiles = files.stream().filter(f -> f.isLocal()).collect(Collectors.toList());
         List<LXCFile> remoteFiles = files.stream().filter(f -> !f.isLocal()).collect(Collectors.toList());
 
         if (ownFiles.isEmpty()) {
-            CLITools.out.println("Not sharing any files.");
+            CLITools.out.println("Not sharing any files from this machine.");
         } else {
             CLITools.out.println("Shared files:");
             printHeader();
