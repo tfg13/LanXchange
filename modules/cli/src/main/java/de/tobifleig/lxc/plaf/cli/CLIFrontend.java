@@ -81,6 +81,9 @@ public class CLIFrontend {
             if (!connectAndPushCommand(command)) {
                 // did not work, try again after backend was started
                 startRequired = true;
+            } else {
+                // success
+                command.onFrontendResult(true);
             }
         }
 
@@ -90,13 +93,14 @@ public class CLIFrontend {
                 CLITools.out.println("Unable to connect to backend!");
             } else {
                 // request restart?
-                if (command == null || command.startBackendOnSendError()) {
+                if (command.startBackendOnSendError()) {
                     CLITools.out.println("DEBUG: Failure, requesting backend start...");
                     System.exit(7);
                 } else {
                     CLITools.out.println("DEBUG: Unable to deliver command, but this is ok.");
                 }
             }
+            command.onFrontendResult(false);
         }
     }
 

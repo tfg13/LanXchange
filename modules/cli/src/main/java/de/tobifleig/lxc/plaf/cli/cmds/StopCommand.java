@@ -9,6 +9,7 @@ package de.tobifleig.lxc.plaf.cli.cmds;
 
 import de.tobifleig.lxc.plaf.cli.BackendCommand;
 import de.tobifleig.lxc.plaf.cli.BackendCommandType;
+import de.tobifleig.lxc.plaf.cli.ui.CLITools;
 
 /**
  * Command to stop the backend and shut down LanXchange.
@@ -29,5 +30,12 @@ public class StopCommand extends BackendCommand {
     @Override
     public boolean startBackendOnSendError() {
         return false;
+    }
+
+    @Override
+    public void onFrontendResult(boolean deliveredToBackend) {
+        if (!deliveredToBackend) {
+            CLITools.out.println("Not running.");
+        }
     }
 }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A (parsed) user command, sent from the front- to the backend.
+ * A (parsed) user command, sent from frontend to backend.
  */
 public abstract class BackendCommand implements Serializable {
 
@@ -41,4 +41,12 @@ public abstract class BackendCommand implements Serializable {
     public boolean startBackendOnSendError() {
         return true;
     }
+
+    /**
+     * Called by the frontend after the attempt to deliver the command to the backend.
+     * Some commands may want to act on the result.
+     * Default action is nop.
+     * @param deliveredToBackend true if command was successfully delivered to backend, false otherwise
+     */
+    public void onFrontendResult(boolean deliveredToBackend) {}
 }
