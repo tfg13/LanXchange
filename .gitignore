@@ -17,3 +17,4 @@ lxc_oldlog*.log
 local.properties
 gradlew
 gradlew.bat
+/tmp/lxcbuild/
