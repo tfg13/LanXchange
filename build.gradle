@@ -140,7 +140,7 @@ task desktopJar(type: Zip) {
     from buildPath + "/jar"
     from "Ubuntu-R.ttf"
     from "lxc_updates.pub"
-    from desktopProjects().sourceSets.main.output.classesDir
+    from desktopProjects().sourceSets.main.output.classesDirs
 }
 
 
@@ -219,54 +219,55 @@ task packSignedFiles(type: Zip) {
 }
 
 // querys for version info and checks signing environment
-task prepareUpdate() << {
-    
-    // Cannot pack without signing environment!
-    def signDir = new File(signPath)
-    if (!signDir.isDirectory()) {
-        throw new InvalidUserDataException("Missing signing environment (" + signPath + ")")
-    }
-    
-    // interactive mode required for this
-    if (System.console() == null) {
-        throw new InvalidUserDataException("This task requires an interactive console (run from terminal)")
-    }
-    
-    // read update system metadata
-    def mainClassFile = new File("modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
-    ext.newversion = -1
-    mainClassFile.eachLine { line ->
-        def matcher = line =~ "\\s*public static final int versionId = ([0-9]+);"
-        if (matcher) {
-            ext.newversion = matcher.group(1)
+task prepareUpdate() {
+    doLast {
+        // Cannot pack without signing environment!
+        def signDir = new File(signPath)
+        if (!signDir.isDirectory()) {
+            throw new InvalidUserDataException("Missing signing environment (" + signPath + ")")
         }
-    }
-    if (ext.newversion == -1) {
-        throw new InvalidUserDataException("Cannot read version number from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
-    }
-    def oldversion = -1
-    def oldversionstring = ""
-    new File("update/v").withReader { oldversion = it.readLine(); oldversionstring = it.readLine()}  
-    if (oldversionstring == null || oldversion == -1 || oldversionstring.isEmpty()) {
-        throw new InvalidUserDataException("Cannot read old version information from update/v")
-    }
-    
-    // check if version number was incremented
-    if (ext.newversion <= oldversion) {
-        throw new InvalidUserDataException("Version number (" + ext.newversion + ") must be greater than the current version (" + oldversion + ")!")
-    }
-    
-    // prompt for new version text
-    println("Old description for version " + oldversion + " is: " + oldversionstring)
-    ext.newversionstring = System.console().readLine("Enter new description: ")
-    if (ext.newversionstring == null || ext.newversionstring.isEmpty()) {
-        throw new InvalidUserDataException("Description cannot be empty")
-    }
 
-    // write new version file
-    new File("update/v").withWriter { out ->
-        out.println(ext.newversion)
-        out.println(ext.newversionstring)
+        // interactive mode required for this
+        if (System.console() == null) {
+            throw new InvalidUserDataException("This task requires an interactive console (run from terminal)")
+        }
+
+        // read update system metadata
+        def mainClassFile = new File("modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
+        ext.newversion = -1
+        mainClassFile.eachLine { line ->
+            def matcher = line =~ "\\s*public static final int versionId = ([0-9]+);"
+            if (matcher) {
+                ext.newversion = matcher.group(1)
+            }
+        }
+        if (ext.newversion == -1) {
+            throw new InvalidUserDataException("Cannot read version number from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
+        }
+        def oldversion = -1
+        def oldversionstring = ""
+        new File("update/v").withReader { oldversion = it.readLine(); oldversionstring = it.readLine() }
+        if (oldversionstring == null || oldversion == -1 || oldversionstring.isEmpty()) {
+            throw new InvalidUserDataException("Cannot read old version information from update/v")
+        }
+
+        // check if version number was incremented
+        if (ext.newversion <= oldversion) {
+            throw new InvalidUserDataException("Version number (" + ext.newversion + ") must be greater than the current version (" + oldversion + ")!")
+        }
+
+        // prompt for new version text
+        println("Old description for version " + oldversion + " is: " + oldversionstring)
+        ext.newversionstring = System.console().readLine("Enter new description: ")
+        if (ext.newversionstring == null || ext.newversionstring.isEmpty()) {
+            throw new InvalidUserDataException("Description cannot be empty")
+        }
+
+        // write new version file
+        new File("update/v").withWriter { out ->
+            out.println(ext.newversion)
+            out.println(ext.newversionstring)
+        }
     }
 }
 
