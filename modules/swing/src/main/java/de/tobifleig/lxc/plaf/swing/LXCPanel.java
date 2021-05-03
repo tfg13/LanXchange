@@ -75,7 +75,6 @@ public class LXCPanel extends JPanel {
      */
     private static final long serialVersionUID = 1L;
     private static final int HOVER_NONE = -1;
-    private static final int HOVER_SELFDIST = 0;
     private static final int HOVER_SETTINGS = 1;
     private static final int HOVER_HELP = 2;
     private static final int DRAWMODE_INIT = 3;
@@ -103,7 +102,6 @@ public class LXCPanel extends JPanel {
     private transient Image screw;
     private transient Image download;
     private transient Image cancel;
-    private transient Image selfdist_small;
     private transient Image drop;
     private final Color background;
     private final Color selBackground;
@@ -261,15 +259,6 @@ public class LXCPanel extends JPanel {
                     // Text "LanXchange" (bottom, center)
                     g2.drawImage(txt, (this.getWidth() / 2) - (txt.getWidth(this) / 2), this.getHeight() - txt.getHeight(this) - 2, this);
                 }
-                // selfdist button
-                // hover?
-                if (traySelected == HOVER_SELFDIST) {
-                    g2.setColor(selBackground);
-                    g2.fillRect(this.getWidth() - 59, this.getHeight() - 30, 29, 30);
-                    g2.setColor(Color.GRAY);
-                    g2.drawString("self distribution", this.getWidth() / 2 - (mer1.stringWidth("self distribution") / 2), this.getHeight() - 10);
-                }
-                g2.drawImage(selfdist_small, this.getWidth() - 55, this.getHeight() - 25, this);
                 // settings button
                 // hover?
                 if (traySelected == HOVER_SETTINGS) {
@@ -619,7 +608,6 @@ public class LXCPanel extends JPanel {
         screw = loadImg("img/screw.png");
         download = loadImg("img/download.png");
         cancel = loadImg("img/cancel.png");
-        selfdist_small = loadImg("img/selfdist_small.png");
         drop = loadImg("img/drop.png");
         mer0 = this.getGraphics().getFontMetrics(f0);
         mer1 = this.getGraphics().getFontMetrics(f1);
@@ -667,10 +655,7 @@ public class LXCPanel extends JPanel {
                         break;
                     case DRAWMODE_MAIN:
                     default:
-                        if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                            // display selfdist
-                            SelfDistributor.showGui((JFrame) SwingUtilities.getRoot(LXCPanel.this));
-                        } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
+                        if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
                             // display settings
                             options.showAndWait();
                             guiListener.reloadConfiguration();
@@ -778,12 +763,6 @@ public class LXCPanel extends JPanel {
                         if (e.getX() < 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
                             if (traySelected != HOVER_HELP) {
                                 traySelected = HOVER_HELP;
-                                selfTrigger();
-                            }
-                        } else if (e.getX() > LXCPanel.this.getWidth() - 55 && e.getX() < LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
-                            // self-distribution button
-                            if (traySelected != HOVER_SELFDIST) {
-                                traySelected = HOVER_SELFDIST;
                                 selfTrigger();
                             }
                         } else if (e.getX() > LXCPanel.this.getWidth() - 25 && e.getY() > LXCPanel.this.getHeight() - 25) {
