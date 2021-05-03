@@ -34,6 +34,17 @@ def jnaPath = "lib/swing/jna-4.2.1-win-stripped.jar"
 //
 ///////////////////////////////////
 
+// Build IDE jar version
+task releaseIDE() {
+    description "IDE build for swing version"
+    dependsOn "cleanBuildEnv"
+    dependsOn desktopProjects().build
+    dependsOn "prepareJar"
+    dependsOn "prepareJar2"
+    dependsOn "prepareJar3"
+    dependsOn "desktopJar"
+}
+
 // Builds the desktop (swing) release
 task releaseDesktop() {
     description "Builds the desktop release with the swing gui."
@@ -102,7 +113,6 @@ task prepareJar(type: Copy) {
     mustRunAfter "cleanBuildEnv"
 
     def jna_file = file(jnaPath)
-    def outputDir = file("${buildDir}/unpacked/dist")
 
     from zipTree(jna_file)
     into buildPath + "/jar"
@@ -128,19 +138,14 @@ task prepareJar3(type: Copy) {
 // create main jar
 task desktopJar(type: Zip) {
     mustRunAfter "prepareJar3"
-    
+
     archiveName "lanxchange.jar"
     destinationDir file(buildPath)
-    
-    // create manifest on the fly
-    def manifest = project('swing').jar.manifest
-    manifest.attributes("Main-Class": "de.tobifleig.lxc.plaf.swing.Main")
-    manifest.writeTo(buildPath + "/jar/META-INF/MANIFEST.MF")
-    
+
     from buildPath + "/jar"
     from "Ubuntu-R.ttf"
     from "lxc_updates.pub"
-    from desktopProjects().sourceSets.main.output.classesDirs
+    from desktopProjects().sourceSets.main.output
 }
 
 
