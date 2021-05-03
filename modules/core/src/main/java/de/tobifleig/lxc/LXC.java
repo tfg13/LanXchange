@@ -200,60 +200,6 @@ public class LXC {
 
         // startup completed, display gui
         gui.display();
-
-        quickShare(args);
-    }
-
-    /**
-     * quick share for PC version (will be replaced by full cli interface some day)
-     * @param args the command line args, will look for "-share=file1,file2,file3"
-     */
-    private void quickShare(String[] args) {
-        String quickShare = "";
-        boolean quickShareRequested = false;
-        for (String s : args) {
-            if (s.startsWith("-share=")) {
-                quickShare = s.substring(7);
-                quickShareRequested = true;
-                break;
-            }
-        }
-        if (!quickShareRequested) {
-            return;
-        }
-        if (quickShare.isEmpty()) {
-            logger.info("Quickshare: No files found, sharing nothing");
-            return;
-        }
-
-        String[] files = quickShare.split(",");
-        final List<File> actualFiles = new ArrayList<File>();
-        for (String path : files) {
-            File file = new File(path);
-            if (file.exists()) {
-                actualFiles.add(file);
-            } else {
-                logger.warn("Quickshare: Cannot find file \"" + path + "\"");
-            }
-        }
-        if (actualFiles.isEmpty()) {
-            logger.info("Quickshare: No files found, sharing nothing");
-        }
-        Thread thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                LXCFile tempFile = new LXCFile(LXCFile.convertToVirtual(actualFiles), actualFiles.get(0).getName());
-                // share
-                int newIndex = LXC.this.files.addLocal(tempFile);
-                if (newIndex != -1) {
-                    network.broadcastList();
-                    gui.notifyFileChange(GuiInterface.UPDATE_ORIGIN_LOCAL, GuiInterface.UPDATE_OPERATION_ADD, newIndex, 1, Collections.singletonList(tempFile));
-                }
-            }
-        }, "lxc_helper_sizecalcer");
-        thread.setPriority(Thread.NORM_PRIORITY - 1);
-        thread.start();
     }
 
     /**
