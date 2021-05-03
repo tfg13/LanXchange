@@ -1,26 +1,27 @@
 buildscript {
     repositories {
-        jcenter()
+        google()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:4.1.1'
     }
 }
 
 repositories {
     mavenCentral()
-    maven { url 'http://guardian.github.com/maven/repo-releases' }
+    maven { url 'http://guardian.github.io/maven/repo-releases' }
 }
 
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':core')
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.android.support:support-v4:25.2.0'
-    compile 'com.android.support:design:25.2.0'
-    compile 'com.android.support:recyclerview-v7:25.2.0'
-    compile 'net.rdrei.android.dirchooser:library:3.2'
+    implementation project(':core')
+    implementation 'com.android.support:appcompat-v7:25.2.0'
+    implementation 'com.android.support:support-v4:25.2.0'
+    implementation 'com.android.support:design:25.2.0'
+    implementation 'com.android.support:recyclerview-v7:25.2.0'
+    implementation 'net.rdrei.android.dirchooser:library:3.2'
 }
 
 android {
@@ -40,13 +41,8 @@ android {
             minifyEnabled false
         }
     }
-    defaultConfig {
-        jackOptions {
-            enabled true
-        }
-    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-} 
+}

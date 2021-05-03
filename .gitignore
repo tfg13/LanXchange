@@ -13,4 +13,7 @@ lxc_oldlog*.log
 /.idea/
 /.navigation/
 /.gradle/
+/gradle/
 local.properties
+gradlew
+gradlew.bat
