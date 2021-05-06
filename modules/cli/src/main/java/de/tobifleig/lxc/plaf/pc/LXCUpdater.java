@@ -26,6 +26,8 @@ import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.util.ByteLimitInputStream;
 import de.tobifleig.lxc.util.ByteLimitOutputStream;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,9 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.Signature;
+import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Enumeration;
 import java.util.Scanner;
@@ -50,10 +50,9 @@ import java.util.zip.ZipFile;
  * This class manages automated updates for swing-platforms.
  * The update system never installs anything without confirmation.
  *
- * This system downloads unauthenticated data from the internet.
- * The author is aware of this and changed this system multiple times over the years in order to harden it against many
- * possible attack vectors. The following is a non-exhaustive list of vectors that have been considered and how
- * this updater deals with them.
+ * Internet access uses only TLS (>=1.2), and updates are additionally handled by a hardened updater originally designed
+ * for insecure connections. The following is a non-exhaustive list of attack vectors that this updater defends against
+ * (all of these only apply after the TLS connections have been successful)
  *
  * - Generic manipulation of update file by MitM or malicious update server:
  *      + Updates are signed and only a single, pinned certificate is accepted.
@@ -148,9 +147,19 @@ public final class LXCUpdater {
             logger.warn("Warning: Update downgrade protection disabled by startup flag");
         }
 
+        // Enforce TLS
+        SSLContext sc;
+        try {
+            sc = SSLContext.getInstance("TLSv1.3");
+        } catch (NoSuchAlgorithmException nse) {
+            logger.info("Failed to use TLSv1.3, falling back to TLSv1.2");
+            sc = SSLContext.getInstance("TLSv1.2");
+        }
+        sc.init(null, null, new SecureRandom());
         // Contact update server, download version file
-        HttpURLConnection versionCheckConnection = (HttpURLConnection) new URL("http://updates.lanxchange.com/v").openConnection();
+        HttpsURLConnection versionCheckConnection = (HttpsURLConnection) new URL("https://updates.lanxchange.com/v").openConnection();
         versionCheckConnection.setRequestProperty("User-Agent", ""); // do not leak java version
+        versionCheckConnection.setSSLSocketFactory(sc.getSocketFactory());
         Scanner scanner = new Scanner(new VersionDataFilterInputStream(versionCheckConnection.getInputStream(), versionBytesLimit), "utf8");
         int gotver = Integer.parseInt(scanner.nextLine());
         String title = scanner.nextLine();
@@ -162,11 +171,12 @@ public final class LXCUpdater {
             if (updateGui.prompt()) {
                 updateGui.toProgressView();
                 // download update
-                URL url = new URL("http://updates.lanxchange.com/update_master.zip");
+                URL url = new URL("https://updates.lanxchange.com/update_master.zip");
                 FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("User-Agent", ""); // do not leak java version
+                conn.setSSLSocketFactory(sc.getSocketFactory());
                 conn.connect();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
