@@ -3,7 +3,7 @@ A simple tool for spontaneous, local network file transfers. Supports Windows, M
 Features:
 
 - No setup required, just launch LanXchange on multiple devices
-- Automatically finds devices in the same network
+- Automatically finds devices in the same network - configuration free operation
 - Uses the local network for transfers - much faster than cloud based solutions
 - Runs on Android phones/tablets and PCs (Win, Mac, Linux)
 - No Ads, no tracking, 100% free and open source software

@@ -1,1 +1,1 @@
-Tool for cross platform local network file sharing.
+Cross-platform local network file sharing
