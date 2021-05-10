@@ -1,0 +1,21 @@
+A simple tool for spontaneous, local network file transfers. Supports Windows, Mac and Linux PCs and Android phones.
+
+Features:
+
+- No setup required, just launch LanXchange on multiple devices
+- Automatically finds devices in the same network - configuration free operation
+- Uses the local network for transfers - much faster than cloud based solutions
+- Runs on Android phones/tablets and PCs (Win, Mac, Linux)
+- No Ads, no tracking, 100% free and open source software
+
+PC version is available from https://www.lanxchange.com/
+Source (for both Android & PC) is available from https://github.com/tfg13/LanXchange
+
+
+Used permissions:
+- Internet: Required to access the local network. This application only communicates in your home network.
+- Access network state: Used to decide which network adapters to use (LanXchange only uses local connections like Wifi, never mobile broadband)
+- Access wifi state: Used to check Wifi state (to avoid sending anything when Wifi is off)
+- Change wifi multicast state: Required for local discovery of other devices without central server
+- Wake lock: To keep transfers running and files available when the screen turns off. LanXchange turns itself off if not used to save power.
+- Storage: To read and write the transferred files

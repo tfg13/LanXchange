@@ -1,0 +1,6 @@
+- full support for Android 7
+- support very large screen aspect ratios (like S8)
+- show running transfers
+- choose download directory (SD card still pending)
+- "show log" functionality in about dialog
+- misc bug fixes
