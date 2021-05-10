@@ -34,7 +34,7 @@ import java.net.URISyntaxException;
  *
  * @author Tobias Fleig <tobifleig googlemail com>
  */
-final class DesktopInteractionHelper {
+public final class DesktopInteractionHelper {
 
     private static final LXCLogger logger = LXCLogBackend.getLogger("desktop-helper");
 
@@ -47,7 +47,7 @@ final class DesktopInteractionHelper {
      * Attempts to open the given URL with the default browser
      * @param url website url
      */
-    static void openURL(String url) {
+    public static void openURL(String url) {
         // should work on windows, most linux desktops
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();

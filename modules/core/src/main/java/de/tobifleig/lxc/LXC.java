@@ -99,6 +99,7 @@ public class LXC {
         platform.readConfiguration(args);
 
         if (platform.hasAutoUpdates()) {
+            platform.postUpdateStep(args);
             platform.checkAndPerformUpdates(args);
         }
 
@@ -171,20 +172,20 @@ public class LXC {
 
             @Override
             public void downloadFailedFileMissing() {
-                gui.showError("At least one file could not be downloaded because it is no longer offered.");
+                gui.showError("At least one file could not be downloaded because it is no longer offered.", "");
             }
 
             @Override
             public void downloadFailedFileOk(String problemFilePath) {
-                gui.showError("Download error, unable to create/write file:\n\"" + problemFilePath + "\"\nPossible reasons include missing write permissions and insufficient free space.");
+                gui.showError("Download error, unable to create/write file:\n\"" + problemFilePath + "\"\nPossible reasons include missing write permissions and insufficient free space.", "");
             }
 
             @Override
             public void uploadFailedFileMissing(LXCFile file) {
                 if (file.getFiles().size() == 1) {
-                    gui.showError("Uploading \"" + file.getShownName() + "\" failed, LXC cannot locate this file anymore (did you move/delete it?)\n To avoid future errors, this file is no longer offered.");
+                    gui.showError("Uploading \"" + file.getShownName() + "\" failed, LXC cannot locate this file anymore (did you move/delete it?)\n To avoid future errors, this file is no longer offered.", "");
                 } else {
-                    gui.showError("Uploading \"" + file.getShownName() + "\" failed, at least one file cannot be located anymore (did you move/delete it?)\n To avoid future errors, these files are no longer offered.");
+                    gui.showError("Uploading \"" + file.getShownName() + "\" failed, at least one file cannot be located anymore (did you move/delete it?)\n To avoid future errors, these files are no longer offered.", "");
                 }
             }
         }, files, platform);
@@ -193,7 +194,7 @@ public class LXC {
         if (!network.checkSingletonAndStart()) {
             // It is not possible to run multiple instances at the same time.
             // Warn user and exit.
-            gui.showError("LXC is already running!");
+            gui.showError("LXC is already running!", "");
             System.exit(1);
         }
         logger.info("My instance-id is " + LXCInstance.local.id);
@@ -263,14 +264,14 @@ public class LXC {
                     }
                 }
                 if (!network.connectAndDownload(file, targetFolder)) {
-                    gui.showError("Download failed, host unreachable.");
+                    gui.showError("Download failed, host unreachable.", "");
                 }
             }
 
             @Override
             public void downloadFile(LXCFile file, File targetDir) {
                 if (!network.connectAndDownload(file, targetDir)) {
-                    gui.showError("Download failed, host unreachable.");
+                    gui.showError("Download failed, host unreachable.", "");
                 }
             }
 

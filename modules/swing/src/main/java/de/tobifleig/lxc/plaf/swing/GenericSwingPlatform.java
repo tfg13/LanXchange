@@ -88,7 +88,7 @@ public class GenericSwingPlatform extends PCPlatform {
                 return cf.getSelectedFile();
             } else {
                 // inform user
-                gui.showError("Cannot write there, please selected another target or start LXC as Administrator");
+                gui.showError("Cannot write there, please selected another target or start LXC as Administrator", "");
                 // cancel
                 logger.info("Canceled download, cannot write to selected target (permission denied)");
                 return null;

@@ -47,7 +47,7 @@ public abstract class PCPlatform implements Platform {
             System.err.println("ERROR: Cannot write to my directory ("
                     + new File(".").getAbsolutePath()
                     + "). Try running LXC in your home directory.");
-            getGui(args).showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.");
+            getGui(args).showError("LXC is not allowed to create/modify files in the folder it is located. Please move to your home directory or start as administrator.", "");
             System.exit(1);
         }
         // init logging
@@ -67,6 +67,11 @@ public abstract class PCPlatform implements Platform {
         return true;
     }
 
+    @Override
+    public void postUpdateStep(String[] args) {
+        // default is just file cleanup
+        LXCUpdater.cleanup();
+    }
 
     @Override
     public void checkAndPerformUpdates(String[] args) {

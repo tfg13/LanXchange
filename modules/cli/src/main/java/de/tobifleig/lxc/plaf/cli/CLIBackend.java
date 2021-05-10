@@ -102,8 +102,9 @@ public class CLIBackend extends PCPlatform {
             }
 
             @Override
-            public void showError(String error) {
+            public boolean showError(String error, String cancelText) {
                 CLITools.out.println("Error: " + error);
+                return true;
             }
 
             @Override

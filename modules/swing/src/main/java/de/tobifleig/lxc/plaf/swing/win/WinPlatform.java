@@ -26,10 +26,12 @@ import com.sun.jna.WString;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.ptr.PointerByReference;
 import de.tobifleig.lxc.data.LXCFile;
+import de.tobifleig.lxc.plaf.swing.DesktopInteractionHelper;
 import de.tobifleig.lxc.plaf.swing.GenericSwingPlatform;
 import de.tobifleig.lxc.plaf.swing.OverallProgressManager;
 
-import java.io.File;
+import java.io.*;
+import java.nio.Buffer;
 import java.util.Arrays;
 
 /**
@@ -124,6 +126,56 @@ public class WinPlatform extends GenericSwingPlatform {
     }
 
     @Override
+    public void postUpdateStep(String[] args) {
+        // first do the exe jump. if it works run super
+        boolean postUpdateFailed = new File("UPDATE_FAILED_MARKER").isFile();
+        if (postUpdateFailed) {
+            logger.error("update helper signals fatal error");
+        }
+        // run update-helper if there is data to update (exe is always required)
+        if (!postUpdateFailed && new File("tmp_update").isDirectory() && new File("tmp_update/lxc.exe").isFile() && new File("update_helper.exe").isFile())  {
+            logger.info("detected previous two-step update, running helper");
+            try {
+                // start helper and wait for return. The helper immediately forks again to escape the JVM
+                ProcessBuilder pb = new ProcessBuilder("update_helper.exe", "-detach");
+                Process helper = pb.start();
+                int result = helper.waitFor();
+                if (result == 0) {
+                    logger.info("updater helper start success, exiting...");
+                    System.exit(0);
+                }
+                logger.error("running update helper failed with error code: " + result);
+                BufferedReader stdout = new BufferedReader(new InputStreamReader(helper.getInputStream()));
+                BufferedReader stderr = new BufferedReader(new InputStreamReader(helper.getErrorStream()));
+                while (stderr.ready()) {
+                    logger.error(stderr.readLine());
+                }
+                while (stdout.ready()) {
+                    logger.error(stdout.readLine());
+                }
+                postUpdateFailed = true;
+            } catch (Exception ex) {
+                logger.error("running update helper failed:", ex);
+                postUpdateFailed = true;
+            }
+        }
+        if (postUpdateFailed) {
+            logger.error("installation looks broken, prompting for redownload");
+            // there is a good chance something is super broken now
+            // at least display a message with some tips
+            if (getGui(args).showError("Automatic update failed :( Sorry, this should not happen.\nIf you want to help, send the content all the logfiles to mail@lanxchange.com.\nLanXchange is probably broken now, press OK to open the website and get a clean copy", "Try running anyway")) {
+                DesktopInteractionHelper.openURL("https://lanxchange.com");
+                System.exit(1);
+            }
+            logger.warn("continuing with potentially broken installation by user choice");
+        }
+        if (!postUpdateFailed) {
+            // everything worked, run normal cleanup
+            super.postUpdateStep(args);
+        }
+    }
+
+    @Override
     public File getFileTarget(LXCFile file) {
         try {
             // prevent race
@@ -159,7 +211,7 @@ public class WinPlatform extends GenericSwingPlatform {
                 return resultFile;
             } else {
                 // inform user
-                gui.showError("Cannot write there, please selected another target or start LXC as Administrator");
+                gui.showError("Cannot write there, please selected another target or start LXC as Administrator", "");
                 // cancel
                 logger.info("Canceled, cannot write (permission denied)");
                 return null;

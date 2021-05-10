@@ -1,0 +1,11 @@
+[package]
+name = "winupdatehelper"
+version = "0.1.0"
+authors = ["tfg13 <tobifleig@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+
+[[bin]]
+name = "update_helper"
+path = "src/main.rs"

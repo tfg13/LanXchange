@@ -36,6 +36,10 @@ def jnaPath = "lib/swing/jna-4.2.1-win-stripped.jar"
 
 // Build IDE jar version
 task releaseIDE() {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
     description "IDE build for swing version"
     dependsOn "cleanBuildEnv"
     dependsOn desktopProjects().build
@@ -47,6 +51,10 @@ task releaseIDE() {
 
 // Builds the desktop (swing) release
 task releaseDesktop() {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
     description "Builds the desktop release with the swing gui."
     dependsOn "cleanBuildEnv"
     dependsOn desktopProjects().build
@@ -66,20 +74,16 @@ task releaseDesktop() {
 
 // Builds the desktop release and packs all files for the automatic update
 task packUpdate(dependsOn: desktopProjects().build) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
     description "Builds the desktop release and packs it as automatic update."
     
     // Check versions, signing environment
     dependsOn "prepareUpdate"
     
     // interactive setup & checks complete, normal build
-    dependsOn "cleanBuildEnv"
-    dependsOn desktopProjects().build
-    dependsOn "prepareJar"
-    dependsOn "prepareJar2"
-    dependsOn "prepareJar3"
-    dependsOn "desktopJar"
-    dependsOn "packDesktop2"
-    dependsOn "signUpdate"
     dependsOn "packSignedFiles"
     
     // order
@@ -105,10 +109,22 @@ task packUpdate(dependsOn: desktopProjects().build) {
 ///////////////////////////////////
 
 task cleanBuildEnv() {
-    deleteRecursive(buildPath)
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    doLast {
+        deleteRecursive(buildPath)
+    }
 }
 
 task prepareJar(type: Copy) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn desktopProjects().build
+    dependsOn "cleanBuildEnv"
     mustRunAfter desktopProjects().build
     mustRunAfter "cleanBuildEnv"
 
@@ -120,6 +136,11 @@ task prepareJar(type: Copy) {
 }
 
 task prepareJar2(type: Copy) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "prepareJar"
     mustRunAfter "prepareJar"
 
     from "lib/swing/lxcwin64.dll"
@@ -128,6 +149,11 @@ task prepareJar2(type: Copy) {
 }
 
 task prepareJar3(type: Copy) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "prepareJar2"
     mustRunAfter "prepareJar2"
 
     from "lib/swing/lxcwin32.dll"
@@ -137,6 +163,11 @@ task prepareJar3(type: Copy) {
 
 // create main jar
 task desktopJar(type: Zip) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "prepareJar3"
     mustRunAfter "prepareJar3"
 
     archiveName "lanxchange.jar"
@@ -151,6 +182,11 @@ task desktopJar(type: Zip) {
 
 // pack desktop release
 task packDesktop(type: Zip) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "desktopJar"
     mustRunAfter "desktopJar"
     
     archiveName "lxc.zip"
@@ -163,14 +199,32 @@ task packDesktop(type: Zip) {
     include ("lxc")
     include ("lxc.exe")
     
-    from (buildPath + "/lanxchange.jar")
-    include ("lanxchange.jar")
+    from (buildPath) {
+        include("lanxchange.jar")
+    }
 }
 
-// pack desktop release
-// alternative version that includes the version number file, required for updates
-task packDesktop2(type: Zip) {
+task prepareZip(type: Copy) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "desktopJar"
     mustRunAfter "desktopJar"
+
+    from "lxc.exe"
+    into (buildPath + "/tmp_update")
+}
+
+// pack desktop release for update
+// includes more files, like the update helper and version number file required for updates
+task packUpdateZip(type: Zip) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "prepareZip"
+    mustRunAfter "prepareZip"
 
     archiveName "lxc.zip"
     destinationDir file(buildPath)
@@ -180,10 +234,15 @@ task packDesktop2(type: Zip) {
     include ("COPYING")
     include ("3rd_party_licenses/font_license.txt")
     include ("lxc")
-    include ("lxc.exe")
 
-    from (buildPath + "/lanxchange.jar")
-    include ("lanxchange.jar")
+    from ("modules/winupdatehelper/target/release") {
+        include("update_helper.exe")
+    }
+
+    from (buildPath) {
+        include("lanxchange.jar")
+        include("tmp_update/lxc.exe")
+    }
 
     from ("update/v")
     include ("v")
@@ -191,7 +250,12 @@ task packDesktop2(type: Zip) {
 
 // sign update
 task signUpdate(type: JavaExec) {
-    mustRunAfter "packDesktop"
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "packUpdateZip"
+    mustRunAfter "packUpdateZip"
     
     doFirst {
         // prepare signing environment
@@ -213,18 +277,28 @@ task signUpdate(type: JavaExec) {
 
 // zip signed update
 task packSignedFiles(type: Zip) {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn "signUpdate"
     mustRunAfter "signUpdate"
     
     archiveName "update_master.zip"
     destinationDir file(signPath)
     
-    from signPath
-    include "lxc.zip"
-    include "lxc.sign"
+    from (signPath) {
+        include "lxc.zip"
+        include "lxc.sign"
+    }
 }
 
 // querys for version info and checks signing environment
 task prepareUpdate() {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
     doLast {
         // Cannot pack without signing environment!
         def signDir = new File(signPath)

@@ -54,8 +54,11 @@ public interface GuiInterface {
      * Displays an error.
      *
      * @param error the message to show
+     * @param cancelText text on "cancel" button. Will only be shown if non-empty
+     *
+     * @return true if normal action was taken, false if cancel was chosen
      */
-    public void showError(String error);
+    public boolean showError(String error, String cancelText);
 
     /**
      * Sets the listener.

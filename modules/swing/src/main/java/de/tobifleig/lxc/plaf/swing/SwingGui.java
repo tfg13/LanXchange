@@ -42,14 +42,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
-import javax.swing.UIManager;
+import javax.swing.*;
 
 /**
  * The GUI
@@ -344,17 +340,29 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
     }
 
     @Override
-    public void showError(final String error) {
+    public boolean showError(final String error, final String cancelText) {
+        FutureTask<Boolean> ft = new FutureTask<>(() -> {
+            JOptionPane pane;
+            if (!cancelText.equals("")) {
+                pane = new JOptionPane(error, JOptionPane.ERROR_MESSAGE, JOptionPane.YES_NO_OPTION);
+                pane.setOptions(new String[]{"OK", cancelText});
+            } else {
+                pane = new JOptionPane(error, JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION);
+                pane.setOptions(new String[]{"OK"});
+            }
+            JDialog dialog = pane.createDialog(SwingGui.this, "LXC - Error");
+            dialog.setVisible(true);
+            return !((String) pane.getValue()).equals(cancelText);
+        });
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-
-                @Override
-                public void run() {
-                    JOptionPane.showMessageDialog(SwingGui.this, error, "LXC - Error", JOptionPane.ERROR_MESSAGE);
-                }
-            });
+            SwingUtilities.invokeAndWait(ft);
         } catch (InterruptedException | InvocationTargetException ex) {
             logger.wtf(ex);
+        }
+        try {
+            return ft.get();
+        } catch (InterruptedException | ExecutionException e) {
+            return true;
         }
     }
 

@@ -109,7 +109,14 @@ public final class LXCUpdater {
     /**
      * Files contained in older versions that can be deleted if they still exist.
      */
-    private static final String[] oldFiles = new String[]{"lxc_debug.exe", "LXC.ico", "Ubuntu-R.ttf", "lxc_updates.pub", "font_license.txt"};
+    private static final String[] oldFiles = new String[]{
+            "lxc_debug.exe",
+            "LXC.ico",
+            "Ubuntu-R.ttf",
+            "lxc_updates.pub",
+            "font_license.txt",
+            "update_helper.exe"
+    };
 
     /**
      * Max number of bytes read from unauthenticated text sources.
@@ -308,14 +315,6 @@ public final class LXCUpdater {
                         new File("update_dl.zip").delete();
                         new File("v").delete();
 
-                        // cleanup, delete outdated files
-                        for (String s : oldFiles) {
-                            File f = new File(s);
-                            if (f.exists()) {
-                                f.delete();
-                            }
-                        }
-
                         //done
                         updateGui.setStatusToRestart();
                         updateGui.setRestartTime(5, !restartable);
@@ -350,6 +349,22 @@ public final class LXCUpdater {
         }
         updateGui.finish();
     }
+
+    // cleanup deletes files contained in older versions or left over by the update system that can safely be deleted
+    public static void cleanup() {
+        try {
+            // cleanup, delete outdated files
+            for (String s : oldFiles) {
+                File f = new File(s);
+                if (f.exists()) {
+                    f.delete();
+                }
+            }
+        } catch (Exception ex) {
+            logger.warn("cleanup failed:", ex);
+        }
+    }
+
 
     /**
      * Extracts the embedded version number from the signed update file to protect against downgrade attacks.

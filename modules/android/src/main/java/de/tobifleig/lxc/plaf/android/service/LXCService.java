@@ -157,6 +157,12 @@ public class LXCService extends Service implements Platform {
     }
 
     @Override
+    public void postUpdateStep(String[] args) {
+        throw new UnsupportedOperationException(
+                "this platform does not support automatic updates!");
+    }
+
+    @Override
     public void checkAndPerformUpdates(String[] args) {
         throw new UnsupportedOperationException(
                 "this platform does not support automatic updates!");

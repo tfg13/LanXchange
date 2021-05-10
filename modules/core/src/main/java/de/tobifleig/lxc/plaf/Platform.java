@@ -38,6 +38,16 @@ public interface Platform {
     public boolean hasAutoUpdates();
 
     /**
+     * Runs the platform-specific post-update code, if any.
+     * This is different from the update itself, as this runs
+     * after the restart, so it already uses new code and can patch things up.
+     *
+     * @throws UnsupportedOperationException if hasAutoUpdate() == false
+     * @param args LXC's arguments
+     */
+    public void postUpdateStep(String[] args);
+
+    /**
      * Triggers the platform-specific update system, if any.
      *
      * @throws UnsupportedOperationException if hasAutoUpdate() == false
