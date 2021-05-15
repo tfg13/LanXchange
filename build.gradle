@@ -306,22 +306,25 @@ task prepareUpdate() {
             throw new InvalidUserDataException("Missing signing environment (" + signPath + ")")
         }
 
-        // interactive mode required for this
-        if (System.console() == null) {
-            throw new InvalidUserDataException("This task requires an interactive console (run from terminal)")
-        }
-
         // read update system metadata
         def mainClassFile = new File("modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
         ext.newversion = -1
+        ext.newversionstring = ""
         mainClassFile.eachLine { line ->
             def matcher = line =~ "\\s*public static final int versionId = ([0-9]+);"
             if (matcher) {
                 ext.newversion = matcher.group(1)
             }
+            def matcher2 = line =~ "\\s*public static final String versionString = \"([0-9a-zA-Z_\\- .]+)\";"
+            if (matcher2) {
+                ext.newversionstring = matcher2.group(1)
+            }
         }
         if (ext.newversion == -1) {
             throw new InvalidUserDataException("Cannot read version number from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
+        }
+        if (ext.newversionstring == "") {
+            throw new InvalidUserDataException("Cannot read version name from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
         }
         def oldversion = -1
         def oldversionstring = ""
@@ -335,12 +338,13 @@ task prepareUpdate() {
             throw new InvalidUserDataException("Version number (" + ext.newversion + ") must be greater than the current version (" + oldversion + ")!")
         }
 
-        // prompt for new version text
-        println("Old description for version " + oldversion + " is: " + oldversionstring)
-        ext.newversionstring = System.console().readLine("Enter new description: ")
-        if (ext.newversionstring == null || ext.newversionstring.isEmpty()) {
-            throw new InvalidUserDataException("Description cannot be empty")
+        // check if version text changed
+        if (ext.newversionstring == oldversionstring) {
+            throw new InvalidUserDataException("Version meta (" + ext.newversionstring + ") must be different from current version (" + oldversionstring + ")!")
         }
+
+        // autogenerate full version text
+        ext.newversionstring = "LXC " + ext.newversionstring
 
         // write new version file
         new File("update/v").withWriter { out ->
