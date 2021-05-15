@@ -21,6 +21,14 @@ configure([project('cli')]) {
     targetCompatibility = 1.8
 }
 
+// not part of desktopProjects to prevent circular dep
+configure([project('packaging')]) {
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    compileJava.options.encoding = "UTF-8"
+}
+
 // configure paths
 def signPath = "B:\\\\"
 def pRoot = project(":").rootDir.getAbsolutePath()

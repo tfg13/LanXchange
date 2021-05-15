@@ -1,0 +1,54 @@
+//sourceSets {
+//    packageTest {
+//        compileClasspath += sourceSets.main.output
+//        runtimeClasspath += sourceSets.main.output
+//    }
+//}
+//
+//configurations {
+//    packageTestImplementation.extendsFrom implementation
+//    packageTestRuntimeOnly.extendsFrom runtimeOnly
+//}
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13'
+}
+
+task testDesktop(type: Test) {
+    // trick gradle into always running this :/
+    inputs.dir("src")
+    outputs.upToDateWhen { false }
+
+    useJUnit()
+
+    maxHeapSize = '1G'
+    workingDir = project(":").rootDir
+
+    filter {
+        includeTestsMatching "de.tobifleig.lxc.packaging.DesktopReleaseTest"
+    }
+
+    dependsOn ":releaseDesktop"
+    mustRunAfter ":releaseDesktop"
+}
+
+task testUpdate(type: Test) {
+    // trick gradle into always running this :/
+    inputs.dir("src")
+    outputs.upToDateWhen { false }
+
+    useJUnit()
+
+    maxHeapSize = '1G'
+    workingDir = project(":").rootDir
+
+    filter {
+        includeTestsMatching "de.tobifleig.lxc.packaging.UpdateTest"
+    }
+
+    dependsOn ":packUpdate"
+    mustRunAfter ":packUpdate"
+}
