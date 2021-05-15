@@ -141,9 +141,10 @@ public final class LXCUpdater {
      * @param overrideVerification skips signature check (dangerous!)
      * @param allowDowngrade disables downgrade check (dangerous!)
      * @param restartable if true, whoever started LXC is aware of this update system and wants to be notified when LXC should be restarted rather than regularly terminated (this is done by returning exit code 6 rather than 0)
+     * @param beta use beta stream (updatesbeta.lanxchange.com) instead of stable
      * @throws Exception may throw a bunch of exceptions, this class requires, working internet, github, signature checks etc.
      */
-    public static void checkAndPerformUpdate(UpdaterGui updateGui, boolean forceUpdate, boolean overrideVerification, boolean allowDowngrade, boolean restartable) throws Exception {
+    public static void checkAndPerformUpdate(UpdaterGui updateGui, boolean forceUpdate, boolean overrideVerification, boolean allowDowngrade, boolean restartable, boolean beta) throws Exception {
         if (forceUpdate) {
             logger.info("Forcing update...");
         }
@@ -152,6 +153,9 @@ public final class LXCUpdater {
         }
         if (allowDowngrade) {
             logger.warn("Warning: Update downgrade protection disabled by startup flag");
+        }
+        if (beta) {
+            logger.info("Using BETA stream");
         }
 
         // Enforce TLS
@@ -164,7 +168,7 @@ public final class LXCUpdater {
         }
         sc.init(null, null, new SecureRandom());
         // Contact update server, download version file
-        HttpsURLConnection versionCheckConnection = (HttpsURLConnection) new URL("https://updates.lanxchange.com/v").openConnection();
+        HttpsURLConnection versionCheckConnection = (HttpsURLConnection) new URL("https://" + updateDomain(beta) + "/v").openConnection();
         versionCheckConnection.setRequestProperty("User-Agent", ""); // do not leak java version
         versionCheckConnection.setSSLSocketFactory(sc.getSocketFactory());
         Scanner scanner = new Scanner(new VersionDataFilterInputStream(versionCheckConnection.getInputStream(), versionBytesLimit), "utf8");
@@ -178,7 +182,7 @@ public final class LXCUpdater {
             if (updateGui.prompt()) {
                 updateGui.toProgressView();
                 // download update
-                URL url = new URL("https://updates.lanxchange.com/update_master.zip");
+                URL url = new URL("https://" + updateDomain(beta) + "/update_master.zip");
                 FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
@@ -348,6 +352,13 @@ public final class LXCUpdater {
             logger.info("You have the latest version");
         }
         updateGui.finish();
+    }
+
+    static String updateDomain(boolean beta) {
+        if (beta) {
+            return "updatesbeta.lanxchange.com";
+        }
+        return "updates.lanxchange.com";
     }
 
     // cleanup deletes files contained in older versions or left over by the update system that can safely be deleted

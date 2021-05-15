@@ -82,6 +82,7 @@ public abstract class PCPlatform implements Platform {
         boolean overrideVerification = false;
         boolean allowDowngrade = false;
         boolean restartable = false;
+        boolean beta = false;
         if (Configuration.containsKey("allowupdates")) {
             String result = Configuration.getStringSetting("allowupdates");
             if ("yes".equals(result.toLowerCase())
@@ -92,6 +93,13 @@ public abstract class PCPlatform implements Platform {
             // not set yet, default to true (yes)
             checkForUpdates = true;
             Configuration.putStringSetting("allowupdates", "true");
+        }
+        if (Configuration.containsKey("beta")) {
+            String result = Configuration.getStringSetting("beta");
+            if ("yes".equals(result.toLowerCase())
+                    || "true".equals(result.toLowerCase())) {
+                beta = true;
+            }
         }
         // special settings
         for (String s : args) {
@@ -107,6 +115,8 @@ public abstract class PCPlatform implements Platform {
                 // whoever launched LXC tells us he is able to restart us in
                 // case of an update
                 restartable = true;
+            } else if (s.equals("-beta")) {
+                beta = true;
             }
         }
         if (checkForUpdates || forceUpdate) {
@@ -117,13 +127,14 @@ public abstract class PCPlatform implements Platform {
             final boolean noVerification = overrideVerification;
             final boolean managed = restartable;
             final boolean allowDowngradeF = allowDowngrade;
+            final boolean betaF = beta;
             // check in separate thread
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
                     try {
                         LXCUpdater.checkAndPerformUpdate(getUpdaterGui(), force,
-                                noVerification, allowDowngradeF, managed);
+                                noVerification, allowDowngradeF, managed, betaF);
                     } catch (Exception ex) {
                         logger.error("Updater crashed", ex);
                     }
