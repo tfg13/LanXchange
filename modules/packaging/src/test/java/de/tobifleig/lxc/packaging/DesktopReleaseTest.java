@@ -5,6 +5,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +66,11 @@ public class DesktopReleaseTest {
         }
 
         noOtherFiles(DesktopReleaseTest.tempDir, expectedFiles);
+    }
+
+    @Test
+    public void DesktopJar() throws IOException {
+        validateMainJar(new File(DesktopReleaseTest.tempDir, "lanxchange.jar"));
     }
 
     @AfterClass

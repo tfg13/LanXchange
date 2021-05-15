@@ -1,7 +1,9 @@
 package de.tobifleig.lxc.packaging;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.zip.ZipEntry;
@@ -10,6 +12,20 @@ import java.util.zip.ZipFile;
 import static org.junit.Assert.*;
 
 public final class PackagingTestCommon {
+
+    static File[] jarFiles = new File[]{
+            // just pick one file from each dependency and gradle module
+            // as a general check if something was copied
+            new File("com/sun/jna", "Platform.class"),
+            new File("de/tobifleig/lxc", "LXC.class"),
+            new File("de/tobifleig/lxc/plaf/swing", "Main.class"),
+            new File("de/tobifleig/lxc/plaf/pc", "LXCUpdater.class"),
+            new File("META-INF", "MANIFEST.MF"),
+            new File("win32-x86", "lxcwin.dll"),
+            new File("win32-x86-64", "lxcwin.dll"),
+            new File("lxc_updates.pub"),
+            new File("Ubuntu-R.ttf"),
+    };
 
     /**
      * Basic checks for a file. It should exist and be non-empty.
@@ -93,5 +109,15 @@ public final class PackagingTestCommon {
             }
         }
         return results;
+    }
+
+    static void validateMainJar(File jar) throws IOException {
+        ArrayList<File> expectedFiles = new ArrayList<>();
+        expectedFiles.addAll(Arrays.asList(jarFiles));
+        File tempDir = Files.createTempDirectory("lxc_packaging_tests_jar").toFile();
+        extractZipFile(tempDir, jar.getAbsolutePath());
+        for (File file : expectedFiles) {
+            basicChecks(tempDir, file);
+        }
     }
 }

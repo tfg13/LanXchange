@@ -105,6 +105,11 @@ public class UpdateTest {
         assertTrue("updater max data size violation", new File(tempDir1, updatePkg).length() < 512 * 1024 * 1024);
     }
 
+    @Test
+    public void TestDesktopJar() throws IOException {
+        validateMainJar(new File(tempDir2, "lanxchange.jar"));
+    }
+
     @AfterClass
     public static void afterClass() {
         delRec(UpdateTest.tempDir1);
