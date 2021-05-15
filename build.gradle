@@ -22,7 +22,7 @@ configure([project('cli')]) {
 }
 
 // configure paths
-def signPath = "/mnt/veracrypt1"
+def signPath = "B:\\\\"
 def buildPath = "/tmp/lxcbuild"
 def jnaPath = "lib/swing/jna-4.2.1-win-stripped.jar"
 
