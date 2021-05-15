@@ -23,8 +23,9 @@ configure([project('cli')]) {
 
 // configure paths
 def signPath = "B:\\\\"
-def buildPath = "/tmp/lxcbuild"
-def jnaPath = "lib/swing/jna-4.2.1-win-stripped.jar"
+def pRoot = project(":").rootDir.getAbsolutePath()
+def buildPath = pRoot + "/tmp/lxcbuild"
+def jnaPath = pRoot + "/lib/swing/jna-4.2.1-win-stripped.jar"
 
 
 
@@ -66,7 +67,7 @@ task releaseDesktop() {
     doLast {
         copy {
             from (buildPath + "/lxc.zip")
-            into ("releases/stable")
+            into (pRoot + "/releases/stable")
         }
         println "Done. Results in releases/stable. Unpack anywhere to install."
     }
@@ -95,7 +96,7 @@ task packUpdate(dependsOn: desktopProjects().build) {
         // copy update master file
         copy {
             from signPath + "/update_master.zip"
-            into "update"
+            into pRoot + "/update"
         }
         // done!
         println("Done. Commit and push directory \"update\" to apply (do not forget aws!)")
@@ -143,7 +144,7 @@ task prepareJar2(type: Copy) {
     dependsOn "prepareJar"
     mustRunAfter "prepareJar"
 
-    from "lib/swing/lxcwin64.dll"
+    from pRoot + "/lib/swing/lxcwin64.dll"
     into buildPath + "/jar/win32-x86-64"
     rename("lxcwin64.dll", "lxcwin.dll")
 }
@@ -156,7 +157,7 @@ task prepareJar3(type: Copy) {
     dependsOn "prepareJar2"
     mustRunAfter "prepareJar2"
 
-    from "lib/swing/lxcwin32.dll"
+    from pRoot + "/lib/swing/lxcwin32.dll"
     into buildPath + "/jar/win32-x86"
     rename("lxcwin32.dll", "lxcwin.dll")
 }
@@ -174,8 +175,8 @@ task desktopJar(type: Zip) {
     destinationDir file(buildPath)
 
     from buildPath + "/jar"
-    from "Ubuntu-R.ttf"
-    from "lxc_updates.pub"
+    from pRoot + "/Ubuntu-R.ttf"
+    from pRoot + "/lxc_updates.pub"
     from desktopProjects().sourceSets.main.output
 }
 
@@ -192,7 +193,7 @@ task packDesktop(type: Zip) {
     archiveName "lxc.zip"
     destinationDir file(buildPath)
     
-    from (".")
+    from (pRoot)
     include ("img/*.png")
     include ("COPYING")
     include ("3rd_party_licenses/font_license.txt")
@@ -212,7 +213,7 @@ task prepareZip(type: Copy) {
     dependsOn "desktopJar"
     mustRunAfter "desktopJar"
 
-    from "lxc.exe"
+    from pRoot + "/lxc.exe"
     into (buildPath + "/tmp_update")
 }
 
@@ -229,13 +230,13 @@ task packUpdateZip(type: Zip) {
     archiveName "lxc.zip"
     destinationDir file(buildPath)
 
-    from (".")
+    from (pRoot)
     include ("img/*.png")
     include ("COPYING")
     include ("3rd_party_licenses/font_license.txt")
     include ("lxc")
 
-    from ("modules/winupdatehelper/target/release") {
+    from (pRoot + "/modules/winupdatehelper/target/release") {
         include("update_helper.exe")
     }
 
@@ -244,7 +245,7 @@ task packUpdateZip(type: Zip) {
         include("tmp_update/lxc.exe")
     }
 
-    from ("update/v")
+    from (pRoot + "/update/v")
     include ("v")
 }
 
@@ -307,7 +308,7 @@ task prepareUpdate() {
         }
 
         // read update system metadata
-        def mainClassFile = new File("modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
+        def mainClassFile = new File(pRoot + "/modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
         ext.newversion = -1
         ext.newversionstring = ""
         mainClassFile.eachLine { line ->
@@ -328,7 +329,7 @@ task prepareUpdate() {
         }
         def oldversion = -1
         def oldversionstring = ""
-        new File("update/v").withReader { oldversion = it.readLine(); oldversionstring = it.readLine() }
+        new File(pRoot + "/update/v").withReader { oldversion = it.readLine(); oldversionstring = it.readLine() }
         if (oldversionstring == null || oldversion == -1 || oldversionstring.isEmpty()) {
             throw new InvalidUserDataException("Cannot read old version information from update/v")
         }
@@ -347,7 +348,7 @@ task prepareUpdate() {
         ext.newversionstring = "LXC " + ext.newversionstring
 
         // write new version file
-        new File("update/v").withWriter { out ->
+        new File(pRoot + "/update/v").withWriter { out ->
             out.println(ext.newversion)
             out.println(ext.newversionstring)
         }
