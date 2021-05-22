@@ -30,12 +30,11 @@ configure([project('packaging')]) {
 }
 
 // configure paths
-def signPath = "B:\\\\"
 def pRoot = project(":").rootDir.getAbsolutePath()
 def buildPath = pRoot + "/tmp/lxcbuild"
 def jnaPath = pRoot + "/lib/swing/jna-4.2.1-win-stripped.jar"
 
-
+def builds = ["Prod": ["signPath" : "B:\\\\"], "Test": ["signPath": "modules/packaging/res/env"]]
 
 ///////////////////////////////////
 //
@@ -82,32 +81,34 @@ task releaseDesktop() {
 }
 
 // Builds the desktop release and packs all files for the automatic update
-task packUpdate(dependsOn: desktopProjects().build) {
-    // trick gradle into always running this :/
-    inputs.file("COPYING")
-    outputs.upToDateWhen { false }
+builds.each {name, props ->
+    tasks.register("packUpdate$name") {
+        // trick gradle into always running this :/
+        inputs.file("COPYING")
+        outputs.upToDateWhen { false }
 
-    description "Builds the desktop release and packs it as automatic update."
-    
-    // Check versions, signing environment
-    dependsOn "prepareUpdate"
-    
-    // interactive setup & checks complete, normal build
-    dependsOn "packSignedFiles"
-    
-    // order
-    desktopProjects().build.each {
-        it.mustRunAfter ":prepareUpdate"
-    }
-    
-    doLast {
-        // copy update master file
-        copy {
-            from signPath + "/update_master.zip"
-            into pRoot + "/update"
+        description "Builds the desktop release and packs it as automatic update."
+
+        // Check versions, signing environment
+        dependsOn "prepareUpdate$name"
+
+        // interactive setup & checks complete, normal build
+        dependsOn "packSignedFiles$name"
+
+        // order
+        desktopProjects().build.each {
+            it.mustRunAfter ":prepareUpdate$name"
         }
-        // done!
-        println("Done. Commit and push directory \"update\" to apply (do not forget aws!)")
+
+        doLast {
+            // copy update master file
+            copy {
+                from "$props.signPath" + "/update_master.zip"
+                into pRoot + "/update"
+            }
+            // done!
+            println("Done. Commit and push directory \"update\" to apply (do not forget aws!)")
+        }
     }
 }
 
@@ -258,111 +259,118 @@ task packUpdateZip(type: Zip) {
 }
 
 // sign update
-task signUpdate(type: JavaExec) {
-    // trick gradle into always running this :/
-    inputs.file("COPYING")
-    outputs.upToDateWhen { false }
+builds.each { name, props ->
+    tasks.register("signUpdate$name", JavaExec) {
+        // trick gradle into always running this :/
+        inputs.file("COPYING")
+        outputs.upToDateWhen { false }
 
-    dependsOn "packUpdateZip"
-    mustRunAfter "packUpdateZip"
-    
-    doFirst {
-        // prepare signing environment
-        deleteIfExists(signPath + "/lxc.zip")
-        deleteIfExists(signPath + "/update_master.zip")
-        deleteIfExists(signPath + "/lxc.sign")
-        
-        // copy update into signing environment
-        copy {
-            from (buildPath + "/lxc.zip")
-            into (signPath)
+        dependsOn "packUpdateZip"
+        mustRunAfter "packUpdateZip"
+
+        doFirst {
+            def signPath = "$props.signPath"
+            // prepare signing environment
+            deleteIfExists(signPath + "/lxc.zip")
+            deleteIfExists(signPath + "/update_master.zip")
+            deleteIfExists(signPath + "/lxc.sign")
+
+            // copy update into signing environment
+            copy {
+                from(buildPath + "/lxc.zip")
+                into(signPath)
+            }
         }
+
+        // sign
+        main = "de.tobifleig.lxc.Signer"
+        workingDir = "$props.signPath"
     }
-    
-    // sign
-    main = "de.tobifleig.lxc.Signer"
-    workingDir = signPath
 }
 
 // zip signed update
-task packSignedFiles(type: Zip) {
-    // trick gradle into always running this :/
-    inputs.file("COPYING")
-    outputs.upToDateWhen { false }
+builds.each { name, props ->
+    tasks.register("packSignedFiles$name", Zip) {
+        // trick gradle into always running this :/
+        inputs.file("COPYING")
+        outputs.upToDateWhen { false }
 
-    dependsOn "signUpdate"
-    mustRunAfter "signUpdate"
-    
-    archiveName "update_master.zip"
-    destinationDir file(signPath)
-    
-    from (signPath) {
-        include "lxc.zip"
-        include "lxc.sign"
+        dependsOn "signUpdate$name"
+        mustRunAfter "signUpdate$name"
+
+        archiveName "update_master.zip"
+        destinationDir file("$props.signPath")
+
+        from("$props.signPath") {
+            include "lxc.zip"
+            include "lxc.sign"
+        }
     }
 }
 
 // querys for version info and checks signing environment
-task prepareUpdate() {
-    // trick gradle into always running this :/
-    inputs.file("COPYING")
-    outputs.upToDateWhen { false }
+builds.each { name, props ->
+    tasks.register("prepareUpdate$name") {
+        // trick gradle into always running this :/
+        inputs.file("COPYING")
+        outputs.upToDateWhen { false }
 
-    doLast {
-        // Cannot pack without signing environment!
-        def signDir = new File(signPath)
-        if (!signDir.isDirectory()) {
-            throw new InvalidUserDataException("Missing signing environment (" + signPath + ")")
-        }
-
-        // read update system metadata
-        def mainClassFile = new File(pRoot + "/modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
-        ext.newversion = -1
-        ext.newversionstring = ""
-        mainClassFile.eachLine { line ->
-            def matcher = line =~ "\\s*public static final int versionId = ([0-9]+);"
-            if (matcher) {
-                ext.newversion = matcher.group(1)
+        doLast {
+            def signPath = "$props.signPath"
+            // Cannot pack without signing environment!
+            def signDir = new File(signPath)
+            if (!signDir.isDirectory()) {
+                throw new InvalidUserDataException("Missing signing environment (" + signPath + ")")
             }
-            def matcher2 = line =~ "\\s*public static final String versionString = \"([0-9a-zA-Z_\\- .]+)\";"
-            if (matcher2) {
-                ext.newversionstring = matcher2.group(1)
+
+            // read update system metadata
+            def mainClassFile = new File(pRoot + "/modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
+            ext.newversion = -1
+            ext.newversionstring = ""
+            mainClassFile.eachLine { line ->
+                def matcher = line =~ "\\s*public static final int versionId = ([0-9]+);"
+                if (matcher) {
+                    ext.newversion = matcher.group(1)
+                }
+                def matcher2 = line =~ "\\s*public static final String versionString = \"([0-9a-zA-Z_\\- .]+)\";"
+                if (matcher2) {
+                    ext.newversionstring = matcher2.group(1)
+                }
             }
-        }
-        if (ext.newversion == -1) {
-            throw new InvalidUserDataException("Cannot read version number from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
-        }
-        if (ext.newversionstring == "") {
-            throw new InvalidUserDataException("Cannot read version name from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
-        }
-        def oldversion = -1
-        def oldversionstring = ""
-        new File(pRoot + "/update/v").withReader { oldversion = it.readLine(); oldversionstring = it.readLine() }
-        if (oldversionstring == null || oldversion == -1 || oldversionstring.isEmpty()) {
-            throw new InvalidUserDataException("Cannot read old version information from update/v")
-        }
+            if (ext.newversion == -1) {
+                throw new InvalidUserDataException("Cannot read version number from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
+            }
+            if (ext.newversionstring == "") {
+                throw new InvalidUserDataException("Cannot read version name from modules/core/src/main/java/de/tobifleig/lxc/LXC.java")
+            }
+            def oldversion = -1
+            def oldversionstring = ""
+            new File(pRoot + "/update/v").withReader { oldversion = it.readLine(); oldversionstring = it.readLine() }
+            if (oldversionstring == null || oldversion == -1 || oldversionstring.isEmpty()) {
+                throw new InvalidUserDataException("Cannot read old version information from update/v")
+            }
 
-        // check if version number was incremented
-        if (ext.newversion <= oldversion) {
-            throw new InvalidUserDataException("Version number (" + ext.newversion + ") must be greater than the current version (" + oldversion + ")!")
-        }
+            // check if version number was incremented
+            if (ext.newversion <= oldversion) {
+                throw new InvalidUserDataException("Version number (" + ext.newversion + ") must be greater than the current version (" + oldversion + ")!")
+            }
 
-        // check if version text changed
-        if (ext.newversionstring == oldversionstring) {
-            throw new InvalidUserDataException("Version meta (" + ext.newversionstring + ") must be different from current version (" + oldversionstring + ")!")
-        }
+            // check if version text changed
+            if (ext.newversionstring == oldversionstring) {
+                throw new InvalidUserDataException("Version meta (" + ext.newversionstring + ") must be different from current version (" + oldversionstring + ")!")
+            }
 
-        // autogenerate full version text
-        ext.newversionstring = "LXC " + ext.newversionstring
+            // autogenerate full version text
+            ext.newversionstring = "LXC " + ext.newversionstring
 
-        // write new version file
-        new File(pRoot + "/update/v").withWriter { out ->
-            out.println(ext.newversion)
-            out.println(ext.newversionstring)
+            // write new version file
+            new File(pRoot + "/update/v").withWriter { out ->
+                out.println(ext.newversion)
+                out.println(ext.newversionstring)
+            }
         }
     }
 }
-
 ///////////////////////////////////
 //
 // helpers

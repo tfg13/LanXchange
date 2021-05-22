@@ -35,7 +35,7 @@ task testDesktop(type: Test) {
     mustRunAfter ":releaseDesktop"
 }
 
-task testUpdate(type: Test) {
+task testProdUpdate(type: Test) {
     // trick gradle into always running this :/
     inputs.dir("src")
     outputs.upToDateWhen { false }
@@ -46,9 +46,27 @@ task testUpdate(type: Test) {
     workingDir = project(":").rootDir
 
     filter {
-        includeTestsMatching "de.tobifleig.lxc.packaging.UpdateTest"
+        includeTestsMatching "de.tobifleig.lxc.packaging.release.UpdateTest"
     }
 
-    dependsOn ":packUpdate"
-    mustRunAfter ":packUpdate"
+    dependsOn ":packUpdateProd"
+    mustRunAfter ":packUpdateProd"
+}
+
+task testTestUpdate(type: Test) {
+    // trick gradle into always running this :/
+    inputs.dir("src")
+    outputs.upToDateWhen { false }
+
+    useJUnit()
+
+    maxHeapSize = '1G'
+    workingDir = project(":").rootDir
+
+    filter {
+        includeTestsMatching "de.tobifleig.lxc.packaging.testkeys.UpdateTest"
+    }
+
+    dependsOn ":packUpdateTest"
+    mustRunAfter ":packUpdateTest"
 }

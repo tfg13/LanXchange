@@ -30,7 +30,7 @@ public final class PackagingTestCommon {
     /**
      * Basic checks for a file. It should exist and be non-empty.
      */
-    static void basicChecks(File tempDir, File f) {
+    public static void basicChecks(File tempDir, File f) {
         File reHomed = new File(tempDir, f.getPath());
         assertTrue("File " + reHomed.getPath() + " missing", reHomed.isFile());
         assertNotEquals("File " + reHomed.getPath() + " unexpected zero size", 0, reHomed.length());
@@ -39,7 +39,7 @@ public final class PackagingTestCommon {
     /**
      * Checks no other files are present than the expected ones
      */
-    static void noOtherFiles(File tempDir, ArrayList<File> fileList) {
+    public static void noOtherFiles(File tempDir, ArrayList<File> fileList) {
         HashSet<String> expected = new HashSet<>();
         for (File f : fileList) {
             expected.add(f.getPath());
@@ -49,7 +49,7 @@ public final class PackagingTestCommon {
         }
     }
 
-    static void extractZipFile(File target, String zip) throws IOException {
+    public static void extractZipFile(File target, String zip) throws IOException {
         ZipFile zipFile = new ZipFile(zip);
         Enumeration<? extends ZipEntry> zipEntryEnum = zipFile.entries();
         byte[] buffer = new byte[1024];
@@ -74,7 +74,7 @@ public final class PackagingTestCommon {
     }
 
     // best-effort recursive delete, never throws
-    static void delRec(File f) {
+    public static void delRec(File f) {
         if (f == null) {
             return;
         }
@@ -89,7 +89,7 @@ public final class PackagingTestCommon {
         }
     }
 
-    static ArrayList<File> flattenDirEntries(String prefix, File dir) {
+    public static ArrayList<File> flattenDirEntries(String prefix, File dir) {
         ArrayList<File> results = new ArrayList<>();
         for (File f : dir.listFiles()) {
             if (f.isDirectory()) {
@@ -111,7 +111,7 @@ public final class PackagingTestCommon {
         return results;
     }
 
-    static void validateMainJar(File jar) throws IOException {
+    public static void validateMainJar(File jar) throws IOException {
         ArrayList<File> expectedFiles = new ArrayList<>();
         expectedFiles.addAll(Arrays.asList(jarFiles));
         File tempDir = Files.createTempDirectory("lxc_packaging_tests_jar").toFile();

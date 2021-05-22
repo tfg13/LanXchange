@@ -18,7 +18,7 @@ public class DesktopReleaseTest {
 
     private static File tempDir;
 
-    static File[] coreFiles = new File[]{
+    public static File[] coreFiles = new File[]{
             new File("3rd_party_licenses", "font_license.txt"),
             new File("img", "busy.png"),
             new File("img", "cancel.png"),
