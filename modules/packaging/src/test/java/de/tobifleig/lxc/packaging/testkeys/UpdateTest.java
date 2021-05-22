@@ -49,7 +49,7 @@ public class UpdateTest extends AUpdateTest {
     @Test
     public void TestSignatureVerifies() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         // generate test keys?
-        super.TestSignatureVerifies(updateSig, updatePkg, tempDir1, "lxc_updates.pub");
+        super.TestSignatureVerifies(updateSig, updatePkg, tempDir1, "modules/packaging/res/env/lxc_updates.pub");
     }
 
     @Test

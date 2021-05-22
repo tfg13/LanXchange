@@ -1,3 +1,5 @@
+import java.security.KeyPairGenerator
+
 // define what is required to build the desktop release (swing)
 def desktopProjects() {
     [project('core'), project('cli'), project('swing')]
@@ -34,7 +36,16 @@ def pRoot = project(":").rootDir.getAbsolutePath()
 def buildPath = pRoot + "/tmp/lxcbuild"
 def jnaPath = pRoot + "/lib/swing/jna-4.2.1-win-stripped.jar"
 
-def builds = ["Prod": ["signPath" : "B:\\\\"], "Test": ["signPath": "modules/packaging/res/env"]]
+def builds = [
+        "Prod": [
+                "signPath" : "B:\\\\",
+                "extraSignPrep" : "Nothing",
+        ],
+        "Test": [
+                "signPath": "modules/packaging/res/env",
+                "extraSignPrep": "PrepTestSignEnv"
+        ],
+]
 
 ///////////////////////////////////
 //
@@ -91,14 +102,12 @@ builds.each {name, props ->
 
         // Check versions, signing environment
         dependsOn "prepareUpdate$name"
+        mustRunAfter "prepareUpdate$name"
 
         // interactive setup & checks complete, normal build
         dependsOn "packSignedFiles$name"
+        mustRunAfter "packSignedFiles$name"
 
-        // order
-        desktopProjects().build.each {
-            it.mustRunAfter ":prepareUpdate$name"
-        }
 
         doLast {
             // copy update master file
@@ -127,6 +136,49 @@ task cleanBuildEnv() {
         deleteRecursive(buildPath)
     }
 }
+
+task PrepTestSignEnv() {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    dependsOn project('core').build
+
+    doLast {
+        def testSignPath = builds.Test.signPath
+        deleteRecursive(testSignPath)
+        new File(testSignPath + "/de/tobifleig/lxc/util").mkdirs()
+
+        copy {
+            from(project('core').sourceSets.main.output.classesDirs.getSingleFile().getAbsolutePath() + "/de/tobifleig/lxc/util/Signer.class")
+            into(testSignPath + "/de/tobifleig/lxc/util/")
+        }
+
+        // create keys for test
+        def gen = KeyPairGenerator.getInstance("RSA")
+        gen.initialize(1024)
+        def keyPair = gen.genKeyPair()
+        def priv = keyPair.getPrivate().getEncoded()
+        def pub = keyPair.getPublic().getEncoded()
+        new File(testSignPath + "/lxc_updates.priv").withOutputStream {
+            it.write priv
+        }
+        new File(testSignPath + "/lxc_updates.pub").withOutputStream {
+            it.write pub
+        }
+    }
+}
+
+task Nothing() {
+    // trick gradle into always running this :/
+    inputs.file("COPYING")
+    outputs.upToDateWhen { false }
+
+    doLast {
+        // aaaaah gradle
+    }
+}
+
 
 task prepareJar(type: Copy) {
     // trick gradle into always running this :/
@@ -228,34 +280,38 @@ task prepareZip(type: Copy) {
 
 // pack desktop release for update
 // includes more files, like the update helper and version number file required for updates
-task packUpdateZip(type: Zip) {
-    // trick gradle into always running this :/
-    inputs.file("COPYING")
-    outputs.upToDateWhen { false }
+builds.each { name, props ->
+    tasks.register("packUpdateZip$name", Zip) {
+        // trick gradle into always running this :/
+        inputs.file("COPYING")
+        outputs.upToDateWhen { false }
 
-    dependsOn "prepareZip"
-    mustRunAfter "prepareZip"
+        dependsOn "prepareZip"
+        mustRunAfter "prepareZip"
 
-    archiveName "lxc.zip"
-    destinationDir file(buildPath)
+        mustRunAfter "prepareUpdate$name"
 
-    from (pRoot)
-    include ("img/*.png")
-    include ("COPYING")
-    include ("3rd_party_licenses/font_license.txt")
-    include ("lxc")
+        archiveName "lxc.zip"
+        destinationDir file(buildPath)
 
-    from (pRoot + "/modules/winupdatehelper/target/release") {
-        include("update_helper.exe")
+        from(pRoot)
+        include("img/*.png")
+        include("COPYING")
+        include("3rd_party_licenses/font_license.txt")
+        include("lxc")
+
+        from(pRoot + "/modules/winupdatehelper/target/release") {
+            include("update_helper.exe")
+        }
+
+        from(buildPath) {
+            include("lanxchange.jar")
+            include("tmp_update/lxc.exe")
+        }
+
+        from(pRoot + "/update/v")
+        include("v")
     }
-
-    from (buildPath) {
-        include("lanxchange.jar")
-        include("tmp_update/lxc.exe")
-    }
-
-    from (pRoot + "/update/v")
-    include ("v")
 }
 
 // sign update
@@ -265,8 +321,8 @@ builds.each { name, props ->
         inputs.file("COPYING")
         outputs.upToDateWhen { false }
 
-        dependsOn "packUpdateZip"
-        mustRunAfter "packUpdateZip"
+        dependsOn "packUpdateZip$name"
+        mustRunAfter "packUpdateZip$name"
 
         doFirst {
             def signPath = "$props.signPath"
@@ -283,7 +339,7 @@ builds.each { name, props ->
         }
 
         // sign
-        main = "de.tobifleig.lxc.Signer"
+        main = "de.tobifleig.lxc.util.Signer"
         workingDir = "$props.signPath"
     }
 }
@@ -314,6 +370,9 @@ builds.each { name, props ->
         // trick gradle into always running this :/
         inputs.file("COPYING")
         outputs.upToDateWhen { false }
+
+        dependsOn "$props.extraSignPrep".split(",")
+        mustRunAfter "$props.extraSignPrep".split(",")
 
         doLast {
             def signPath = "$props.signPath"
