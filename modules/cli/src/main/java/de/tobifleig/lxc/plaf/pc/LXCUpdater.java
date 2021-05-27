@@ -137,28 +137,12 @@ public final class LXCUpdater {
      * Checks for updates, prompts the user and installs them.
      *
      * @param updateGui the updater gui
-     * @param forceUpdate skips online version check and allows re-installation of the current version. Does *not* disable protection against downgrade attacks
-     * @param overrideVerification skips signature check (dangerous!)
-     * @param allowDowngrade disables downgrade check (dangerous!)
-     * @param restartable if true, whoever started LXC is aware of this update system and wants to be notified when LXC should be restarted rather than regularly terminated (this is done by returning exit code 6 rather than 0)
-     * @param beta use beta stream (updatesbeta.lanxchange.com) instead of stable
+     * @param options updater options. See Options
      * @throws Exception may throw a bunch of exceptions, this class requires, working internet, github, signature checks etc.
      */
-    public static void checkAndPerformUpdate(UpdaterGui updateGui, boolean forceUpdate, boolean overrideVerification, boolean allowDowngrade, boolean restartable, boolean beta) throws Exception {
-        if (forceUpdate) {
-            logger.info("Forcing update...");
-        }
-        if (overrideVerification) {
-            logger.warn("Update signature check disabled by startup flag");
-        }
-        if (allowDowngrade) {
-            logger.warn("Warning: Update downgrade protection disabled by startup flag");
-        }
-        if (beta) {
-            logger.info("Using BETA stream");
-        }
+    public static void checkAndPerformUpdate(UpdaterGui updateGui, Options options) throws Exception {
+        options.logOptionUsage();
 
-        // Enforce TLS
         SSLContext sc;
         try {
             sc = SSLContext.getInstance("TLSv1.3");
@@ -168,26 +152,37 @@ public final class LXCUpdater {
         }
         sc.init(null, null, new SecureRandom());
         // Contact update server, download version file
-        HttpsURLConnection versionCheckConnection = (HttpsURLConnection) new URL("https://" + updateDomain(beta) + "/v").openConnection();
+        HttpURLConnection versionCheckConnection;
+        if (options.isDisableTLS()) {
+            versionCheckConnection = (HttpURLConnection) new URL("http://" + options.updateDomain() + "/v").openConnection();
+        } else {
+            versionCheckConnection = (HttpsURLConnection) new URL("https://" + options.updateDomain() + "/v").openConnection();
+            // Enforce TLS
+            ((HttpsURLConnection) versionCheckConnection).setSSLSocketFactory(sc.getSocketFactory());
+        }
         versionCheckConnection.setRequestProperty("User-Agent", ""); // do not leak java version
-        versionCheckConnection.setSSLSocketFactory(sc.getSocketFactory());
         Scanner scanner = new Scanner(new VersionDataFilterInputStream(versionCheckConnection.getInputStream(), versionBytesLimit), "utf8");
         int gotver = Integer.parseInt(scanner.nextLine());
         String title = scanner.nextLine();
         scanner.close();
         // compare version number
-        if (gotver > LXC.versionId || forceUpdate) {
+        if (gotver > options.getInternalVersion() || options.forceUpdate) {
             logger.info("Newer Version available!");
             updateGui.setVersionTitle(title);
             if (updateGui.prompt()) {
                 updateGui.toProgressView();
                 // download update
-                URL url = new URL("https://" + updateDomain(beta) + "/update_master.zip");
                 FileOutputStream os = new FileOutputStream(new File("update_dl.zip"));
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+                HttpURLConnection conn;
+                if (options.isDisableTLS()) {
+                    conn = (HttpURLConnection) new URL("http://" + options.updateDomain() + "/update_master.zip").openConnection();
+                } else {
+                    conn = (HttpsURLConnection) new URL("https://" + options.updateDomain() + "/update_master.zip").openConnection();
+                    // Enforce TLS
+                    ((HttpsURLConnection) conn).setSSLSocketFactory(sc.getSocketFactory());
+                }
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("User-Agent", ""); // do not leak java version
-                conn.setSSLSocketFactory(sc.getSocketFactory());
                 conn.connect();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -237,10 +232,10 @@ public final class LXCUpdater {
                 masterZip.close();
                 // the check itself
                 KeyFactory fact = KeyFactory.getInstance("RSA");
-                InputStream ins = ClassLoader.getSystemClassLoader().getResourceAsStream("lxc_updates.pub");
+                InputStream ins = ClassLoader.getSystemClassLoader().getResourceAsStream(options.updateSignaturePublicKey());
                 if (ins == null) {
                     // try file
-                    ins = new FileInputStream(new File("lxc_updates.pub"));
+                    ins = new FileInputStream(new File(options.updateSignaturePublicKey()));
                 }
                 ByteArrayOutputStream sigRead = new ByteArrayOutputStream();
                 int bytesRead = 0;
@@ -270,9 +265,9 @@ public final class LXCUpdater {
                 inss.read(bs);
                 inss.close();
                 // signature ok?
-                if (sign.verify(bs) || overrideVerification) {
+                if (sign.verify(bs) || options.overrideVerification) {
                     // protect against downgrade attacks
-                    if (allowDowngrade || verifyVersion(new File("temp_update.zip"), gotver, forceUpdate)) {
+                    if (options.allowDowngrade || verifyVersion(new File("temp_update.zip"), gotver, options.forceUpdate)) {
                         updateGui.setStatusToInstall();
                         // extract update
                         File source = new File("temp_update.zip");
@@ -321,17 +316,17 @@ public final class LXCUpdater {
 
                         //done
                         updateGui.setStatusToRestart();
-                        updateGui.setRestartTime(5, !restartable);
+                        updateGui.setRestartTime(5, !options.restartable);
                         Thread.sleep(1000);
-                        updateGui.setRestartTime(4, !restartable);
+                        updateGui.setRestartTime(4, !options.restartable);
                         Thread.sleep(1000);
-                        updateGui.setRestartTime(3, !restartable);
+                        updateGui.setRestartTime(3, !options.restartable);
                         Thread.sleep(1000);
-                        updateGui.setRestartTime(2, !restartable);
+                        updateGui.setRestartTime(2, !options.restartable);
                         Thread.sleep(1000);
-                        updateGui.setRestartTime(1, !restartable);
+                        updateGui.setRestartTime(1, !options.restartable);
                         Thread.sleep(1000);
-                        updateGui.setRestartTime(0, !restartable);
+                        updateGui.setRestartTime(0, !options.restartable);
                         System.exit(6);
 
                     } else {
@@ -352,13 +347,6 @@ public final class LXCUpdater {
             logger.info("You have the latest version");
         }
         updateGui.finish();
-    }
-
-    static String updateDomain(boolean beta) {
-        if (beta) {
-            return "updatesbeta.lanxchange.com";
-        }
-        return "updates.lanxchange.com";
     }
 
     // cleanup deletes files contained in older versions or left over by the update system that can safely be deleted
@@ -413,5 +401,106 @@ public final class LXCUpdater {
      * Utility-Class, private Constructor
      */
     private LXCUpdater() {
+    }
+
+    public static class Options {
+        /**
+         * skips online version check and allows re-installation of the current version. Does *not* disable protection against downgrade attacks
+         */
+        public boolean forceUpdate;
+        /**
+         * skips signature check (dangerous!)
+         */
+        public boolean overrideVerification;
+        /**
+         * disables downgrade check (dangerous!)
+         */
+        public boolean allowDowngrade;
+        /**
+         * if true, whoever started LXC is aware of this update system and wants to be notified when LXC should be restarted rather than regularly terminated (this is done by returning exit code 6 rather than 0)
+         */
+        public boolean restartable;
+        /**
+         * use beta stream (updatesbeta.lanxchange.com) instead of stable
+         */
+        public boolean beta;
+        /**
+         * allow options that are unsafe for production
+         */
+        public boolean unsafe;
+        /**
+         * override updater URL
+         */
+        public String unsafeUrlOverride;
+        /**
+         * disable TLS
+         */
+        public boolean unsafeDisableTLS;
+        /**
+         * override actual internal version with this
+         */
+        public int unsafeOverrideInternalVersion;
+        /**
+         * override update signature public key
+         */
+        public String unsafePublicKey;
+
+        public void logOptionUsage() {
+            if (forceUpdate) {
+                logger.info("Forcing update...");
+            }
+            if (unsafe) {
+                logger.warn("ALERT: Allowing unsafe Update options!!!");
+            }
+            if (overrideVerification) {
+                logger.warn("Update signature check disabled by startup flag");
+            }
+            if (allowDowngrade) {
+                logger.warn("Warning: Update downgrade protection disabled by startup flag");
+            }
+            if (beta) {
+                logger.info("Using BETA stream");
+            }
+            if (unsafe && unsafeUrlOverride != null) {
+                logger.warn("ALERT: Overwriting updater URL to " + updateDomain() + "!");
+            }
+            if (unsafe && unsafeDisableTLS) {
+                logger.warn("ALERT: TLS disabled!");
+            }
+            if (unsafe && unsafeOverrideInternalVersion > 0) {
+                logger.warn("ALERT: Overwriting internal version to " + unsafeOverrideInternalVersion);
+            }
+            if (unsafe && unsafePublicKey != null) {
+                logger.warn("ALERT: Overwriting update signature public key to " + updateSignaturePublicKey() + "!");
+            }
+        }
+
+        String updateDomain() {
+            if (unsafe && unsafeUrlOverride != null) {
+                return unsafeUrlOverride;
+            }
+            if (beta) {
+                return "updatesbeta.lanxchange.com";
+            }
+            return "updates.lanxchange.com";
+        }
+
+        int getInternalVersion() {
+            if (unsafe && unsafeOverrideInternalVersion > 0) {
+                return unsafeOverrideInternalVersion;
+            }
+            return LXC.versionId;
+        }
+
+        String updateSignaturePublicKey() {
+            if (unsafe && unsafePublicKey != null) {
+                return unsafePublicKey;
+            }
+            return "lxc_updates.pub";
+        }
+
+        boolean isDisableTLS() {
+            return unsafe && unsafeDisableTLS;
+        }
     }
 }

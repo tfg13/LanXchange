@@ -12,12 +12,7 @@ import de.tobifleig.lxc.log.LXCLogBackend;
 import de.tobifleig.lxc.log.LXCLogger;
 import de.tobifleig.lxc.plaf.Platform;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Iterator;
 
 /**
@@ -75,14 +70,10 @@ public abstract class PCPlatform implements Platform {
 
     @Override
     public void checkAndPerformUpdates(String[] args) {
+        LXCUpdater.Options options = new LXCUpdater.Options();
         // Find out if updating is allowed, requested, forced and/or if the
         // verification should be disabled.
         boolean checkForUpdates = false;
-        boolean forceUpdate = false;
-        boolean overrideVerification = false;
-        boolean allowDowngrade = false;
-        boolean restartable = false;
-        boolean beta = false;
         if (Configuration.containsKey("allowupdates")) {
             String result = Configuration.getStringSetting("allowupdates");
             if ("yes".equals(result.toLowerCase())
@@ -98,43 +89,49 @@ public abstract class PCPlatform implements Platform {
             String result = Configuration.getStringSetting("beta");
             if ("yes".equals(result.toLowerCase())
                     || "true".equals(result.toLowerCase())) {
-                beta = true;
+                options.beta = true;
             }
         }
         // special settings
-        for (String s : args) {
+        for (int i = 0; i < args.length; i++) {
+            String s = args[i];
             if (s.equals("-update")) {
                 checkForUpdates = true;
             } else if (s.equals("-forceupdate")) {
-                forceUpdate = true;
+                options.forceUpdate = true;
             } else if (s.equals("-overrideVerification")) {
-                overrideVerification = true;
+                options.overrideVerification = true;
             }  else if (s.equals("-allowDowngrade")) {
-                allowDowngrade = true;
+                options.allowDowngrade = true;
             } else if (s.equals("-managed")) {
                 // whoever launched LXC tells us he is able to restart us in
                 // case of an update
-                restartable = true;
+                options.restartable = true;
             } else if (s.equals("-beta")) {
-                beta = true;
+                options.beta = true;
+            } else if (s.equals("-unsafe_updates")) {
+                options.unsafe = true;
+            } else if (s.equals("-unsafe_url_override") && i + 1 < args.length) {
+                options.unsafeUrlOverride = args[i + 1];
+                i++;
+            } else if (s.equals("-unsafe_disable_tls")) {
+                options.unsafeDisableTLS = true;
+            } else if (s.equals("-unsafe_internal_version_override") && i + 1 < args.length) {
+                options.unsafeOverrideInternalVersion = Integer.parseInt(args[i + 1]);
+                i++;
+            } else if (s.equals("-unsafe_update_sig_pubkey") && i + 1 < args.length) {
+                options.unsafePublicKey = args[i + 1];
+                i++;
             }
         }
-        if (checkForUpdates || forceUpdate) {
+        if (checkForUpdates || options.forceUpdate) {
             logger.info("Checking for Updates...");
-            // Ugly workaround, anonymous inner classes require (local)
-            // variables to be final
-            final boolean force = forceUpdate;
-            final boolean noVerification = overrideVerification;
-            final boolean managed = restartable;
-            final boolean allowDowngradeF = allowDowngrade;
-            final boolean betaF = beta;
             // check in separate thread
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        LXCUpdater.checkAndPerformUpdate(getUpdaterGui(), force,
-                                noVerification, allowDowngradeF, managed, betaF);
+                        LXCUpdater.checkAndPerformUpdate(getUpdaterGui(), options);
                     } catch (Exception ex) {
                         logger.error("Updater crashed", ex);
                     }
