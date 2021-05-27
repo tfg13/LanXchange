@@ -51,7 +51,7 @@ public class UpdateDialog extends javax.swing.JDialog implements UpdaterGui {
         jLabel16.setIcon(jLabel13.getIcon());
         jPanel3.setVisible(false);
         jLabel3.putClientProperty("html.disable", true);
-        setSize(getWidth(), jPanel2.getSize().height + 130);
+        setSize(getWidth(), jPanel2.getSize().height + 150);
         setLocationRelativeTo(parent);
         addWindowListener(new java.awt.event.WindowAdapter() {
 
@@ -95,7 +95,7 @@ public class UpdateDialog extends javax.swing.JDialog implements UpdaterGui {
         jLabel3 = new javax.swing.JLabel();
 
         jPanel3.setOpaque(false);
-        jPanel3.setPreferredSize(new java.awt.Dimension(341, 147));
+        jPanel3.setPreferredSize(new java.awt.Dimension(341, 167));
 
         jLabel8.setText("Update running:");
 
