@@ -316,10 +316,6 @@ public final class LXCUpdater {
 
                         //done
                         updateGui.setStatusToRestart();
-                        updateGui.setRestartTime(5, !options.restartable);
-                        Thread.sleep(1000);
-                        updateGui.setRestartTime(4, !options.restartable);
-                        Thread.sleep(1000);
                         updateGui.setRestartTime(3, !options.restartable);
                         Thread.sleep(1000);
                         updateGui.setRestartTime(2, !options.restartable);
