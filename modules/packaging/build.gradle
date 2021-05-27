@@ -54,6 +54,7 @@ task testProdUpdate(type: Test) {
     mustRunAfter ":packUpdateProd"
 }
 
+// this one is special, run testDesktop first. Then increment the version number in the main class. Then run this.
 task testTestUpdate(type: Test) {
     // trick gradle into always running this :/
     inputs.dir("src")

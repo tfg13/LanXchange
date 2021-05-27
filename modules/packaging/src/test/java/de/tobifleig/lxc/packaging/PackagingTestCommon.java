@@ -2,10 +2,7 @@ package de.tobifleig.lxc.packaging;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -119,5 +116,23 @@ public final class PackagingTestCommon {
         for (File file : expectedFiles) {
             basicChecks(tempDir, file);
         }
+    }
+
+    public static void assertLogShowsNoTrouble(File log, List<String> acceptableLoglines) throws IOException {
+        assertTrue("Log file " + log + " seems empty", log.length() > 0);
+        Files.readAllLines(log.toPath()).stream().filter(s -> {
+            for (String line : acceptableLoglines) {
+                if (s.contains(line)) {
+                    // expected, filter out
+                    return false;
+                }
+            }
+            return true;
+        }).forEach(s -> {
+            // no warnings or errors can be left over after filtering
+            if (s.toLowerCase().contains("warn") || s.toLowerCase().contains("error")) {
+                fail("Unexpected problem in log after restart: " + s);
+            }
+        });
     }
 }

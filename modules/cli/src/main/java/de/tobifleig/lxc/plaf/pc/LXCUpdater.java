@@ -267,7 +267,7 @@ public final class LXCUpdater {
                 // signature ok?
                 if (sign.verify(bs) || options.overrideVerification) {
                     // protect against downgrade attacks
-                    if (options.allowDowngrade || verifyVersion(new File("temp_update.zip"), gotver, options.forceUpdate)) {
+                    if (options.allowDowngrade || verifyVersion(options, new File("temp_update.zip"), gotver, options.forceUpdate)) {
                         updateGui.setStatusToInstall();
                         // extract update
                         File source = new File("temp_update.zip");
@@ -374,14 +374,14 @@ public final class LXCUpdater {
      * @param forceUpdate whether to accept re-installations (update version number equals current version number)
      * @return true if all checks passed, false otherwise
      */
-    private static boolean verifyVersion(File zipFile, int claimedVersion, boolean forceUpdate) {
+    private static boolean verifyVersion(Options options, File zipFile, int claimedVersion, boolean forceUpdate) {
         try (ZipFile zip = new ZipFile(zipFile)) {
             Scanner scanner = new Scanner(zip.getInputStream(zip.getEntry("v")), "utf8");
             int embeddedVersion = Integer.parseInt(scanner.nextLine());
             // test 1: embedded version must match version server claimed to send
             if (embeddedVersion == claimedVersion) {
                 // test 2: embedded version must be greater than current version, equal is allowed if forceUpdate is true
-                if (embeddedVersion > LXC.versionId || (forceUpdate && embeddedVersion == LXC.versionId)) {
+                if (embeddedVersion > options.getInternalVersion() || (forceUpdate && embeddedVersion == options.getInternalVersion())) {
                     // all checks passed
                     return true;
                 }

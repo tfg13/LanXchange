@@ -82,7 +82,7 @@ public class UpdateTest extends AUpdateTest {
     }
 
     @Test
-    public void TestFullUpdate() throws IOException, InterruptedException, NoSuchAlgorithmException {
+    public void TestFullUpdateTwice() throws IOException, InterruptedException, NoSuchAlgorithmException {
         basicChecks(tempDir3, new File("lxc.exe"));
         // spin up local fake update host
         HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 8080), 0);
@@ -126,12 +126,65 @@ public class UpdateTest extends AUpdateTest {
                 }
         ).waitFor();
         assertEquals(0, exitCode);
-        server.stop(0);
         // wait a bit for the new exe to start, then assert the update actually worked
         // this is not ideal
         Thread.sleep(2000);
         List<String> logData = Files.readAllLines(new File(tempDir3, "lxc.log").toPath());
+        // new version is there
         assertTrue("unable to prove update happened!", logData.stream().anyMatch(s -> s.contains("This is LanXchange " + LXC.versionString + " (" + LXC.versionId + ")")));
+        // no errors, and only the expected updater warnings
+        List<String> acceptableWarnings = Arrays.asList(
+                "ALERT: Allowing unsafe Update options!!!",
+                "ALERT: Overwriting updater URL to",
+                "ALERT: TLS disabled!",
+                "ALERT: Overwriting update signature public key to"
+        );
+        // no errors in previous log (oldlog2 is the first run that did the update, oldlog1 is the short run that started the helper)
+        assertLogShowsNoTrouble(new File(tempDir3, "lxc_oldlog1.log"), acceptableWarnings);
+        assertLogShowsNoTrouble(new File(tempDir3, "lxc_oldlog2.log"), acceptableWarnings);
+        // update went well
+        assertFalse(new File(tempDir3, "UPDATE_FAILED_MARKER").exists());
+        // wait for close
+        while (true) {
+            if (Files.readAllLines(new File(tempDir3, "lxc.log").toPath()).stream().anyMatch(s -> s.contains("LXC done. Thank you."))) {
+                break;
+            }
+            Thread.sleep(500);
+        }
+        // time to shutdown
+        Thread.sleep(1000);
+        // run again, force update this time
+        int exitCode2 = Runtime.getRuntime().exec(
+                new String[]{
+                        new File(tempDir3, "lxc.exe").getAbsolutePath(),
+                        "-unsafe_updates",
+                        "-unsafe_url_override", "localhost:8080",
+                        "-unsafe_disable_tls",
+                        "-unsafe_update_sig_pubkey", "lxc_updates_test.pub",
+                        "-unsafe_internal_version_override", String.valueOf(LXC.versionId - 1),
+                }
+        ).waitFor();
+        assertEquals(0, exitCode2);
+        // wait a bit for the new exe to start, then assert the update actually worked
+        // this is not ideal
+        Thread.sleep(2000);
+        // check version again (doesn't say that much this time)
+        logData = Files.readAllLines(new File(tempDir3, "lxc.log").toPath());
+        assertTrue("unable to prove update happened!", logData.stream().anyMatch(s -> s.contains("This is LanXchange " + LXC.versionString + " (" + LXC.versionId + ")")));
+        // no errors, and only the expected updater warnings
+        List<String> acceptableWarnings2 = Arrays.asList(
+                "ALERT: Allowing unsafe Update options!!!",
+                "ALERT: Overwriting updater URL to",
+                "ALERT: TLS disabled!",
+                "ALERT: Overwriting update signature public key to",
+                "ALERT: Overwriting internal version to"
+        );
+        // no errors in previous log (oldlog2 is the first run that did the update, oldlog1 is the short run that started the helper)
+        assertLogShowsNoTrouble(new File(tempDir3, "lxc_oldlog1.log"), acceptableWarnings2);
+        assertLogShowsNoTrouble(new File(tempDir3, "lxc_oldlog2.log"), acceptableWarnings2);
+        // update went well
+        assertFalse(new File(tempDir3, "UPDATE_FAILED_MARKER").exists());
+        server.stop(0);
     }
 
     @AfterClass
