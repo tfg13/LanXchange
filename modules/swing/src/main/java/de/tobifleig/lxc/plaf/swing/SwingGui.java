@@ -254,9 +254,20 @@ public class SwingGui extends javax.swing.JFrame implements GuiInterface {
                     } catch (Exception ex) {
                         logger.error("Unable to set icon image", ex);
                     }
+                    // closing actions (normal close and ctrl-w)
                     addWindowListener(new WindowAdapter() {
                         @Override
                         public void windowClosing(WindowEvent e) {
+                            if (listener.shutdown(false, true, true)) {
+                                // swing sometimes refuses to shutdown correctly
+                                System.exit(0);
+                            }
+                        }
+                    });
+                    panel.getInputMap().put(KeyStroke.getKeyStroke("ctrl W"), "promptClose");
+                    panel.getActionMap().put("promptClose", new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
                             if (listener.shutdown(false, true, true)) {
                                 // swing sometimes refuses to shutdown correctly
                                 System.exit(0);
